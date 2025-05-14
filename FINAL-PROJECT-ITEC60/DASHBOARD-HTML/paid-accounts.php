@@ -1,5 +1,6 @@
 <?php
 include '../includes/dashboard-header-sidebar.php';
+include '../includes/db-connection.php';
 ?>
 
 <!DOCTYPE html>
@@ -15,11 +16,11 @@ include '../includes/dashboard-header-sidebar.php';
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css">
   <!-- ========== Bootstrap 5.3 CSS  ========== -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-
-
   <style>
-    .sidebar-collapse-acc:nth-child(3) {
+    .sidebar-content-item:nth-child(2) {
+      background-color: var(--dashboard-primary);
+    }
+    .sidebar-collapse-acc:nth-child(2) {  
       background-color: var(--dashboard-primary);
     }
   </style>
@@ -45,20 +46,25 @@ include '../includes/dashboard-header-sidebar.php';
                 <tr class="text-align-left">
                   <th class="db-text-primary text-align-left" scope="col">#</th>
                   <th class="db-text-primary" scope="col">Email</th>
-                  <th class="db-text-primary text-align-left" scope="col"">Cash Tendered</th>
+                  <th class="db-text-primary text-center" scope="col"">Cash Tendered</th>
+                  <th class="db-text-primary text-start" scope="col"">Reference No.</th>
+                  <th class="db-text-primary text-start" scope="col"">Date Created</th>
                 </tr>
               </thead>
               <tbody>
-                <tr">
-                  <th class="db-text-primary text-align-left" scope="row">1</th>
-                  <td>james.macalintal@cvsu.edu.ph</td>
-                  <td class="text-align-left">100</td>
-                </tr>
+                <?php 
+                  $select_query = mysqli_query($con, "SELECT p.payment_id, s.signup_email, p.payment_amount, p.reference_no, p.date_created FROM tbl_signup_acc AS s JOIN tbl_payment AS p ON s.signup_id = p.signup_id");
+
+                  while ($row = mysqli_fetch_assoc($select_query)) {
+                ?>
                 <tr>
-                  <th class="db-text-primary text-align-left" scope="row">2</th>
-                  <td>ewankosayo@cvsu.edu.ph</td>
-                  <td class="text-align-left">100</td>
+                  <th class="db-text-primary text-align-left" scope="row"> <?php echo $row['payment_id'] ?> </th>
+                  <td class="text-left"><?php echo htmlspecialchars($row['signup_email']) ?></td>
+                  <td class="text-center"><?php echo $row['payment_amount'] ?></td>
+                  <td class="text-start"><?php echo htmlspecialchars( $row['reference_no']) ?></td>
+                  <td class="text-start"><?php echo $row['date_created'] ?></td>
                 </tr>
+                <?php } ?>
               </tbody>
             </table>
           </div>
@@ -67,14 +73,11 @@ include '../includes/dashboard-header-sidebar.php';
       </div>
     </section>
   </main>
-
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
   <!--  ========== DATA TABLES CDN  ========== -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
   <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.min.js"></script>
-
-  <!--  ========== Bootstrap 5.3 JS Bundle (includes Popper)  ========== -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
     new DataTable('#table-signin-acc', {

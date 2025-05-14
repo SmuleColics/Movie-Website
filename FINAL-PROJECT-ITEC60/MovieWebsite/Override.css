@@ -1,0 +1,73 @@
+#section-coming-soon {
+  margin-top: 230px;
+}
+
+#section-mcam {
+  margin-top: -160px;
+}
+
+#section-top-10-movies {
+  margin-top: 30px;
+}
+
+#section-popular-movies {
+  margin-top: 60px;
+}
+
+
+/* CATEGORIES */
+.main-content {
+  min-height: 100vh;
+}
+
+.text-30 {
+  font-size: 30px;
+}
+
+.main-content-bottom-categories button {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+#categories-body {
+  height: 0;
+}
+
+.main-content-top-categories {
+  margin-bottom: 24px;
+}
+
+#footer-categories {
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  #section-coming-soon {
+    margin-top: -120px;
+  }
+  #section-top-10-movies {
+    margin-top: 30px;
+  }
+  #dropdown-poular-documentaries {
+    align-items: center;
+  } 
+  .text-30 {
+    font-size: 24px;
+  }
+  .main-content-bottom-categories button {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  #main-content-categories {
+    margin-top: 114px;
+  }
+  #categories-long-text {
+    width: 100% !important;
+  }
+  .main-content-top-categories {
+    margin-bottom: 8px;
+  }
+  #footer-categories {
+    margin-top: 120px;
+  }
+}

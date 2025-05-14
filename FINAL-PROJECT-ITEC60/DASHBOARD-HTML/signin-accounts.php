@@ -1,5 +1,5 @@
 <?php
-include '../includes/dashboard-header-sidebar.php';
+  include '../includes/dashboard-header-sidebar.php';
 ?>
 
 <!DOCTYPE html>
@@ -14,11 +14,12 @@ include '../includes/dashboard-header-sidebar.php';
   <!-- ===== DATA TABLES CDN ===== -->
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css">
   <!-- ========== Bootstrap 5.3 CSS  ========== -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
+      .sidebar-content-item:nth-child(2) {
+        background-color: var(--dashboard-primary);
+      }
     .sidebar-collapse-acc:nth-child(1) {
       background-color: var(--dashboard-primary);
     }
@@ -26,6 +27,7 @@ include '../includes/dashboard-header-sidebar.php';
 </head>
 
 <body>
+
   <main class="container-lg p-0 overflow-hidden">
     <!-- ========== SIGN IN ACCOUNTS SECTION ========== -->
     <section class="signin-accounts-section text-left p-3">
@@ -50,6 +52,8 @@ include '../includes/dashboard-header-sidebar.php';
                 </tr>
               </thead>
               <tbody>
+                
+
                 <tr>
                   <th class="db-text-primary text-align-left" scope="row">1</th>
                   <td>james.macalintal@cvsu.edu.ph</td>
@@ -101,15 +105,11 @@ include '../includes/dashboard-header-sidebar.php';
       </div>
     </div>
   </div>
-
-
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
   <!--  ========== DATA TABLES CDN  ========== -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
   <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.min.js"></script>
-
-  <!--  ========== Bootstrap 5.3 JS Bundle (includes Popper)  ========== -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
     new DataTable('#table-signin-acc', {
@@ -120,6 +120,8 @@ include '../includes/dashboard-header-sidebar.php';
         searchPlaceholder: 'Search...'
       }
     });
+
+  
   </script>
 </body>
 

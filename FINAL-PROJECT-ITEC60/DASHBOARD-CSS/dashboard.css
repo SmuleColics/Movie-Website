@@ -172,3 +172,67 @@ select[id^="dt-length-"] {
 .text-align-left {
   text-align: left !important;
 }
+
+.file-trending::-webkit-file-upload-button {
+  background-color: transparent !important;
+  color: var(--db-text-sec) !important;
+  border-color: var(--secondary-color) !important;
+}
+
+.file-trending {
+  background-color: transparent !important;
+  color: var(--db-text-sec) !important;
+  border-color: var(--secondary-color) !important;
+} 
+
+.file-trending::placeholder {
+  color: var(--secondary-color) !important;
+}
+
+select {
+    background-color: var(--bootstrap-dark) !important;
+    color: var(--db-text-sec) !important;
+    border-color: var(--secondary-color) !important;
+}
+
+.genre-container, .category-container {
+  position: relative;
+}
+
+.caret-genre {
+  position: absolute;
+  color: var(--db-text-sec);
+  bottom: 12px;
+  right: 15px;
+  pointer-events: none; /* avoid clicking the icon */
+}
+
+.caret-category {
+  position: absolute;
+  color: var(--db-text-sec);
+  bottom: 194px;
+  right: 28px;
+  pointer-events: none; /* avoid clicking the icon */
+}
+  
+.fa-user-container {
+  width: 70px;
+  height: 70px; 
+  font-size: 28px;
+}
+
+.mp-info {
+  margin-right: 120px;
+}
+
+.mp-info-last {
+  margin-right: 170px;
+}
+
+#modal-edit-btn {
+  background-color: var(#607EBC);
+}
+
+.btn-primary {
+  background-color: var(--db-bg-primary) !important;
+}

@@ -1,9 +1,39 @@
 <?php
+include '../includes/db-connection.php';
 include '../includes/dashboard-header-sidebar.php';
 
-//TANGGALIN DIN TO ONCE MAY SQL NA (MGA VALUES)
-$users_quantity = array(65, 70, 80, 81, 56, 55, 40);
+$sql = mysqli_query($con, "SELECT p.date_created 
+                          FROM tbl_payment AS p 
+                          JOIN tbl_signup_acc AS s ON p.signup_id = s.signup_id");
+
+$users_quantity = array(0, 0, 0, 0, 0, 0, 0);
+
+while ($row = mysqli_fetch_assoc($sql)) {
+    $date_created = $row['date_created'];
+
+    // Get the day of the week (0 = Sunday, 6 = Saturday)
+    $day_index = date('w', strtotime($date_created));
+
+    // Increment the corresponding day in users_quantity
+    $users_quantity[$day_index]++;
+}
+
+
 $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
+
+//USERS
+$result = mysqli_query($con, "SELECT COUNT(*) FROM tbl_signup_acc");
+$row = mysqli_fetch_array($result);
+
+$revenue_query = mysqli_query($con, "SELECT SUM(p.payment_amount) FROM tbl_signup_acc AS s JOIN tbl_payment AS p ON s.signup_id = p.signup_id");
+$revenue = mysqli_fetch_array($revenue_query);
+
+$movie_query = mysqli_query($con, "SELECT COUNT(category) FROM tbl_trending WHERE category = 'Movie'");
+$movie = mysqli_fetch_array($movie_query);
+
+$series_query = mysqli_query($con, "SELECT COUNT(category) FROM tbl_trending WHERE category = 'Series'");
+$series = mysqli_fetch_array($series_query);
+
 ?>
 
 <!DOCTYPE html>
@@ -48,7 +78,9 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
                 </div>
                 <div class="card-top-right w-100 text-end mt-3 db-text-sec">
                   <h6 class="card-subtitle fs-14 mb-1">Users</h6>
-                  <h5 class="card-title text-end fs-24">113</h5>
+                  <h5 class="card-title text-end fs-24">
+                    <?php echo $row["COUNT(*)"]; ?>
+                  </h5>
                 </div>
               </div>
 
@@ -77,7 +109,7 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
                 </div>
                 <div class="card-top-right w-100 text-end mt-3 db-text-sec">
                   <h6 class="card-subtitle fs-14 mb-1">Revenue</h6>
-                  <h5 class="card-title fs-24">₱100</h5>
+                  <h5 class="card-title fs-24">₱<?php echo $revenue[0]; ?></h5>
                 </div>
               </div>
 
@@ -106,7 +138,7 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
                 </div>
                 <div class="card-top-right w-100 text-end mt-3 db-text-sec">
                   <h6 class="card-subtitle fs-14 mb-1">Movies</h6>
-                  <h5 class="card-title fs-24">1132</h5>
+                  <h5 class="card-title fs-24"><?php echo $movie[0]; ?></h5>
                 </div>
               </div>
 
@@ -135,7 +167,7 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
                 </div>
                 <div class="card-top-right w-100 text-end mt-3 db-text-sec">
                   <h6 class="card-subtitle fs-14 mb-1">Series</h6>
-                  <h5 class="card-title fs-24">112</h5>
+                  <h5 class="card-title fs-24"><?php echo $series[0]; ?></h5>
                 </div>
               </div>
 
@@ -165,7 +197,7 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
             <div class="card-body">
               <div class="card-chart-top db-text-sec">
                 <h6 class="card-subtitle fs-18">Daily Users</h6>
-                <h5 class="card-title text-start fs-14 db-text-secondary">55% increased in today's user</h5>
+                <h5 class="card-title text-start fs-14 db-text-secondary">Users activity this week</h5>
               </div>
               <div class="card-divider my-3"></div>
               <div class="card-chart-bottom db-text-secondary d-flex align-items-center gap-2 fs-14">
@@ -245,9 +277,9 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
     </section>
 
     <!-- ========== TABLES SECTION ========== -->
-    <section class="db-tables-section p-3">
+    <!-- <section class="db-tables-section p-3">
       <div class="row g-3">
-        <!-- ========== TABLES FOR EMPLOYEES ========== -->
+    
         <div class="col-xl-7">
           <div class="card bg-dark">
             <div class="card-body">
@@ -344,7 +376,7 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
           </div>
         </div>
 
-        <!-- ========== TABLES FOR TASKS ========== -->
+
         <div class="col-xl-5">
           <div class="card bg-dark">
             <div class="card-body">
@@ -443,11 +475,11 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
           </div>
         </div>
       </div>
-    </section>
+    </section> -->
   </main>
 
   <!-- ========== TASK MODAL  EDIT ========== -->
-  <div class="modal fade" id="taskEditModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <!-- <div class="modal fade" id="taskEditModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
@@ -468,10 +500,10 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
         </form>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- ========== TASK MODAL DELETE ========== -->
-  <div class="modal fade" id="taskDeleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <!-- <div class="modal fade" id="taskDeleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header d-flex justify-content-between">
@@ -491,10 +523,10 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
 
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- ========== EMPLOYEE MODAL  EDIT ========== -->
-  <div class="modal fade" id="empEditModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <!-- <div class="modal fade" id="empEditModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
@@ -524,10 +556,10 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
         
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- ========== EMPLOYEE MODAL DELETE ========== -->
-  <div class="modal fade" id="empDeleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <!-- <div class="modal fade" id="empDeleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header d-flex justify-content-between">
@@ -545,7 +577,7 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
         </form>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
@@ -590,8 +622,8 @@ $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
             ticks: {
               color: 'white' // Y-axis labels color
             },
-            min: 10,
-            max: 100
+            min: 0,
+            max: 20
           }
         }
       }

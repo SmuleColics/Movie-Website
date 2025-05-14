@@ -1,3 +1,7 @@
+:root {
+    --db-bg-primary: #607EBC; /* STEEL BLUE */
+}
+
 body {
   background-color: var(--bg-body) !important;
   margin-top: 55px !important;
@@ -67,6 +71,10 @@ body {
 
 .dropdown-item:active {
   background-color: var(--dashboard-primary) !important;
+}
+
+.header-user:hover {
+  background-color: var(--db-bg-primary) !important;
 }
 
 /* <!-- ========== START OF SIDEBAR ========== --> */

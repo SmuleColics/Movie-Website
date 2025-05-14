@@ -7,6 +7,7 @@
   --secondary-color: #6c757d;
   --dark: #343a40;
   --header-color: #181818;
+  --db-text-sec: #f4fff8;
 }
 
 body {
@@ -23,6 +24,10 @@ body {
 
 .db-text-secondary {
   color: var(--secondary-color) !important;
+}
+
+.db-text-sec {
+  color: var(--db-text-sec) !important;
 }
 
 .flexbox-align {
