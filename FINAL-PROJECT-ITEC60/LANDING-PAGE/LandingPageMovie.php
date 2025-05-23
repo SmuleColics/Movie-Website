@@ -31,7 +31,7 @@ include('SignIn/db-con.php');
           class="db-text-primary">Vault</span></a>
     </div>
     <div class="right-header">
-      <button class="btn db-bg-primary db-text-sec me-md-5"><a class="text-white text-decoration-none" href="SignIn/SignIn.html">Sign
+      <button class="btn db-bg-primary db-text-sec me-md-5"><a class="text-white text-decoration-none" href="SignIn/LP-Signin.php">Sign
           In</a></button>
     </div>
   </header>
@@ -46,7 +46,7 @@ include('SignIn/db-con.php');
         <h1 class="endless-movies fs-56 fw-bold text-nowrap text-center">Endless movies, TV <span
             class="d-block text-nowrap text-center">series, and more.</span></h1> 
         <h2 class="starting-at fs-20 fw-semibold mt-2 mb-4">Starting at just ₱99. Cancel anytime.</h2>
-        <p class="excited-to">Excited to start streaming? <a href="SignIn/SignUp.html" class="db-text-primary">Sign up</a> first to subscribe or
+        <p class="excited-to">Excited to start streaming? <a href="SignIn/LP-Signup.php" class="db-text-primary">Sign up</a> first to subscribe or
           renew your membership.</p>
         <!-- <button class="btn btn-primary sign-up-btn">Sign up</button> -->
       </div>  
@@ -219,8 +219,10 @@ include('SignIn/db-con.php');
         <p class="pt-5 color-light-white">CineVault Philippines</p>
       </div>
     </footer>
-
     <!-- END OF FOOTER -->
+    
+    <!-- ========== LANDING PAGE MODAL ========== -->
+
     <?php
     $select_query = mysqli_query($con, "SELECT * FROM tbl_trending");
 
@@ -271,7 +273,7 @@ include('SignIn/db-con.php');
               
                   <div>
                     <button class='btn btn-primary fs-4 mb-3'>
-                      <a class='text-white text-decoration-none' href='SignIn/SignUp.html'>
+                      <a class='text-white text-decoration-none' href='SignIn/LP-Signup.php'>
                         Get started <i class='fa-solid fa-chevron-right text-white'></i>
                       </a>
                     </button>
@@ -288,8 +290,6 @@ include('SignIn/db-con.php');
     }
 
     ?>
-
-    <!-- START OF MODALS -->
 
     <!-- END OF MODALS -->
 

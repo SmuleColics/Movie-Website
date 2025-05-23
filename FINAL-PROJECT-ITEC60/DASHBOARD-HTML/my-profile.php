@@ -5,14 +5,27 @@ include '../includes/db-connection.php';
 
 $select = mysqli_query($con, "SELECT * FROM tbl_admin_acc WHERE admin_id = {$_SESSION['admin_id']}");
 $row = mysqli_fetch_assoc($select);
-$admin_email = $row['admin_email'];
-$admin_mobile = $row['admin_mobile'];
-$admin_fname = $row['admin_fname'];
-$admin_mname = $row['admin_mname'];
-$admin_lname = $row['admin_lname'];
-$admin_fb = $row['admin_fb'];
-$admin_password = $row['admin_password'];
-$admin_date_created = $row['admin_date_created'];
+$admin_email = $row['email'];
+$admin_mobile = $row['mobile'];
+$admin_fname = $row['first_name'];
+$admin_mname = $row['middle_name'];
+$admin_lname = $row['last_name'];
+$admin_fb = $row['facebook_acc'];
+$admin_password = $row['password'];
+$admin_date_created = $row['date_created'];
+$employee_id = $row['employee_id'];
+$department = $row['department'];
+$gender = $row['gender'];
+$marital_status = $row['marital_status'];
+$nationality = $row['nationality'];
+
+// Assign "Not Assigned" if empty
+$employee_id_disp = !empty($employee_id) ? $employee_id : "Not Assigned";
+$department_disp = !empty($department) ? $department : "Not Assigned";
+$gender_disp = !empty($gender) ? $gender : "Not Assigned";
+$marital_status_disp = !empty($marital_status) ? $marital_status : "Not Assigned";
+$nationality_disp = !empty($nationality) ? $nationality : "Not Assigned";
+
 ?>
 
 <!DOCTYPE html>
@@ -56,7 +69,7 @@ $admin_date_created = $row['admin_date_created'];
 
                   <div class="d-grid db-bg-primary w-100 rounded-1">
                     <center class="py-1">
-                      <a href="#" class="db-text-sec text-decoration-none">  
+                      <a href="edit-my-profile.php" class="db-text-sec text-decoration-none">   
                         <i class="fa-solid fa-pen-to-square"></i>
                         Edit Profile
                       </a>
@@ -83,8 +96,8 @@ $admin_date_created = $row['admin_date_created'];
                 </div>
 
                 <div class="d-flex flex-column">
-                  <p class="db-text-secondary">Not Assigned</p>
-                  <p class="db-text-secondary">Not Assigned</p>
+                  <p class="db-text-secondary"><?php echo $employee_id_disp; ?></p>
+                  <p class="db-text-secondary"><?php echo $department_disp; ?></p>
                   <p class="db-text-secondary">Administrator</p>
                   <p class="db-text-secondary mb-0"><?php echo $admin_date_created ?></p>
                 </div>
@@ -107,9 +120,9 @@ $admin_date_created = $row['admin_date_created'];
 
                 <div class="d-flex flex-column">
                   <p class="db-text-secondary"><?php echo $admin_fname . " " . $admin_mname . " " . $admin_lname ?></p>
-                  <p class="db-text-secondary">Not Assigned</p>
-                  <p class="db-text-secondary">Not Assigned</p>
-                  <p class="db-text-secondary mb-0">Not Assigned</p>
+                  <p class="db-text-secondary"><?php echo $gender_disp; ?></p>
+                  <p class="db-text-secondary"><?php echo $marital_status_disp; ?></p>
+                  <p class="db-text-secondary mb-0"><?php echo $nationality_disp; ?></p>
                 </div>
               </div>
             </div>
@@ -127,7 +140,7 @@ $admin_date_created = $row['admin_date_created'];
                   <p class="db-text-sec mb-0">Facebook account</p>
                 </div>
 
-                <div class="d-flex flex-column">
+                <div class="d-flex flex-column" style="margin-left: -80px">
                   <p class="db-text-secondary"><?php echo $admin_email ?></p>
                   <p class="db-text-secondary"><?php echo $admin_mobile ?></p>
                   <p class="db-text-secondary mb-0"><?php echo $admin_fb ?></p>

@@ -13,12 +13,12 @@ if (isset($_POST['admin-signin-btn'])) {
 
   $email = mysqli_real_escape_string($con, $email);
 
-  $result = mysqli_query($con, "SELECT * FROM tbl_admin_acc WHERE admin_email = '$email'");
+  $result = mysqli_query($con, "SELECT * FROM tbl_admin_acc WHERE email = '$email'");
 
   if ($row = mysqli_fetch_assoc($result)) {
-    if (password_verify($pass, $row['admin_password'])) {
+    if (password_verify($pass, $row['password'])) {
       $_SESSION['admin_id'] = $row['admin_id'];
-      $_SESSION['admin_email'] = $row['admin_email']; 
+      $_SESSION['admin_email'] = $row['email']; 
       $_SESSION['admin_logged_in'] = true;
 
       echo "<script>

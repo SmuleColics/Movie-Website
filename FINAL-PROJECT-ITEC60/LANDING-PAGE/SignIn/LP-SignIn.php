@@ -57,7 +57,7 @@ include 'db-con.php';
                     // ✅ Redirect
                     echo "<script>
                             alert('Login successful!');
-                            window.location.href = '../../MovieWebsite/FirstProject.html';
+                            window.location.href = '../../MovieWebsite/FirstProject.php';
                           </script>";
                     exit;
 

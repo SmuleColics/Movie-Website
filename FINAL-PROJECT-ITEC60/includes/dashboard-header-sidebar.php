@@ -14,7 +14,7 @@ if (isset($_GET['logout'])) {
   exit;
 }
 
-$hrefs = ["../DASHBOARD-HTML/db-action.php"];
+$hrefs = ["../DASHBOARD-HTML/genre-action.php"];
 
 $genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Terror", "Music", "Mistery", "Science fiction", "Cinema TV", "Thriller", "War", "Western", "Kids", "News", "Reality", "Romance", "Sci-Fi & Fantasy", "Soap", "Talk", "War & Politics"];
 ?>
@@ -221,20 +221,38 @@ $genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
 
 
             <li class="sidebar-content-item d-flex align-items-center mb-1">
-              <a href="../DASHBOARD-HTML/top-10.php" class="sidebar-anchor">
+              <a href="../DASHBOARD-HTML/web-home.php" class="sidebar-anchor">
                 <span class="material-symbols-outlined">
-                  leaderboard
+                  home
                 </span>
-                <span class="sidebar-text ms-2">Top 10</span>
+                <span class="sidebar-text ms-2">Home</span>
               </a>
             </li>
 
             <li class="sidebar-content-item d-flex align-items-center mb-1">
-              <a href="../DASHBOARD-HTML/trending.php" class="sidebar-anchor">
+              <a href="../DASHBOARD-HTML/web-movies.php" class="sidebar-anchor">
                 <span class="material-symbols-outlined">
-                  trending_up
+                  Movie
                 </span>
-                <span class="sidebar-text ms-2">Trending</span>
+                <span class="sidebar-text ms-2">Movies</span>
+              </a>
+            </li>
+
+            <li class="sidebar-content-item d-flex align-items-center mb-1">
+              <a href="../DASHBOARD-HTML/web-series.php" class="sidebar-anchor">
+                <span class="material-symbols-outlined">
+                  video_library
+                </span>
+                <span class="sidebar-text ms-2">Series</span>
+              </a>
+            </li>
+
+            <li class="sidebar-content-item d-flex align-items-center mb-1">
+              <a href="../DASHBOARD-HTML/db-landingpage.php" class="sidebar-anchor">
+                <span class="material-symbols-outlined">
+                  explore
+                </span>
+                <span class="sidebar-text ms-2">Landing Page</span>
               </a>
             </li>
 
@@ -330,20 +348,38 @@ $genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
         </ul>
 
         <li class="sidebar-content-item d-flex align-items-center mb-1">
-          <a href="../DASHBOARD-HTML/top-10.php" class="sidebar-anchor">
+          <a href="../DASHBOARD-HTML/web-home.php" class="sidebar-anchor">
             <span class="material-symbols-outlined">
-              leaderboard
+              Home
             </span>
-            <span class="sidebar-text ms-2">Top 10</span>
+            <span class="sidebar-text ms-2">Home</span>
           </a>
         </li>
 
         <li class="sidebar-content-item d-flex align-items-center mb-1">
-          <a href="../DASHBOARD-HTML/trending.php" class="sidebar-anchor">
+          <a href="../DASHBOARD-HTML/web-movies.php" class="sidebar-anchor">
             <span class="material-symbols-outlined">
-              trending_up
+              Movie
             </span>
-            <span class="sidebar-text ms-2">Trending</span>
+            <span class="sidebar-text ms-2">Movies</span>
+          </a>
+        </li>
+
+        <li class="sidebar-content-item d-flex align-items-center mb-1">
+          <a href="../DASHBOARD-HTML/web-series.php" class="sidebar-anchor">
+            <span class="material-symbols-outlined">
+              video_library
+            </span>
+            <span class="sidebar-text ms-2">Series</span>
+          </a>
+        </li>
+
+        <li class="sidebar-content-item d-flex align-items-center mb-1">
+          <a href="../DASHBOARD-HTML/db-landingpage.php" class="sidebar-anchor">
+            <span class="material-symbols-outlined">
+              explore
+            </span>
+            <span class="sidebar-text ms-2">Landing Page</span>
           </a>
         </li>
 
@@ -352,9 +388,9 @@ $genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
           data-bs-toggle="collapse" data-bs-target="#collapseMovies">
           <div class="d-flex align-items-center">
             <span class="aside-icon material-symbols-outlined">
-              movie_edit
+              category
             </span>
-            <span class="sidebar-text ms-2">Movies</span>
+            <span class="sidebar-text ms-2">Genre</span>
           </div>
           <div>
             <span class="dropdown-toggle"></span>

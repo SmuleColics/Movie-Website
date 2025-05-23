@@ -5,6 +5,7 @@
   --dark: #343a40;
   --bootstrap-dark: #212529;
   --bg-table: 		#2a2f34;
+  --box-text: #e9e0e0;
 }
 
 .card-icon-container {
@@ -208,9 +209,10 @@ select {
 }
 
 .caret-category {
-  position: absolute;
-  color: var(--db-text-sec);
-  bottom: 194px;
+  position: absolute !important;
+  color: var(--db-text-sec);  
+  /* transform: translateY(100px); */
+  bottom: 320px !important;
   right: 28px;
   pointer-events: none; /* avoid clicking the icon */
 }
@@ -235,4 +237,62 @@ select {
 
 .btn-primary {
   background-color: var(--db-bg-primary) !important;
+}
+
+.full-name  {
+    /* width: 100% !important; */
+    width: 120px !important;
+}
+
+.fullname .name-edit-inputs {
+  width: 100% !important; 
+  min-width: 97px !important;   
+  padding: 1px 6px;
+  border: 1px solid var(--box-text);
+  border-radius: 6px;
+  color: white;
+}
+
+.edit-profile {
+  width: 300px !important;
+}
+
+.edit-profile .edit-inputs {
+  width: 100% !important;
+  position: relative;
+  padding: 1px 6px;
+  border: 1px solid var(--box-text);
+  border-radius: 6px;
+  color: white;
+}
+
+
+@media (max-width: 575.98px) {
+  .info-1 {
+    margin-left: 40px !important;
+  }
+  .info-2 {
+    margin-left: 56px !important;
+  }
+  .fullname .name-edit-inputs {
+    width: 100% !important;
+    min-width: 32px !important;
+  }
+}
+
+#category-option {
+  height: 38px; /* Adjust to match your button, typical Bootstrap btn height */
+  background: var(--dashboard-primary, #607EBC) !important;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0 16px;
+  font-size: 1rem;
+  outline: none;
+  margin-top: 12px; /* to match .mt-3 on button */
+  /* Optional: Add shadow or transition for effect */
+  transition: background 0.2s, color 0.2s;
+}
+#category-option:focus {
+  box-shadow: 0 0 0 2px rgba(96,126,188,0.2);
 }
