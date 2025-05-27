@@ -221,19 +221,12 @@
           <button class="btn btn-outline-light rounded-5">History</button>
           <button class="btn btn-outline-primary rounded-5">Terror</button>
           <button class="btn btn-outline-light rounded-5">Music</button>
-          <button class="btn btn-outline-primary rounded-5">Mistery</button>
-          <button class="btn btn-outline-light rounded-5">Romance</button>
-          <button class="btn btn-outline-primary rounded-5">
-            Science fiction
-          </button>
+          <button class="btn btn-outline-primary rounded-5">Mystery</button>
+          <button class="btn btn-outline-light rounded-5">Science fiction</button>
           <button class="btn btn-outline-light rounded-5">Cinema TV</button>
           <button class="btn btn-outline-primary rounded-5">Thriller</button>
           <button class="btn btn-outline-light rounded-5">War</button>
           <button class="btn btn-outline-primary rounded-5">Western</button>
-          <button class="btn btn-outline-light rounded-5">Adventure</button>
-          <button class="btn btn-outline-primary rounded-5">
-            Action & Adventure
-          </button>
           <button class="btn btn-outline-light rounded-5">Kids</button>
           <button class="btn btn-outline-primary rounded-5">News</button>
           <button class="btn btn-outline-light rounded-5">Reality</button>

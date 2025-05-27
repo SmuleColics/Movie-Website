@@ -1,6 +1,11 @@
 <?php
 // Set the directory where your videos are stored
-$videoDir = "../DASHBOARD-HTML/TOP10_VIDEOS/";
+$type = isset($_GET['type']) ? $_GET['type'] : 'top10'; // default to top10 if not set
+if ($type === 'trend') {
+    $videoDir = "../DASHBOARD-HTML/TREND_VIDEOS/";
+} else {
+    $videoDir = "../DASHBOARD-HTML/TOP10_VIDEOS/";
+}
 
 // Get the video filename from the GET parameter
 $videoFile = isset($_GET['video']) ? basename($_GET['video']) : '';

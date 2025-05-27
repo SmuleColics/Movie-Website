@@ -5,6 +5,10 @@
   --ivory: #FFFFF0;
   --placeholder-color: #F8F8FF;
   --text-sec: #f4fff8;
+  --bootstrap-dark: #212529;
+  --secondary-color: #6c757d;
+  --db-text-sec: #f4fff8;
+
 }
 
 
@@ -435,6 +439,10 @@ footer {
   }
 }
 
+.trend-title {
+  height: 52px !important;
+}
+
 img, .top-10-text, .trending-img, .action-movies-img, .featured-img, .popular-img {
   transition: all 0.2s ease-in-out;
 }
@@ -529,10 +537,19 @@ img, .top-10-text, .trending-img, .action-movies-img, .featured-img, .popular-im
   position: absolute;
   bottom: 160px;
   /* top: 20px !; */
-  left: 26px;
-  width: 350px;
-  height: 130px !important;
   object-fit: cover;
+  left: 26px; 
+}
+
+.top10-title {
+  height: 130px;
+   /* width: 350px; */
+
+}
+
+.trend-title {
+  /* transform: scale(1.2); */
+  height: 400px;
 }
 
 .video-player {
@@ -583,3 +600,30 @@ img, .top-10-text, .trending-img, .action-movies-img, .featured-img, .popular-im
   left: 28px;
 }
 
+select {
+  background-color: var(--bootstrap-dark) !important;
+  color: var(--db-text-sec) !important;
+  border-color: var(--secondary-color) !important;
+}
+
+.db-text-sec {
+  color: var(--db-text-sec);
+}
+
+.caret-season {
+  position: absolute;
+  color: var(--db-text-sec);
+  bottom: 12px;
+  right: 13px;
+  pointer-events: none; /* avoid clicking the icon */
+}
+
+.video-episode {
+  width: 180px;
+  height: 100px;
+  object-fit: cover;
+}
+
+.video-episode:hover {
+  transform: scale(1.1) !important;
+}
