@@ -179,112 +179,40 @@ $genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
               </a>
             </li>
 
-            <!-- <li class="sidebar-content-item d-flex align-items-center mb-1">
-                <a href="../DASHBOARD-HTML/dashboard-company-prof.php" class="sidebar-anchor">
-                  <span class="aside-icon material-symbols-outlined">
-                    work
-                  </span>
-                  <span class="sidebar-text ms-2">Company Profile</span>
-                </a>
-              </li> -->
-
-            <li class="sidebar-content-item sidebar-collapse d-flex align-items-cente justify-content-between mb-1"
-              data-bs-toggle="collapse" data-bs-target="#collapseAccount" aria-expanded="true">
-              <div class="d-flex align-items-center">
-                <span class="aside-icon material-symbols-outlined">
-                  manage_accounts
-                </span>
-                <span class="sidebar-text ms-2">Manage Accounts</span>
-              </div>
-              <div>
-                <span class="dropdown-toggle"></span>
-              </div>
-            </li>
-
-            <ul class="collapse list-unstyled show" id="collapseAccount">
-              <!-- <li class="sidebar-collapse-acc d-flex align-items-center mb-1">
-                  <a href="../DASHBOARD-HTML/signin-accounts.php" class="sidebar-anchor">
-                    <span class="sidebar-text sidebar-text-collapse ms-2">Signin Accounts</span>
-                  </a>
-                </li> -->
-              <li class="sidebar-collapse-acc d-flex align-items-center mb-1">
-                <a href="../DASHBOARD-HTML/signup-accounts.php" class="sidebar-anchor">
-                  <span class="sidebar-text sidebar-text-collapse ms-2">Signup Accounts</span>
-                </a>
-              </li>
-              <li class="sidebar-collapse-acc d-flex align-items-center mb-1">
-                <a href="../DASHBOARD-HTML/paid-accounts.php" class="sidebar-anchor">
-                  <span class="sidebar-text sidebar-text-collapse ms-2">Paid Accounts</span>
-                </a>
-              </li>
-            </ul>
-
-
             <li class="sidebar-content-item d-flex align-items-center mb-1">
               <a href="../DASHBOARD-HTML/web-home.php" class="sidebar-anchor">
                 <span class="material-symbols-outlined">
-                  home
+                  movie
                 </span>
-                <span class="sidebar-text ms-2">Home</span>
-              </a>
-            </li>
-
-            <li class="sidebar-content-item d-flex align-items-center mb-1">
-              <a href="../DASHBOARD-HTML/web-movies.php" class="sidebar-anchor">
-                <span class="material-symbols-outlined">
-                  Movie
-                </span>
-                <span class="sidebar-text ms-2">Movies</span>
-              </a>
-            </li>
-
-            <li class="sidebar-content-item d-flex align-items-center mb-1">
-              <a href="../DASHBOARD-HTML/web-series.php" class="sidebar-anchor">
-                <span class="material-symbols-outlined">
-                  video_library
-                </span>
-                <span class="sidebar-text ms-2">Series</span>
-              </a>
-            </li>
-
-            <li class="sidebar-content-item d-flex align-items-center mb-1">
-              <a href="../DASHBOARD-HTML/db-landingpage.php" class="sidebar-anchor">
-                <span class="material-symbols-outlined">
-                  explore
-                </span>
-                <span class="sidebar-text ms-2">Landing Page</span>
+                <span class="sidebar-text" style="margin-left: 12px">Movies</span>
               </a>
             </li>
 
             <li
               class="sidebar-content-item sidebar-collapse d-flex align-items-center justify-content-between mb-1 movies-db"
-              data-bs-toggle="collapse" data-bs-target="#collapseMovies" aria-expanded="true">
-              <div class="d-flex align-items-center">
-                <span class="aside-icon material-symbols-outlined">
-                  movie_edit
-                </span>
-                <span class="sidebar-text ms-2">Movies</span>
-              </div>
-              <div>
-                <span class="dropdown-toggle"></span>
-              </div>
+              aria-expanded="true">
+              <a href="../DASHBOARD-HTML/web-genre.php" class="sidebar-anchor">
+                <div class="d-flex align-items-center">
+                  <span class="aside-icon material-symbols-outlined">
+                    category
+                  </span>
+                  <span class="sidebar-text ms-2">Genre</span>
+                </div>
+              </a>
             </li>
 
-            <ul class="collapse list-unstyled show" id="collapseMovies">
-              <?php
-              foreach ($hrefs as $href) {
-                foreach ($genres as $genre) {
-                  echo "
-                        <li class='sidebar-collapse-movies d-flex align-items-center mb-1'>
-                            <a href='$href' class='sidebar-anchor'>
-                              <span class='sidebar-text sidebar-text-collapse ms-2'>$genre</span>
-                            </a>
-                        </li>
-                      ";
-                }
-              }
-              ?>
-            </ul>
+            <li class="sidebar-content-item sidebar-collapse d-flex align-items-cente justify-content-between mb-1"
+              aria-expanded="true">
+              <a href="../DASHBOARD-HTML/signup-accounts.php" class="sidebar-anchor">
+                <div class="d-flex align-items-center">
+                  <span class="aside-icon material-symbols-outlined">
+                    manage_accounts
+                  </span>
+                  <span class="sidebar-text ms-2">Manage Accounts</span>
+                </div>
+              </a>
+            </li>
+
           </ul>
         </div>
       </div>
@@ -307,111 +235,41 @@ $genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
           </a>
         </li>
 
-        <!-- <li class="sidebar-content-item d-flex align-items-center mb-1">
-            <a href="../DASHBOARD-HTML/my-profile.php" class="sidebar-anchor">
-                <span class="aside-icon material-symbols-outlined">
-                  account_circle
-                </span>
-                <span class="sidebar-text ms-2">My Profile</span>
-            </a>
-          </li> -->
-
-        <li class="sidebar-content-item sidebar-collapse d-flex align-items-cente justify-content-between mb-1"
-          data-bs-toggle="collapse" data-bs-target="#collapseAccount">
-          <div class="d-flex align-items-center">
-            <span class="aside-icon material-symbols-outlined">
-              manage_accounts
-            </span>
-            <span class="sidebar-text ms-2">Manage Accounts</span>
-          </div>
-          <div>
-            <span class="dropdown-toggle"></span>
-          </div>
-        </li>
-
-        <ul class="collapse list-unstyled show" id="collapseAccount">
-          <!-- <li class="sidebar-collapse-acc d-flex align-items-center mb-1">
-              <a href="../DASHBOARD-HTML/signin-accounts.php" class="sidebar-anchor">
-                <span class="sidebar-text sidebar-text-collapse ms-2">Signin Accounts</span>
-              </a>
-            </li> -->
-          <li class="sidebar-collapse-acc d-flex align-items-center mb-1">
-            <a href="../DASHBOARD-HTML/signup-accounts.php" class="sidebar-anchor">
-              <span class="sidebar-text sidebar-text-collapse ms-2">Signup Accounts</span>
-            </a>
-          </li>
-          <li class="sidebar-collapse-acc d-flex align-items-center mb-1">
-            <a href="../DASHBOARD-HTML/paid-accounts.php" class="sidebar-anchor">
-              <span class="sidebar-text sidebar-text-collapse ms-2">Paid Accounts</span>
-            </a>
-          </li>
-        </ul>
-
         <li class="sidebar-content-item d-flex align-items-center mb-1">
           <a href="../DASHBOARD-HTML/web-home.php" class="sidebar-anchor">
             <span class="material-symbols-outlined">
-              Home
+              movie
             </span>
-            <span class="sidebar-text ms-2">Home</span>
-          </a>
-        </li>
-
-        <li class="sidebar-content-item d-flex align-items-center mb-1">
-          <a href="../DASHBOARD-HTML/web-movies.php" class="sidebar-anchor">
-            <span class="material-symbols-outlined">
-              Movie
-            </span>
-            <span class="sidebar-text ms-2">Movies</span>
-          </a>
-        </li>
-
-        <li class="sidebar-content-item d-flex align-items-center mb-1">
-          <a href="../DASHBOARD-HTML/web-series.php" class="sidebar-anchor">
-            <span class="material-symbols-outlined">
-              video_library
-            </span>
-            <span class="sidebar-text ms-2">Series</span>
-          </a>
-        </li>
-
-        <li class="sidebar-content-item d-flex align-items-center mb-1">
-          <a href="../DASHBOARD-HTML/db-landingpage.php" class="sidebar-anchor">
-            <span class="material-symbols-outlined">
-              explore
-            </span>
-            <span class="sidebar-text ms-2">Landing Page</span>
+            <span class="sidebar-text" style="margin-left: 12px">Movies</span>
           </a>
         </li>
 
         <li
           class="sidebar-content-item sidebar-collapse d-flex align-items-cente justify-content-between mb-1 movies-db"
-          data-bs-toggle="collapse" data-bs-target="#collapseMovies">
-          <div class="d-flex align-items-center">
-            <span class="aside-icon material-symbols-outlined">
-              category
-            </span>
-            <span class="sidebar-text ms-2">Genre</span>
-          </div>
-          <div>
-            <span class="dropdown-toggle"></span>
-          </div>
+          aria-expanded="true">
+          <a href="../DASHBOARD-HTML/web-genre.php" class="sidebar-anchor">
+            <div class="d-flex align-items-center">
+              <span class="aside-icon material-symbols-outlined">
+                category
+              </span>
+              <span class="sidebar-text ms-2">Genre</span>
+            </div>
+          </a </li>
+
+
+        <li class="sidebar-content-item sidebar-collapse d-flex align-items-cente justify-content-between mb-1">
+          <a href="../DASHBOARD-HTML/signup-accounts.php" class="sidebar-anchor">
+            <div class="d-flex align-items-center">
+              <span class="aside-icon material-symbols-outlined">
+                manage_accounts
+              </span>
+              <span class="sidebar-text ms-2">Manage Accounts</span>
+            </div>
+          </a>
+
         </li>
 
-        <ul class="collapse list-unstyled show" id="collapseMovies" style="margin-bottom: 100px;">
-          <?php
-          foreach ($hrefs as $href) {
-            foreach ($genres as $genre) {
-              echo "
-                    <li class='sidebar-collapse-movies d-flex align-items-center mb-1'>
-                        <a href='$href' class='sidebar-anchor'>
-                          <span class='sidebar-text sidebar-text-collapse ms-2'>$genre</span>
-                        </a>
-                    </li>
-                  ";
-            }
-          }
-          ?>
-        </ul>
+
       </ul>
     </div>
   </aside>

@@ -350,56 +350,8 @@
       </section>
       <!-- START OF SECTION WALLPAPER -->
 
-      <!-- START OF SECTION RECOMMENDED -->
-      <section id="section-coming-soon" class="section-action-movies ms-md-5 ms-3">
-        <div class="action-movies-top d-flex justify-content-between">
-          <p class="action-movies-text text-white fs-24 fw-bold">Recommended Series for You</p>
-        </div>
-        <div class="action-images-container d-flex gap-3 position-relative">
-          <div class="comedy-images">
-            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/2jIi55JtYKJTL1km8qHMuUilOWo.jpg" alt="">
-            <i class="fa-solid fa-play play-button-comedy"></i>
-          </div>
-          <div class="comedy-images">
-            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/2Wmmu1MkqxJ48J7aySET9EKEjXz.jpg" alt="">
-            <i class="fa-solid fa-play play-button-comedy"></i>
-          </div>
-          <div class="comedy-images">
-            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/3ZIPTvMnzI5ThmdGeEYQFxJV5Sg.jpg" alt="">
-            <i class="fa-solid fa-play play-button-comedy"></i>
-          </div>
-          <div class="comedy-images">
-            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/gFEHva8Csx18hMGJJZ6gi4sFSKR.jpg" alt="">
-            <i class="fa-solid fa-play play-button-comedy"></i>
-          </div>
-          <div class="comedy-images">
-            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/lgD4j9gUGmMckZpWWRJjorWqGVT.jpg" alt="">
-            <i class="fa-solid fa-play play-button-comedy"></i>
-          </div>
-          <div class="comedy-images">
-            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/nEwybsfZBSPjcZamPpKDTaTI5g.jpg" alt="">
-            <i class="fa-solid fa-play play-button-comedy"></i>
-          </div>
-          <div class="comedy-images">
-            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/oQxrvUhP3ycwnlxIrIMQ9Z3kleq.jpg" alt="">
-            <i class="fa-solid fa-play play-button-comedy"></i>
-          </div>
-          <div class="comedy-images">
-            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/tK855sva67LB7opmPW4JHn1c5VI.jpg" alt="">
-            <i class="fa-solid fa-play play-button-comedy"></i>
-          </div>
-
-          <div class="next-button-action position-absolute">
-            <button class="btn border-1 next-chevron-btn">
-              <i class="fas fa-chevron-right fa-xl text-white-50"></i>
-            </button>
-          </div>
-        </div>
-      </section>
-      <!-- END OF SECTION RECOMMENDED -->
-
       <!-- START OF SECTION TOP 10 -->
-      <section id="section-top-10-movies" class="section-top-10 text-white ms-5">  
+      <section id="section-top-10" class="section-top-10 text-white ms-5">  
         <div class="top-10-container">
           <div class="top-10-top d-flex align-items-center">
             <p class="top-10-top-text">TOP 10</p>
@@ -537,6 +489,54 @@
         </div>
       </section>
       <!-- END OF SECTION POPULAR DOCUMENTARIES -->
+
+      <!-- START OF SECTION RECOMMENDED -->
+      <section class="section-action-movies ms-md-5 ms-3">
+        <div class="action-movies-top d-flex justify-content-between">
+          <p class="action-movies-text text-white fs-24 fw-bold">Family</p>
+        </div>
+        <div class="action-images-container d-flex gap-3 position-relative">
+          <div class="comedy-images">
+            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/2jIi55JtYKJTL1km8qHMuUilOWo.jpg" alt="">
+            <i class="fa-solid fa-play play-button-comedy"></i>
+          </div>
+          <div class="comedy-images">
+            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/2Wmmu1MkqxJ48J7aySET9EKEjXz.jpg" alt="">
+            <i class="fa-solid fa-play play-button-comedy"></i>
+          </div>
+          <div class="comedy-images">
+            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/3ZIPTvMnzI5ThmdGeEYQFxJV5Sg.jpg" alt="">
+            <i class="fa-solid fa-play play-button-comedy"></i>
+          </div>
+          <div class="comedy-images">
+            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/gFEHva8Csx18hMGJJZ6gi4sFSKR.jpg" alt="">
+            <i class="fa-solid fa-play play-button-comedy"></i>
+          </div>
+          <div class="comedy-images">
+            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/lgD4j9gUGmMckZpWWRJjorWqGVT.jpg" alt="">
+            <i class="fa-solid fa-play play-button-comedy"></i>
+          </div>
+          <div class="comedy-images">
+            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/nEwybsfZBSPjcZamPpKDTaTI5g.jpg" alt="">
+            <i class="fa-solid fa-play play-button-comedy"></i>
+          </div>
+          <div class="comedy-images">
+            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/oQxrvUhP3ycwnlxIrIMQ9Z3kleq.jpg" alt="">
+            <i class="fa-solid fa-play play-button-comedy"></i>
+          </div>
+          <div class="comedy-images">
+            <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/tK855sva67LB7opmPW4JHn1c5VI.jpg" alt="">
+            <i class="fa-solid fa-play play-button-comedy"></i>
+          </div>
+
+          <div class="next-button-action position-absolute">
+            <button class="btn border-1 next-chevron-btn">
+              <i class="fas fa-chevron-right fa-xl text-white-50"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+      <!-- END OF SECTION RECOMMENDED -->
       
       <!-- START OF FEATURED -->
       <section class="section-featured text-white ms-md-5 ms-3>  
@@ -622,7 +622,7 @@
     <!-- START OF SECTION MCAM -->
     <section id="section-mcas" class="section-action-movies ms-md-5 ms-3">
       <div class="action-movies-top d-flex justify-content-between">
-        <p class="action-movies-text text-white fs-24 fw-bold">Most Critically Acclaimed Series</p>
+        <p class="action-movies-text text-white fs-24 fw-bold">Cinema TV</p>
       </div>
       <div class="action-images-container d-flex gap-3 position-relative">
         <div class="comedy-images">

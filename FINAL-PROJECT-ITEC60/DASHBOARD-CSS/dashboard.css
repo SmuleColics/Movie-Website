@@ -1,6 +1,6 @@
 :root {
   --db-text-sec: #f4fff8;
-  --secondary-color: #6c757d;
+  --secondary-color: #6c757d; /* border color placeholder color*/
   --db-bg-primary: #607EBC; /* STEEL BLUE */
   --dark: #343a40;
   --bootstrap-dark: #212529;

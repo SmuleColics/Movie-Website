@@ -332,9 +332,21 @@ if (isset($_GET['logout'])) {
     </section>
     <!-- START OF SECTION WALLPAPER -->
 
+
     <!-- START OF SECTION TOP 10 -->
     <?php
-    $select = mysqli_query($con, "SELECT * FROM tbl_top10 LIMIT 10");
+    $select = mysqli_query($con, "
+    SELECT 
+      ms.*,
+      g1.genre_name AS genre_1,
+      g2.genre_name AS genre_2,
+      g3.genre_name AS genre_3
+    FROM tbl_movie_series ms
+    LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
+    LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
+    LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+    ORDER BY ms.views DESC LIMIT 10
+  ");
     $top10_rank = 1;
     $modals = "";
     ?>
@@ -358,7 +370,7 @@ if (isset($_GET['logout'])) {
           </div>
           <div class="top-10-images-container d-flex gap-8 position-relative overflow-visible">
             <?php while ($row = mysqli_fetch_assoc($select)):
-              $top10_id = $row['top10_id'];
+              $movie_series_id = $row['movie_series_id'];
               $top10_title = $row['title'];
               $top10_duration = $row['duration'];
               $top10_poster = $row['poster'];
@@ -372,91 +384,86 @@ if (isset($_GET['logout'])) {
               $top10_genre_3 = $row['genre_3'];
               $top10_cast = $row['cast'];
               $top10_description = $row['description'];
-
               ?>
               <div class="top-10-images position-relative">
                 <p class="top-10-text"><?php echo $top10_rank; ?></p>
-                <a href='#' data-bs-toggle='modal' data-bs-target='#modal-top10-<?php echo $top10_id ?>'>
+                <a href='#' data-bs-toggle='modal' data-bs-target='#modal-top10-<?php echo $movie_series_id ?>'>
                   <div class="top-10-hover position-relative">
                     <img class="top-10-img rounded-3"
-                      src="../DASHBOARD-HTML/TOP10_IMAGES/<?php echo htmlspecialchars($top10_poster); ?>"
+                      src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($top10_poster); ?>"
                       alt="<?php echo htmlspecialchars($top10_title); ?>">
                     <i class="fa-solid fa-play play-button-top-10"></i>
                   </div>
                 </a>
               </div>
               <?php
-              // Build genres string
               $genres = htmlspecialchars($top10_genre_1);
               if (!empty($top10_genre_2))
                 $genres .= ', ' . htmlspecialchars($top10_genre_2);
               if (!empty($top10_genre_3))
                 $genres .= ', ' . htmlspecialchars($top10_genre_3);
 
-              // Build modals for each top 10 movie/series
               $modals .= "
-        <div class='modal fade' id='modal-top10-{$top10_id}' tabindex='-1' aria-labelledby='exampleModalLabel-{$top10_id}' aria-hidden='true'>
-          <div class='modal-dialog modal-dialog-centered modal-lg modal-dark border-3'>
-            <div class='modal-content bg-dark modals'>
-              <div class='modal-body'>
-                <div class='modal-body-content'>
-                  <div class='modal-pic-container m-0 position-relative'>
-                    <video
-                      class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-                      autoplay
-                      muted
-                      loop
-                    >
-                      <source src=\"../DASHBOARD-HTML/TOP10_VIDEOS/" . htmlspecialchars($top10_video) . "\" type=\"video/mp4\">
-                      Your browser does not support the video tag.
-                    </video>";
+  <div class='modal fade' id='modal-top10-{$movie_series_id}' tabindex='-1' aria-labelledby='exampleModalLabel-{$movie_series_id}' aria-hidden='true'>
+    <div class='modal-dialog modal-dialog-centered modal-lg modal-dark border-3'>
+      <div class='modal-content bg-dark modals'>
+        <div class='modal-body'>
+          <div class='modal-body-content'>
+            <div class='modal-pic-container m-0 position-relative'>
+              <video
+                class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
+                autoplay
+                muted
+                loop
+              >
+                <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($top10_video) . "\" type=\"video/mp4\">
+                Your browser does not support the video tag.
+              </video>";
               if (!empty($top10_modal_poster_title)) {
-                $modals .= "<img class='poster-title-img top10-title' src='../DASHBOARD-HTML/TOP10_IMAGES/" . htmlspecialchars($top10_modal_poster_title) . "' alt=''>";
+                $modals .= "<img class='poster-title-img top10-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($top10_modal_poster_title) . "' alt=''>";
               } else {
                 $modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($top10_title) . "</p>";
               }
               $modals .= "
-                    <a href=\"play-vid.php?video=" . urlencode($top10_video) . "&type=top10\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
-                      <i class=\"fa-solid fa-play me-1\"></i> Play
-                    </a>
-                    <button class=\"volume-control bg-transparent position-absolute\">
-                      <i class=\"fa-solid fa-volume-xmark volume-icon\"></i>
-                    </button>
-                    <button type='button' class='btn-close btn-close-white position-absolute modal-close-button' data-bs-dismiss='modal' aria-label='Close'></button>
-                  </div>   
+              <a href=\"play-vid.php?video=" . urlencode($top10_video) . "&type=movie_series&id=" . $movie_series_id . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
+                <i class=\"fa-solid fa-play me-1\"></i> Play
+              </a>
+              <button class=\"volume-control bg-transparent position-absolute\">
+                <i class=\"fa-solid fa-volume-xmark volume-icon\"></i>
+              </button>
+              <button type='button' class='btn-close btn-close-white position-absolute modal-close-button' data-bs-dismiss='modal' aria-label='Close'></button>
+            </div>   
 
-                  <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
-                    <div class=\"col-8 text-wrap\">
-                      <div class=\"d-flex gap-2\">
-                        <p class='modal-text-rating mb-0'>" . htmlspecialchars($top10_date_released) . "</p>
-                        <p class='modal-text-rating mb-0'>" . htmlspecialchars($top10_duration) . "</p>
-                      </div>
-                      <div class=\"d-flex gap-2 align-items-center\">
-                        <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($top10_age_rating) . "+</p>
-                        <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($top10_category) . "</p>
-                      </div>
-                      <p class='modal-text-rating'>" . htmlspecialchars($top10_description) . "</p>
-                    </div>
-                    <div class=\"col-4 ps-0 pe-4 text-wrap\">
-                      <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
-                        <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span> 
-                        " . htmlspecialchars($top10_cast) . ", more...
-                      </p>
-                      <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
-                        <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span> 
-                        {$genres}
-                      </p>
-                    </div>
-                  </div>";
-
-              // --- EPISODES/SEASONS block for Series ---
+            <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
+              <div class=\"col-8 text-wrap\">
+                <div class=\"d-flex gap-2\">
+                  <p class='modal-text-rating mb-0'>" . htmlspecialchars($top10_date_released) . "</p>
+                  <p class='modal-text-rating mb-0'>" . htmlspecialchars($top10_duration) . "</p>
+                </div>
+                <div class=\"d-flex gap-2 align-items-center\">
+                  <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($top10_age_rating) . "+</p>
+                  <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($top10_category) . "</p>
+                </div>
+                <p class='modal-text-rating'>" . htmlspecialchars($top10_description) . "</p>
+              </div>
+              <div class=\"col-4 ps-0 pe-4 text-wrap\">
+                <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
+                  <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span> 
+                  " . htmlspecialchars($top10_cast) . ", more...
+                </p>
+                <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
+                  <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span> 
+                  {$genres}
+                </p>
+              </div>
+            </div>
+          ";
+              // --- EPISODES/SEASONS block for Series (unchanged) ---
               if ($top10_category === 'Series') {
-                // Fetch all seasons for this series
-                $seasons_result = mysqli_query($con, "SELECT * FROM tbl_top10_seasons WHERE top10_id = {$top10_id} ORDER BY season_number");
+                $seasons_result = mysqli_query($con, "SELECT * FROM tbl_movie_series_seasons WHERE movie_series_id = {$movie_series_id} ORDER BY season_number");
                 $seasons = [];
                 while ($season = mysqli_fetch_assoc($seasons_result)) {
-                  // Fetch episodes for this season
-                  $episodes_result = mysqli_query($con, "SELECT * FROM tbl_top10_episodes WHERE season_id = {$season['season_id']} ORDER BY episode_id");
+                  $episodes_result = mysqli_query($con, "SELECT * FROM tbl_movie_series_episodes WHERE season_id = {$season['season_id']} ORDER BY episode_id");
                   $episodes = [];
                   while ($ep = mysqli_fetch_assoc($episodes_result)) {
                     $episodes[] = $ep;
@@ -464,89 +471,84 @@ if (isset($_GET['logout'])) {
                   $season['episodes'] = $episodes;
                   $seasons[] = $season;
                 }
-                // Output the season selector and episode list containers
                 $modals .= '
-              <div class="col-12 d-flex justify-content-between align-items-center mx-4" style="width: 100%">
-                  <div>
-                      <p class="fs-3 mb-0" style="color: #f4fff8;">Episodes</p>
-                  </div>
-                  <div class="position-relative" style="min-width:180px; ">
-                      <select style="transform: translateX(-48px);" id="modal-season-select-' . $top10_id . '" class="form-control me-5">';
+      <div class="col-12 d-flex justify-content-between align-items-center mx-4" style="width: 100%">
+          <div>
+              <p class="fs-3 mb-0" style="color: #f4fff8;">Episodes</p>
+          </div>
+          <div class="position-relative" style="min-width:180px; ">
+              <select style="transform: translateX(-48px);" id="modal-season-select-' . $movie_series_id . '" class="form-control me-5">';
                 foreach ($seasons as $s) {
                   $modals .= '<option value="season-' . $s['season_id'] . '">' . htmlspecialchars($s['season_title']) . '</option>';
                 }
                 $modals .= '</select>
-                      <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
-                  </div>
-              </div>';
+              <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
+          </div>
+      </div>';
                 foreach ($seasons as $idx => $s) {
                   $modals .= '<div class="col-12 mb-4 modal-episodes-block"
-                      id="modal-episodes-' . $top10_id . '-season-' . $s['season_id'] . '"
-                      style="' . ($idx === 0 ? '' : 'display:none;') . '">';
+            id="modal-episodes-' . $movie_series_id . '-season-' . $s['season_id'] . '"
+            style="' . ($idx === 0 ? '' : 'display:none;') . '">';
                   foreach ($s['episodes'] as $ep_idx => $ep) {
                     $modals .= '
-                          <div class="mx-3 py-2 d-flex gap-2">
-                              <div class="d-flex align-items-center gap-3 me-2 ms-4">
-                                  <p class="mb-0 fs-2 db-text-sec">' . ($ep_idx + 1) . '</p>';
+                  <div class="mx-3 py-2 d-flex gap-2">
+                      <div class="d-flex align-items-center gap-3 me-2 ms-4">
+                          <p class="mb-0 fs-2 db-text-sec">' . ($ep_idx + 1) . '</p>';
                     if (!empty($ep['episode_video'])) {
-                      // Make the episode video a clickable link to play-vid.php
                       $modals .= '
-                                  <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=top10">
-                                      <video
-                                          class="position-relative rounded-3 m-0 p-0 video-player video-episode"
-                                          muted
-                                          style="width: 120px; height: 70px; object-fit: cover;">
-                                          <source src="../DASHBOARD-HTML/TOP10_EPISODES/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
-                                          Your browser does not support the video tag.
-                                      </video>
-                                  </a>';
+                          <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=episode&id=' . $ep['episode_id'] . '">
+                              <video
+                                  class="position-relative rounded-3 m-0 p-0 video-player video-episode"
+                                  muted
+                                  style="width: 120px; height: 70px; object-fit: cover;">
+                                  <source src="../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
+                                  Your browser does not support the video tag.
+                              </video>
+                          </a>';
                     }
                     $modals .= '
-                              </div>
-                              <div class="db-text-sec me-4">
-                                  <div class="d-flex align-items-center justify-content-between mb-2">
-                                      <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
-                                      <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
-                                  </div>
-                                  <div>
-                                      <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
-                                  </div>
-                              </div>
-                          </div>';
+                      </div>
+                      <div class="db-text-sec me-4">
+                          <div class="d-flex align-items-center justify-content-between mb-2">
+                              <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
+                              <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
+                          </div>
+                          <div>
+                              <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
+                          </div>
+                      </div>
+                  </div>';
                   }
                   if (empty($s['episodes'])) {
                     $modals .= '<div class="mx-4 py-2 db-text-sec">No episodes available for this season.</div>';
                   }
                   $modals .= '</div>';
                 }
-                // JS for switching seasons
                 $modals .= '
-              <script>
-              document.addEventListener("DOMContentLoaded", function () {
-                  var select = document.getElementById("modal-season-select-' . $top10_id . '");
-                  if (select) {
-                      select.addEventListener("change", function () {
-                          var val = this.value;';
+      <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          var select = document.getElementById("modal-season-select-' . $movie_series_id . '");
+          if (select) {
+              select.addEventListener("change", function () {
+                  var val = this.value;';
                 foreach ($seasons as $s) {
                   $modals .= '
-                          document.getElementById("modal-episodes-' . $top10_id . '-season-' . $s['season_id'] . '").style.display = (val === "season-' . $s['season_id'] . '") ? "" : "none";';
+                  document.getElementById("modal-episodes-' . $movie_series_id . '-season-' . $s['season_id'] . '").style.display = (val === "season-' . $s['season_id'] . '") ? "" : "none";';
                 }
                 $modals .= '
-                      });
-                  }
               });
-              </script>
-              ';
+          }
+      });
+      </script>
+      ';
               }
-              // --- END Series block ---
-            
               $modals .= "
-                </div>
-              </div>
-            </div>
           </div>
         </div>
-        ";
+      </div>
+    </div>
+  </div>
+  ";
               $top10_rank++;
             endwhile; ?>
           </div>
@@ -559,19 +561,17 @@ if (isset($_GET['logout'])) {
         </div>
       </div>
     </section>
-
-    <?php echo $modals; // output all the generated modals ?>
+    <?php echo $modals; ?>
     <!-- END OF SECTION TOP 10 -->
 
 
-    <!-- START OF SECTION TRENDING -->
+    <!-- START OF SECTION ROMANCE -->
     <section class="section-trending ms-md-5 ms-3">
       <div class="trending-this-week">
-        <p class="trending-text text-white fs-24 fw-bold">Trending this week</p>
+        <p class="trending-text text-white fs-24 fw-bold">Romance</p>
       </div>
 
       <div class="top10-featured-wrapper position-relative">
-        <!-- Prev Button -->
         <div class="prev-button-trending position-absolute"
           style="left: 0; top: 50%; transform: translateY(-50%); z-index: 400;">
           <button class="btn border-1 prev-chevron-btn-trending">
@@ -579,15 +579,23 @@ if (isset($_GET['logout'])) {
           </button>
         </div>
 
-        <!-- Images Container -->
         <div class="trending-images-container d-flex gap-3 position-relative">
           <?php
-          // Fetch trending entries
-          $trend_query = mysqli_query($con, "SELECT * FROM tbl_trend LIMIT 8");
+          $trend_query = mysqli_query(
+            $con,
+            "SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
+            FROM tbl_movie_series ms
+            LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
+            LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
+            LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+            WHERE g1.genre_name = 'Romance' OR g2.genre_name = 'Romance' OR g3.genre_name = 'Romance'
+            ORDER BY ms.date_released DESC
+            LIMIT 7"
+          );
           $trend_modals = "";
           $trend_rank = 1;
           while ($row = mysqli_fetch_assoc($trend_query)):
-            $trend_id = $row['trend_id'];
+            $movie_series_id = $row['movie_series_id'];
             $trend_title = $row['title'];
             $trend_poster = $row['poster'];
             $trend_video = $row['video'];
@@ -602,84 +610,83 @@ if (isset($_GET['logout'])) {
             $trend_cast = $row['cast'];
             $trend_description = $row['description'];
 
-            // For modal genres
             $genres = htmlspecialchars($trend_genre_1);
             if (!empty($trend_genre_2))
               $genres .= ', ' . htmlspecialchars($trend_genre_2);
             if (!empty($trend_genre_3))
               $genres .= ', ' . htmlspecialchars($trend_genre_3);
             ?>
-            <div class="trending-images position-relative" style="overflow: visible;">
-              <a href="#" data-bs-toggle="modal" data-bs-target="#modal-trend-<?php echo $trend_id ?>">
+            <div class="trending-images position-relative pe-2" style="overflow: visible;">
+              <a href="#" data-bs-toggle="modal" data-bs-target="#modal-romance-<?php echo $movie_series_id ?>">
                 <div class="trending-hover position-relative">
                   <img class="trending-img rounded-3"
-                    src="../DASHBOARD-HTML/TREND_IMAGES/<?php echo htmlspecialchars($trend_poster); ?>"
+                    src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($trend_poster); ?>"
                     alt="<?php echo htmlspecialchars($trend_title); ?>">
                   <i class="fa-solid fa-play play-button"></i>
                 </div>
               </a>
             </div>
             <?php
-            // Modal (imitate the Top 10 modal design)
             $trend_modals .= "
-        <div class='modal fade' id='modal-trend-{$trend_id}' tabindex='-1' aria-labelledby='exampleModalLabel-{$trend_id}' aria-hidden='true'>
-          <div class='modal-dialog modal-dialog-centered modal-lg modal-dark border-3'>
-            <div class='modal-content bg-dark modals'>
-              <div class='modal-body'>
-                <div class='modal-body-content'>
-                  <div class='modal-pic-container m-0 position-relative'>
-                    <video
-                      class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-                      autoplay
-                      muted
-                      loop
-                    >
-                      <source src=\"../DASHBOARD-HTML/TREND_VIDEOS/" . htmlspecialchars($trend_video) . "\" type=\"video/mp4\">
-                      Your browser does not support the video tag.
-                    </video>";
+      <div class='modal fade' id='modal-romance-{$movie_series_id}' tabindex='-1' aria-labelledby='exampleModalLabel-romance-{$movie_series_id}' aria-hidden='true'>
+        <div class='modal-dialog modal-dialog-centered modal-lg modal-dark border-3'>
+          <div class='modal-content bg-dark modals'>
+            <div class='modal-body'>
+              <div class='modal-body-content'>
+                <div class='modal-pic-container m-0 position-relative'>
+                  <video
+                    class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
+                    autoplay
+                    muted
+                    loop
+                  >
+                    <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($trend_video) . "\" type=\"video/mp4\">
+                    Your browser does not support the video tag.
+                  </video>"; 
             if (!empty($trend_modal_poster_title)) {
-              $trend_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/TREND_IMAGES/" . htmlspecialchars($trend_modal_poster_title) . "' alt=''>";
+              $trend_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($trend_modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
             } else {
               $trend_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($trend_title) . "</p>";
             }
             $trend_modals .= "
-                    <a href=\"play-vid.php?video=" . urlencode($trend_video) . "&type=trend\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
-                      <i class=\"fa-solid fa-play me-1\"></i> Play
-                    </a>
-                    <button class=\"volume-control bg-transparent position-absolute\">
-                      <i class=\"fa-solid fa-volume-xmark volume-icon\"></i>
-                    </button>
-                    <button type='button' class='btn-close btn-close-white position-absolute modal-close-button' data-bs-dismiss='modal' aria-label='Close'></button>
-                  </div>   
-                  <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
-                    <div class=\"col-8 text-wrap\">
-                      <div class=\"d-flex gap-2\">
-                        <p class='modal-text-rating mb-0'>" . htmlspecialchars($trend_date_released) . "</p>
-                        <p class='modal-text-rating mb-0'>" . htmlspecialchars($trend_duration) . "</p>
-                      </div>
-                      <div class=\"d-flex gap-2 align-items-center\">
-                        <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($trend_age_rating) . "+</p>
-                        <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($trend_category) . "</p>
-                      </div>
-                      <p class='modal-text-rating'>" . htmlspecialchars($trend_description) . "</p>
+                  <a href=\"play-vid.php?video=" . urlencode($trend_video) . "&type=movie_series&id=" . $movie_series_id . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
+                    <i class=\"fa-solid fa-play me-1\"></i> Play
+                  </a>
+                  <button class=\"volume-control bg-transparent position-absolute\">
+                    <i class=\"fa-solid fa-volume-xmark volume-icon\"></i>
+                  </button>
+                  <button type='button' class='btn-close btn-close-white position-absolute modal-close-button' data-bs-dismiss='modal' aria-label='Close'></button>
+                </div>
+                <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
+                  <div class=\"col-8 text-wrap\">
+                    <div class=\"d-flex gap-2\">
+                      <p class='modal-text-rating mb-0'>" . htmlspecialchars($trend_date_released) . "</p>
+                      <p class='modal-text-rating mb-0'>" . htmlspecialchars($trend_duration) . "</p>
                     </div>
-                    <div class=\"col-4 ps-0 pe-4 text-wrap\">
-                      <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
-                        <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span> 
-                        " . htmlspecialchars($trend_cast) . ", more...
-                      </p>
-                      <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
-                        <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span> 
-                        {$genres}
-                      </p>
+                    <div class=\"d-flex gap-2 align-items-center\">
+                      <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($trend_age_rating) . "+</p>
+                      <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($trend_category) . "</p>
                     </div>
-                  </div>";
-            // --- EPISODES/SEASONS block for Series ---
+                    <p class='modal-text-rating'>" . htmlspecialchars($trend_description) . "</p>
+                  </div>
+                  <div class=\"col-4 ps-0 pe-4 text-wrap\">
+                    <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
+                      <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span>
+                      " . htmlspecialchars($trend_cast) . ", more...
+                    </p>
+                    <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
+                      <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span>
+                      {$genres}
+                    </p>
+                  </div>
+                </div>
+              ";
+            // --- Series/episodes code (unchanged) ---
             if ($trend_category === 'Series') {
-              $seasons_result = mysqli_query($con, "SELECT * FROM tbl_trend_seasons WHERE trend_id = {$trend_id} ORDER BY season_number");
+              $seasons_result = mysqli_query($con, "SELECT * FROM tbl_movie_series_seasons WHERE movie_series_id = {$movie_series_id} ORDER BY season_number");
               $seasons = [];
               while ($season = mysqli_fetch_assoc($seasons_result)) {
-                $episodes_result = mysqli_query($con, "SELECT * FROM tbl_trend_episodes WHERE season_id = {$season['season_id']} ORDER BY episode_id");
+                $episodes_result = mysqli_query($con, "SELECT * FROM tbl_movie_series_episodes WHERE season_id = {$season['season_id']} ORDER BY episode_id");
                 $episodes = [];
                 while ($ep = mysqli_fetch_assoc($episodes_result)) {
                   $episodes[] = $ep;
@@ -688,106 +695,102 @@ if (isset($_GET['logout'])) {
                 $seasons[] = $season;
               }
               $trend_modals .= '
-                    <div class="col-12 d-flex justify-content-between align-items-center mx-4" style="width: 100%">
-                        <div>
-                            <p class="fs-3 mb-0" style="color: #f4fff8;">Episodes</p>
-                        </div>
-                        <div class="position-relative" style="min-width:180px; ">
-                            <select style="transform: translateX(-48px);" id="modal-season-select-trend-' . $trend_id . '" class="form-control me-5">';
+            <div class="col-12 d-flex justify-content-between align-items-center mx-4" style="width: 100%">
+                <div>
+                    <p class="fs-3 mb-0" style="color: #f4fff8;">Episodes</p>
+                </div>
+                <div class="position-relative" style="min-width:180px; ">
+                    <select style="transform: translateX(-48px);" id="modal-season-select-romance-' . $movie_series_id . '" class="form-control me-5">';
               foreach ($seasons as $s) {
                 $trend_modals .= '<option value="season-' . $s['season_id'] . '">' . htmlspecialchars($s['season_title']) . '</option>';
               }
               $trend_modals .= '</select>
-                            <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
-                        </div>
-                    </div>';
+                    <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
+                </div>
+            </div>';
               foreach ($seasons as $idx => $s) {
                 $trend_modals .= '<div class="col-12 mb-4 modal-episodes-block"
-                        id="modal-episodes-trend-' . $trend_id . '-season-' . $s['season_id'] . '"
-                        style="' . ($idx === 0 ? '' : 'display:none;') . '">';
+                id="modal-episodes-romance-' . $movie_series_id . '-season-' . $s['season_id'] . '"
+                style="' . ($idx === 0 ? '' : 'display:none;') . '">';
                 foreach ($s['episodes'] as $ep_idx => $ep) {
                   $trend_modals .= '
-                                <div class="mx-3 py-2 d-flex gap-2">
-                                    <div class="d-flex align-items-center gap-3 me-2 ms-4">
-                                        <p class="mb-0 fs-2 db-text-sec">' . ($ep_idx + 1) . '</p>';
+                        <div class="mx-3 py-2 d-flex gap-2">
+                            <div class="d-flex align-items-center gap-3 me-2 ms-4">
+                                <p class="mb-0 fs-2 db-text-sec">' . ($ep_idx + 1) . '</p>';
                   if (!empty($ep['episode_video'])) {
                     $trend_modals .= '
-                                        <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=trend">
-                                            <video
-                                                class="position-relative rounded-3 m-0 p-0 video-player video-episode"
-                                                muted
-                                                style="width: 120px; height: 70px; object-fit: cover;">
-                                                <source src="../DASHBOARD-HTML/TREND_EPISODES/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
-                                                Your browser does not support the video tag.
-                                            </video>
-                                        </a>';
+                                <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=episode&id=' . $ep['episode_id'] . '">
+                                    <video
+                                        class="position-relative rounded-3 m-0 p-0 video-player video-episode"
+                                        muted
+                                        style="width: 120px; height: 70px; object-fit: cover;">
+                                        <source src="../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </a>';
                   }
                   $trend_modals .= '
-                                    </div>
-                                    <div class="db-text-sec me-4">
-                                        <div class="d-flex align-items-center justify-content-between mb-2">
-                                            <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
-                                            <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
-                                        </div>
-                                    </div>
-                                </div>';
+                            </div>
+                            <div class="db-text-sec me-4">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
+                                    <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
+                                </div>
+                                <div>
+                                    <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
+                                </div>
+                            </div>
+                        </div>';
                 }
                 if (empty($s['episodes'])) {
                   $trend_modals .= '<div class="mx-4 py-2 db-text-sec">No episodes available for this season.</div>';
                 }
                 $trend_modals .= '</div>';
               }
-              // JS for switching seasons
               $trend_modals .= '
-                    <script>
-                    document.addEventListener("DOMContentLoaded", function () {
-                        var select = document.getElementById("modal-season-select-trend-' . $trend_id . '");
-                        if (select) {
-                            select.addEventListener("change", function () {
-                                var val = this.value;';
+            <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var select = document.getElementById("modal-season-select-romance-' . $movie_series_id . '");
+                if (select) {
+                    select.addEventListener("change", function () {
+                        var val = this.value;';
               foreach ($seasons as $s) {
                 $trend_modals .= '
-                                document.getElementById("modal-episodes-trend-' . $trend_id . '-season-' . $s['season_id'] . '").style.display = (val === "season-' . $s['season_id'] . '") ? "" : "none";';
+                        document.getElementById("modal-episodes-romance-' . $movie_series_id . '-season-' . $s['season_id'] . '").style.display = (val === "season-' . $s['season_id'] . '") ? "" : "none";';
               }
               $trend_modals .= '
-                            });
-                        }
                     });
-                    </script>
-                    ';
+                }
+            });
+            </script>
+            ';
             }
             $trend_modals .= "
-                </div>
               </div>
             </div>
           </div>
         </div>
-        ";
+      </div>
+      ";
             $trend_rank++;
           endwhile;
           ?>
         </div>
-        <!-- Next Button -->
         <div class="next-button-trending position-absolute"
           style="right: 0; top: 50%; transform: translateY(-50%);z-index: 400;">
           <button class="btn border-1 next-chevron-btn-trending">
             <i class="fas fa-chevron-right fa-2xl text-white-50"></i>
           </button>
         </div>
-
       </div>
-
     </section>
     <?php echo $trend_modals; ?>
-    <!-- END OF SECTION TRENDING -->
+    <!-- END OF SECTION ROMANCE -->
 
-    <!-- START OF SECTION ACTION MOVIES -->
-    <section class="section-comedy-movies ms-md-5 ms-3">
+    <!-- START OF SECTION COMEDY -->
+    <section class="section-action-movies ms-md-5 ms-3">
       <div class="action-movies-top d-flex justify-content-between">
-        <p class="action-movies-text text-white fs-24 fw-bold">Comedy Movies</p>
+        <p class="action-movies-text text-white fs-24 fw-bold">Comedy</p>
 
       </div>
       <div class="action-images-container d-flex gap-3 position-relative">
@@ -837,8 +840,8 @@ if (isset($_GET['logout'])) {
     <section class="section-featured text-white ms-md-5 ms-3">
       <div class="featured-container">
         <div class="featured-top">
-          <p class="featured-text">FEATURED</p>
-          <p class="featured-movies-text fs-2">MOVIES</p>
+          <p class="featured-text">ACTION</p>
+          <p class="featured-movies-text fs-2">MOVIES/SERIES</p>
           <div class="featured-images-container d-flex gap-3 position-relative">
             <div class="featured-images position-relative">
               <img class="featured-img rounded-3" src="../Movie Web/Freatured/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg" alt="">

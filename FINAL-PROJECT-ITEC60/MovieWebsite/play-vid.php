@@ -1,23 +1,54 @@
 <?php
-// Set the directory where your videos are stored
-$type = isset($_GET['type']) ? $_GET['type'] : 'top10'; // default to top10 if not set
-if ($type === 'trend') {
-    $videoDir = "../DASHBOARD-HTML/TREND_VIDEOS/";
-} else {
-    $videoDir = "../DASHBOARD-HTML/TOP10_VIDEOS/";
+include '../includes/db-connection.php';
+
+$type = isset($_GET['type']) ? $_GET['type'] : 'movie_series';
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+switch ($type) {
+    case 'trend':
+        $videoDir = "../DASHBOARD-HTML/TREND_VIDEOS/";
+        break;
+    case 'top10':
+    case 'movie_series':
+        $videoDir = "../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/";
+        break;
+    case 'episode':
+        $videoDir = "../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/";
+        break;
+    default:
+        $videoDir = "../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/";
+        break;
 }
 
-// Get the video filename from the GET parameter
 $videoFile = isset($_GET['video']) ? basename($_GET['video']) : '';
-
-// Build the expected full path (for server-side checks)
 $fullPath = $videoDir . $videoFile;
 
-// Only allow playback if the file exists and the extension is .mp4
 if ($videoFile && preg_match('/\.mp4$/i', $videoFile) && file_exists($fullPath)) {
     $videoPath = $fullPath;
+
+    // Increment views (Option 1: Always increment parent on episode view)
+    if ($type === 'movie_series' || $type === 'top10') {
+        if ($id) {
+            mysqli_query($con, "UPDATE tbl_movie_series SET views = views + 1 WHERE movie_series_id = $id");
+        }
+    } else if ($type === 'episode') {
+        if ($id) {
+            // Increment episode views
+            mysqli_query($con, "UPDATE tbl_movie_series_episodes SET views = views + 1 WHERE episode_id = $id");
+            // Also increment parent movie/series views
+            $result = mysqli_query($con, "SELECT season_id FROM tbl_movie_series_episodes WHERE episode_id = $id");
+            if ($result && $row = mysqli_fetch_assoc($result)) {
+                $season_id = $row['season_id'];
+                $result2 = mysqli_query($con, "SELECT movie_series_id FROM tbl_movie_series_seasons WHERE season_id = $season_id");
+                if ($result2 && $row2 = mysqli_fetch_assoc($result2)) {
+                    $movie_series_id = $row2['movie_series_id'];
+                    mysqli_query($con, "UPDATE tbl_movie_series SET views = views + 1 WHERE movie_series_id = $movie_series_id");
+                }
+            }
+        }
+    }
 } else {
-    $videoPath = "default.mp4"; // fallback video
+    $videoPath = "default.mp4";
 }
 ?>
 <!DOCTYPE html>
