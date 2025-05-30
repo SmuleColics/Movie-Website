@@ -642,7 +642,7 @@ if (isset($_GET['logout'])) {
                   >
                     <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($trend_video) . "\" type=\"video/mp4\">
                     Your browser does not support the video tag.
-                  </video>"; 
+                  </video>";
             if (!empty($trend_modal_poster_title)) {
               $trend_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($trend_modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
             } else {
@@ -791,100 +791,442 @@ if (isset($_GET['logout'])) {
     <section class="section-action-movies ms-md-5 ms-3">
       <div class="action-movies-top d-flex justify-content-between">
         <p class="action-movies-text text-white fs-24 fw-bold">Comedy</p>
-
       </div>
-      <div class="action-images-container d-flex gap-3 position-relative">
-        <div class="comedy-images">
-          <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/2jIi55JtYKJTL1km8qHMuUilOWo.jpg" alt="">
-          <i class="fa-solid fa-play play-button-comedy"></i>
-        </div>
-        <div class="comedy-images">
-          <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/2Wmmu1MkqxJ48J7aySET9EKEjXz.jpg" alt="">
-          <i class="fa-solid fa-play play-button-comedy"></i>
-        </div>
-        <div class="comedy-images">
-          <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/3ZIPTvMnzI5ThmdGeEYQFxJV5Sg.jpg" alt="">
-          <i class="fa-solid fa-play play-button-comedy"></i>
-        </div>
-        <div class="comedy-images">
-          <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/gFEHva8Csx18hMGJJZ6gi4sFSKR.jpg" alt="">
-          <i class="fa-solid fa-play play-button-comedy"></i>
-        </div>
-        <div class="comedy-images">
-          <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/lgD4j9gUGmMckZpWWRJjorWqGVT.jpg" alt="">
-          <i class="fa-solid fa-play play-button-comedy"></i>
-        </div>
-        <div class="comedy-images">
-          <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/nEwybsfZBSPjcZamPpKDTaTI5g.jpg" alt="">
-          <i class="fa-solid fa-play play-button-comedy"></i>
-        </div>
-        <div class="comedy-images">
-          <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/oQxrvUhP3ycwnlxIrIMQ9Z3kleq.jpg" alt="">
-          <i class="fa-solid fa-play play-button-comedy"></i>
-        </div>
-        <div class="comedy-images">
-          <img class="action-movies-img rounded-3" src="../Movie Web/Comedy/tK855sva67LB7opmPW4JHn1c5VI.jpg" alt="">
-          <i class="fa-solid fa-play play-button-comedy"></i>
+      <div class="top10-featured-wrapper position-relative">
+        <div class="prev-button-comedy position-absolute"
+          style="left: 0; top: 50%; transform: translateY(-50%); z-index: 400;">
+          <button class="btn border-1 prev-chevron-btn-comedy">
+            <i class="fas fa-chevron-left fa-2xl text-white-50"></i>
+          </button>
         </div>
 
-        <div class="next-button-action position-absolute">
-          <button class="btn border-1 next-chevron-btn">
-            <i class="fas fa-chevron-right fa-xl text-white-50"></i>
+        <div class="action-images-container d-flex gap-3 position-relative">
+          <?php
+          $comedy_query = mysqli_query(
+            $con,
+            "SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
+        FROM tbl_movie_series ms
+        LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
+        LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
+        LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+        WHERE g1.genre_name = 'Comedy' OR g2.genre_name = 'Comedy' OR g3.genre_name = 'Comedy'
+        ORDER BY ms.date_released DESC
+        LIMIT 7"
+          );
+          $comedy_modals = "";
+          while ($row = mysqli_fetch_assoc($comedy_query)):
+            $movie_series_id = $row['movie_series_id'];
+            $comedy_title = $row['title'];
+            $comedy_poster = $row['poster'];
+            $comedy_video = $row['video'];
+            $comedy_modal_poster_title = $row['modal_poster_title'];
+            $comedy_duration = $row['duration'];
+            $comedy_date_released = $row['date_released'];
+            $comedy_age_rating = $row['age_rating'];
+            $comedy_category = $row['category'];
+            $comedy_genre_1 = $row['genre_1'];
+            $comedy_genre_2 = $row['genre_2'];
+            $comedy_genre_3 = $row['genre_3'];
+            $comedy_cast = $row['cast'];
+            $comedy_description = $row['description'];
+
+            $genres = htmlspecialchars($comedy_genre_1);
+            if (!empty($comedy_genre_2))
+              $genres .= ', ' . htmlspecialchars($comedy_genre_2);
+            if (!empty($comedy_genre_3))
+              $genres .= ', ' . htmlspecialchars($comedy_genre_3);
+            ?>
+            <div class="comedy-images position-relative pe-2" style="overflow: visible;">
+              <a href="#" data-bs-toggle="modal" data-bs-target="#modal-comedy-<?php echo $movie_series_id ?>">
+                <div class="trending-hover position-relative">
+                  <img class="action-movies-img rounded-3"
+                    src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($comedy_poster); ?>"
+                    alt="<?php echo htmlspecialchars($comedy_title); ?>">
+                  <i class="fa-solid fa-play play-button-comedy"></i>
+                </div>
+              </a>
+            </div>
+            <?php
+            $comedy_modals .= "
+  <div class='modal fade' id='modal-comedy-{$movie_series_id}' tabindex='-1' aria-labelledby='exampleModalLabel-comedy-{$movie_series_id}' aria-hidden='true'>
+    <div class='modal-dialog modal-dialog-centered modal-lg modal-dark border-3'>
+      <div class='modal-content bg-dark modals'>
+        <div class='modal-body'>
+          <div class='modal-body-content'>
+            <div class='modal-pic-container m-0 position-relative'>
+              <video
+                class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
+                autoplay
+                muted
+                loop
+              >
+                <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($comedy_video) . "\" type=\"video/mp4\">
+                Your browser does not support the video tag.
+              </video>";
+            if (!empty($comedy_modal_poster_title)) {
+              $comedy_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($comedy_modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
+            } else {
+              $comedy_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($comedy_title) . "</p>";
+            }
+            $comedy_modals .= "
+              <a href=\"play-vid.php?video=" . urlencode($comedy_video) . "&type=movie_series&id=" . $movie_series_id . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
+                <i class=\"fa-solid fa-play me-1\"></i> Play
+              </a>
+              <button class=\"volume-control bg-transparent position-absolute\">
+                <i class=\"fa-solid fa-volume-xmark volume-icon\"></i>
+              </button>
+              <button type='button' class='btn-close btn-close-white position-absolute modal-close-button' data-bs-dismiss='modal' aria-label='Close'></button>
+            </div>
+            <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
+              <div class=\"col-8 text-wrap\">
+                <div class=\"d-flex gap-2\">
+                  <p class='modal-text-rating mb-0'>" . htmlspecialchars($comedy_date_released) . "</p>
+                  <p class='modal-text-rating mb-0'>" . htmlspecialchars($comedy_duration) . "</p>
+                </div>
+                <div class=\"d-flex gap-2 align-items-center\">
+                  <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($comedy_age_rating) . "+</p>
+                  <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($comedy_category) . "</p>
+                </div>
+                <p class='modal-text-rating'>" . htmlspecialchars($comedy_description) . "</p>
+              </div>
+              <div class=\"col-4 ps-0 pe-4 text-wrap\">
+                <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
+                  <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span>
+                  " . htmlspecialchars($comedy_cast) . ", more...
+                </p>
+                <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
+                  <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span>
+                  {$genres}
+                </p>
+              </div>
+            </div>
+          ";
+            // --- Series/episodes code (unchanged) ---
+            if ($comedy_category === 'Series') {
+              $seasons_result = mysqli_query($con, "SELECT * FROM tbl_movie_series_seasons WHERE movie_series_id = {$movie_series_id} ORDER BY season_number");
+              $seasons = [];
+              while ($season = mysqli_fetch_assoc($seasons_result)) {
+                $episodes_result = mysqli_query($con, "SELECT * FROM tbl_movie_series_episodes WHERE season_id = {$season['season_id']} ORDER BY episode_id");
+                $episodes = [];
+                while ($ep = mysqli_fetch_assoc($episodes_result)) {
+                  $episodes[] = $ep;
+                }
+                $season['episodes'] = $episodes;
+                $seasons[] = $season;
+              }
+              $comedy_modals .= '
+        <div class="col-12 d-flex justify-content-between align-items-center mx-4" style="width: 100%">
+            <div>
+                <p class="fs-3 mb-0" style="color: #f4fff8;">Episodes</p>
+            </div>
+            <div class="position-relative" style="min-width:180px; ">
+                <select style="transform: translateX(-48px);" id="modal-season-select-comedy-' . $movie_series_id . '" class="form-control me-5">';
+              foreach ($seasons as $s) {
+                $comedy_modals .= '<option value="season-' . $s['season_id'] . '">' . htmlspecialchars($s['season_title']) . '</option>';
+              }
+              $comedy_modals .= '</select>
+                <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
+            </div>
+        </div>';
+              foreach ($seasons as $idx => $s) {
+                $comedy_modals .= '<div class="col-12 mb-4 modal-episodes-block"
+            id="modal-episodes-comedy-' . $movie_series_id . '-season-' . $s['season_id'] . '"
+            style="' . ($idx === 0 ? '' : 'display:none;') . '">';
+                foreach ($s['episodes'] as $ep_idx => $ep) {
+                  $comedy_modals .= '
+                    <div class="mx-3 py-2 d-flex gap-2">
+                        <div class="d-flex align-items-center gap-3 me-2 ms-4">
+                            <p class="mb-0 fs-2 db-text-sec">' . ($ep_idx + 1) . '</p>';
+                  if (!empty($ep['episode_video'])) {
+                    $comedy_modals .= '
+                            <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=episode&id=' . $ep['episode_id'] . '">
+                                <video
+                                    class="position-relative rounded-3 m-0 p-0 video-player video-episode"
+                                    muted
+                                    style="width: 120px; height: 70px; object-fit: cover;">
+                                    <source src="../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </a>';
+                  }
+                  $comedy_modals .= '
+                        </div>
+                        <div class="db-text-sec me-4">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
+                                <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
+                            </div>
+                            <div>
+                                <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
+                            </div>
+                        </div>
+                    </div>';
+                }
+                if (empty($s['episodes'])) {
+                  $comedy_modals .= '<div class="mx-4 py-2 db-text-sec">No episodes available for this season.</div>';
+                }
+                $comedy_modals .= '</div>';
+              }
+              $comedy_modals .= '
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var select = document.getElementById("modal-season-select-comedy-' . $movie_series_id . '");
+            if (select) {
+                select.addEventListener("change", function () {
+                    var val = this.value;';
+              foreach ($seasons as $s) {
+                $comedy_modals .= '
+                    document.getElementById("modal-episodes-comedy-' . $movie_series_id . '-season-' . $s['season_id'] . '").style.display = (val === "season-' . $s['season_id'] . '") ? "" : "none";';
+              }
+              $comedy_modals .= '
+                });
+            }
+        });
+        </script>
+        ';
+            }
+            $comedy_modals .= "
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    ";
+          endwhile;
+          ?>
+        </div>
+        <div class="next-button-comedy position-absolute"
+          style="right: 0; top: 50%; transform: translateY(-50%);z-index: 400;">
+          <button class="btn border-1 next-chevron-btn-comedy">
+            <i class="fas fa-chevron-right fa-2xl text-white-50"></i>
           </button>
         </div>
       </div>
     </section>
-    <!-- END OF SECTION ACTION MOVIES -->
+    <?php echo $comedy_modals; ?>
+    <!-- END OF SECTION COMEDY -->
 
-    <!-- START OF FEATURED -->
+    <!-- START OF ACTION -->
     <section class="section-featured text-white ms-md-5 ms-3">
       <div class="featured-container">
         <div class="featured-top">
           <p class="featured-text">ACTION</p>
           <p class="featured-movies-text fs-2">MOVIES/SERIES</p>
-          <div class="featured-images-container d-flex gap-3 position-relative">
-            <div class="featured-images position-relative">
-              <img class="featured-img rounded-3" src="../Movie Web/Freatured/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg" alt="">
-              <i class="fa-solid fa-play play-button-featured"></i>
-            </div>
-            <div class="featured-images position-relative">
-              <img class="featured-img rounded-3" src="../Movie Web/Freatured/3L3l6LsiLGHkTG4RFB2aBA6BttB.jpg" alt="">
-              <i class="fa-solid fa-play play-button-featured"></i>
-            </div>
-            <div class="featured-images position-relative">
-              <img class="featured-img rounded-3" src="../Movie Web/Trending This Week/CA.jpg" alt="">
-              <i class="fa-solid fa-play play-button-featured"></i>
-            </div>
-            <div class="featured-images position-relative">
-              <img class="featured-img rounded-3" src="../Movie Web/Freatured/4cR3hImKd78dSs652PAkSAyJ5Cx.jpg" alt="">
-              <i class="fa-solid fa-play play-button-featured"></i>
-            </div>
-            <div class="featured-images position-relative">
-              <img class="featured-img rounded-3" src="../Movie Web/Freatured/4Qksv87C57O0IWA8sT2KwxZ4fXh.jpg" alt="">
-              <i class="fa-solid fa-play play-button-featured"></i>
-            </div>
-            <div class="featured-images position-relative">
-              <img class="featured-img rounded-3" src="../Movie Web/Freatured/6m435uh40N7Gzfbd69ttp6W0sdR.jpg" alt="">
-              <i class="fa-solid fa-play play-button-featured"></i>
-            </div>
-            <div class="featured-images position-relative">
-              <img class="featured-img rounded-3" src="../Movie Web/Freatured/A9ENz6d4lC3UYOX8Z1gJwDEo1sM.jpg" alt="">
-              <i class="fa-solid fa-play play-button-featured"></i>
-            </div>
-            <div class="featured-images position-relative">
-              <img class="featured-img rounded-3" src="../Movie Web/Freatured/ajb1rMiorchfRemYHZCkbV9DBg6.jpg" alt="">
-              <i class="fa-solid fa-play play-button-featured"></i>
+          <div class="top10-featured-wrapper position-relative">
+            <div class="prev-button-featured position-absolute"
+              style="left: 0; top: 50%; transform: translateY(-50%); z-index: 400;">
+              <button class="btn border-1 prev-chevron-btn-featured">
+                <i class="fas fa-chevron-left fa-2xl text-white-50"></i>
+              </button>
             </div>
 
-            <div class="next-button-featured position-absolute">
-              <button class="btn border-1 next-chevron-btn">
-                <i class="fas fa-chevron-right fa-xl text-white-50"></i>
+            <div class="featured-images-container d-flex gap-3 position-relative">
+              <?php
+              $action_query = mysqli_query(
+                $con,
+                "SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
+            FROM tbl_movie_series ms
+            LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
+            LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
+            LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+            WHERE g1.genre_name = 'Action' OR g2.genre_name = 'Action' OR g3.genre_name = 'Action'
+            ORDER BY ms.date_released DESC
+            LIMIT 8"
+              );
+              $action_modals = "";
+              while ($row = mysqli_fetch_assoc($action_query)):
+                $movie_series_id = $row['movie_series_id'];
+                $action_title = $row['title'];
+                $action_poster = $row['poster'];
+                $action_video = $row['video'];
+                $action_modal_poster_title = $row['modal_poster_title'];
+                $action_duration = $row['duration'];
+                $action_date_released = $row['date_released'];
+                $action_age_rating = $row['age_rating'];
+                $action_category = $row['category'];
+                $action_genre_1 = $row['genre_1'];
+                $action_genre_2 = $row['genre_2'];
+                $action_genre_3 = $row['genre_3'];
+                $action_cast = $row['cast'];
+                $action_description = $row['description'];
+
+                $genres = htmlspecialchars($action_genre_1);
+                if (!empty($action_genre_2))
+                  $genres .= ', ' . htmlspecialchars($action_genre_2);
+                if (!empty($action_genre_3))
+                  $genres .= ', ' . htmlspecialchars($action_genre_3);
+                ?>
+                <div class="featured-images position-relative pe-2" style="overflow: visible;">
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#modal-action-<?php echo $movie_series_id ?>">
+                    <div class="trending-hover position-relative">
+                      <img class="featured-img rounded-3"
+                        src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($action_poster); ?>"
+                        alt="<?php echo htmlspecialchars($action_title); ?>">
+                      <i class="fa-solid fa-play play-button-featured"></i>
+                    </div>
+                  </a>
+                </div>
+                <?php
+                $action_modals .= "
+    <div class='modal fade' id='modal-action-{$movie_series_id}' tabindex='-1' aria-labelledby='exampleModalLabel-action-{$movie_series_id}' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered modal-lg modal-dark border-3'>
+        <div class='modal-content bg-dark modals'>
+          <div class='modal-body'>
+            <div class='modal-body-content'>
+              <div class='modal-pic-container m-0 position-relative'>
+                <video
+                  class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
+                  autoplay
+                  muted
+                  loop
+                >
+                  <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($action_video) . "\" type=\"video/mp4\">
+                  Your browser does not support the video tag.
+                </video>";
+                if (!empty($action_modal_poster_title)) {
+                  $action_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($action_modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
+                } else {
+                  $action_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($action_title) . "</p>";
+                }
+                $action_modals .= "
+                <a href=\"play-vid.php?video=" . urlencode($action_video) . "&type=movie_series&id=" . $movie_series_id . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
+                  <i class=\"fa-solid fa-play me-1\"></i> Play
+                </a>
+                <button class=\"volume-control bg-transparent position-absolute\">
+                  <i class=\"fa-solid fa-volume-xmark volume-icon\"></i>
+                </button>
+                <button type='button' class='btn-close btn-close-white position-absolute modal-close-button' data-bs-dismiss='modal' aria-label='Close'></button>
+              </div>
+              <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
+                <div class=\"col-8 text-wrap\">
+                  <div class=\"d-flex gap-2\">
+                    <p class='modal-text-rating mb-0'>" . htmlspecialchars($action_date_released) . "</p>
+                    <p class='modal-text-rating mb-0'>" . htmlspecialchars($action_duration) . "</p>
+                  </div>
+                  <div class=\"d-flex gap-2 align-items-center\">
+                    <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($action_age_rating) . "+</p>
+                    <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($action_category) . "</p>
+                  </div>
+                  <p class='modal-text-rating'>" . htmlspecialchars($action_description) . "</p>
+                </div>
+                <div class=\"col-4 ps-0 pe-4 text-wrap\">
+                  <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
+                    <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span>
+                    " . htmlspecialchars($action_cast) . ", more...
+                  </p>
+                  <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
+                    <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span>
+                    {$genres}
+                  </p>
+                </div>
+              </div>
+            ";
+                // --- Series/episodes code (unchanged) ---
+                if ($action_category === 'Series') {
+                  $seasons_result = mysqli_query($con, "SELECT * FROM tbl_movie_series_seasons WHERE movie_series_id = {$movie_series_id} ORDER BY season_number");
+                  $seasons = [];
+                  while ($season = mysqli_fetch_assoc($seasons_result)) {
+                    $episodes_result = mysqli_query($con, "SELECT * FROM tbl_movie_series_episodes WHERE season_id = {$season['season_id']} ORDER BY episode_id");
+                    $episodes = [];
+                    while ($ep = mysqli_fetch_assoc($episodes_result)) {
+                      $episodes[] = $ep;
+                    }
+                    $season['episodes'] = $episodes;
+                    $seasons[] = $season;
+                  }
+                  $action_modals .= '
+          <div class="col-12 d-flex justify-content-between align-items-center mx-4" style="width: 100%">
+              <div>
+                  <p class="fs-3 mb-0" style="color: #f4fff8;">Episodes</p>
+              </div>
+              <div class="position-relative" style="min-width:180px; ">
+                  <select style="transform: translateX(-48px);" id="modal-season-select-action-' . $movie_series_id . '" class="form-control me-5">';
+                  foreach ($seasons as $s) {
+                    $action_modals .= '<option value="season-' . $s['season_id'] . '">' . htmlspecialchars($s['season_title']) . '</option>';
+                  }
+                  $action_modals .= '</select>
+                  <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
+              </div>
+          </div>';
+                  foreach ($seasons as $idx => $s) {
+                    $action_modals .= '<div class="col-12 mb-4 modal-episodes-block"
+              id="modal-episodes-action-' . $movie_series_id . '-season-' . $s['season_id'] . '"
+              style="' . ($idx === 0 ? '' : 'display:none;') . '">';
+                    foreach ($s['episodes'] as $ep_idx => $ep) {
+                      $action_modals .= '
+                      <div class="mx-3 py-2 d-flex gap-2">
+                          <div class="d-flex align-items-center gap-3 me-2 ms-4">
+                              <p class="mb-0 fs-2 db-text-sec">' . ($ep_idx + 1) . '</p>';
+                      if (!empty($ep['episode_video'])) {
+                        $action_modals .= '
+                              <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=episode&id=' . $ep['episode_id'] . '">
+                                  <video
+                                      class="position-relative rounded-3 m-0 p-0 video-player video-episode"
+                                      muted
+                                      style="width: 120px; height: 70px; object-fit: cover;">
+                                      <source src="../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
+                                      Your browser does not support the video tag.
+                                  </video>
+                              </a>';
+                      }
+                      $action_modals .= '
+                          </div>
+                          <div class="db-text-sec me-4">
+                              <div class="d-flex align-items-center justify-content-between mb-2">
+                                  <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
+                                  <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
+                              </div>
+                              <div>
+                                  <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
+                              </div>
+                          </div>
+                      </div>';
+                    }
+                    if (empty($s['episodes'])) {
+                      $action_modals .= '<div class="mx-4 py-2 db-text-sec">No episodes available for this season.</div>';
+                    }
+                    $action_modals .= '</div>';
+                  }
+                  $action_modals .= '
+          <script>
+          document.addEventListener("DOMContentLoaded", function () {
+              var select = document.getElementById("modal-season-select-action-' . $movie_series_id . '");
+              if (select) {
+                  select.addEventListener("change", function () {
+                      var val = this.value;';
+                  foreach ($seasons as $s) {
+                    $action_modals .= '
+                      document.getElementById("modal-episodes-action-' . $movie_series_id . '-season-' . $s['season_id'] . '").style.display = (val === "season-' . $s['season_id'] . '") ? "" : "none";';
+                  }
+                  $action_modals .= '
+                  });
+              }
+          });
+          </script>
+          ';
+                }
+                $action_modals .= "
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ";
+              endwhile;
+              ?>
+            </div>
+            <div class="next-button-featured position-absolute"
+              style="right: 0; top: 50%; transform: translateY(-50%);z-index: 400;">
+              <button class="btn border-1 next-chevron-btn-featured">
+                <i class="fas fa-chevron-right fa-2xl text-white-50"></i>
               </button>
             </div>
           </div>
         </div>
+      </div>
     </section>
-    <!-- END OF SECTION FEATURED -->
+    <?php echo $action_modals; ?>
+    <!-- END OF SECTION ACTION -->
 
     <!-- START OF MOVIES 1 -->
     <section class="movies-1 mt-80">
@@ -921,52 +1263,240 @@ if (isset($_GET['logout'])) {
     </section>
     <!-- END OF MOVIES 1 -->
 
-    <!-- START OF RECOMMENDED -->
+    <!-- START OF SECTION RECOMMENDED -->
+    <?php
+    $recommended_items = [];
+    $show_based_on_genre = false;
+    $genre_for_recommend = '';
+
+    if (isset($_COOKIE['recommended_genre']) && $_COOKIE['recommended_genre'] !== '') {
+      $genre_for_recommend = mysqli_real_escape_string($con, $_COOKIE['recommended_genre']);
+      $show_based_on_genre = true;
+      $recommend_query = mysqli_query(
+        $con,
+        "SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
+     FROM tbl_movie_series ms
+     LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
+     LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
+     LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+     WHERE g1.genre_name = '$genre_for_recommend'
+        OR g2.genre_name = '$genre_for_recommend'
+        OR g3.genre_name = '$genre_for_recommend'
+     ORDER BY RAND() LIMIT 8"
+      );
+    } else {
+      $recommend_query = mysqli_query(
+        $con,
+        "SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
+     FROM tbl_movie_series ms
+     LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
+     LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
+     LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+     ORDER BY RAND() LIMIT 8"
+      );
+    }
+    while ($row = mysqli_fetch_assoc($recommend_query)) {
+      $recommended_items[] = $row;
+    }
+    $recommended_modals = "";
+    ?>
     <section class="section-popular text-white ms-md-5 ms-3">
       <div class="popular-container mt-4">
         <div class="popular-top mb-4">
-          <p class="action-movies-text text-white fs-24 fw-bold">Recommended for You</p>
+          <p class="action-movies-text text-white fs-24 fw-bold">
+            Recommended for
+            You<?php if ($show_based_on_genre)
+              echo " <span class='fs-6 ms-1 text-primary'>(Based on $genre_for_recommend)</span>"; ?>
+          </p>
         </div>
-        <div class="popular-images-container d-flex gap-3 position-relative">
-          <div class="popular-images position-relative">
-            <img class="popular-img rounded-3" src="../Movie Web/Freatured/moana.jpg" alt="">
-            <i class="fa-solid fa-play play-button-popular"></i>
-          </div>
-          <div class="popular-images position-relative">
-            <img class="popular-img rounded-3" src="../Movie Web/Freatured/nrlfJoxP1EkBVE9pU62L287Jl4D.jpg" alt="">
-            <i class="fa-solid fa-play play-button-popular"></i>
-          </div>
-          <div class="popular-images position-relative">
-            <img class="popular-img rounded-3" src="../Movie Web/Freatured/ttN5D6GKOwKWHmCzDGctAvaNMAi.jpg" alt="">
-            <i class="fa-solid fa-play play-button-popular"></i>
-          </div>
-          <div class="popular-images position-relative">
-            <img class="popular-img rounded-3" src="../Movie Web/Freatured/TVvIyCsFCmLk9MRLbAZi4X8f32.jpg" alt="">
-            <i class="fa-solid fa-play play-button-popular"></i>
-          </div>
-          <div class="popular-images position-relative">
-            <img class="popular-img rounded-3" src="../Movie Web/Freatured/uDW5eeFUYp1vaU2ymEdVBG6g7iq.jpg" alt="">
-            <i class="fa-solid fa-play play-button-popular"></i>
-          </div>
-          <div class="popular-images position-relative">
-            <img class="popular-img rounded-3" src="../Movie Web/Freatured/v313aUGmMNj6yNveaiQXysBmjVS.jpg" alt="">
-            <i class="fa-solid fa-play play-button-popular"></i>
-          </div>
-          <div class="popular-images position-relative">
-            <img class="popular-img rounded-3" src="../Movie Web/Freatured/vGXptEdgZIhPg3cGlc7e8sNPC2e.jpg" alt="">
-            <i class="fa-solid fa-play play-button-popular"></i>
-          </div>
+        <div class="position-relative" style="width: 100%;">
+          <div class="popular-images-container d-flex gap-3 position-relative">
+            <?php foreach ($recommended_items as $item): ?>
+              <div class="popular-images position-relative pe-2" style="overflow: visible;">
+                <a href="#" class="recommended-link" data-bs-toggle="modal"
+                  data-bs-target="#modal-recommended-<?php echo $item['movie_series_id']; ?>"
+                  data-genre1="<?php echo htmlspecialchars($item['genre_1']); ?>"
+                  data-genre2="<?php echo htmlspecialchars($item['genre_2']); ?>"
+                  data-genre3="<?php echo htmlspecialchars($item['genre_3']); ?>">
+                  <img class="popular-img rounded-3"
+                    src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($item['poster']); ?>"
+                    alt="<?php echo htmlspecialchars($item['title']); ?>">
+                  <i class="fa-solid fa-play play-button-popular"></i>
+                </a>
+              </div>
+              <?php
+              $genres = htmlspecialchars($item['genre_1']);
+              if (!empty($item['genre_2']))
+                $genres .= ', ' . htmlspecialchars($item['genre_2']);
+              if (!empty($item['genre_3']))
+                $genres .= ', ' . htmlspecialchars($item['genre_3']);
 
-          <div class="next-button-featured position-absolute">
-            <button class="btn border-1 next-chevron-btn">
-              <i class="fas fa-chevron-right fa-xl text-white-50"></i>
+              $recommended_modals .= "
+    <div class='modal fade' id='modal-recommended-{$item['movie_series_id']}' tabindex='-1' aria-labelledby='exampleModalLabel-recommended-{$item['movie_series_id']}' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered modal-lg modal-dark border-3'>
+        <div class='modal-content bg-dark modals'>
+          <div class='modal-body'>
+            <div class='modal-body-content'>
+              <div class='modal-pic-container m-0 position-relative'>
+                <video
+                  class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
+                  autoplay
+                  muted
+                  loop
+                >
+                  <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($item['video']) . "\" type=\"video/mp4\">
+                  Your browser does not support the video tag.
+                </video>";
+              if (!empty($item['modal_poster_title'])) {
+                $recommended_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($item['modal_poster_title']) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
+              } else {
+                $recommended_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($item['title']) . "</p>";
+              }
+              $recommended_modals .= "
+                <a href=\"play-vid.php?video=" . urlencode($item['video']) . "&type=movie_series&id=" . $item['movie_series_id'] . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
+                  <i class=\"fa-solid fa-play me-1\"></i> Play
+                </a>
+                <button class=\"volume-control bg-transparent position-absolute\">
+                  <i class=\"fa-solid fa-volume-xmark volume-icon\"></i>
+                </button>
+                <button type='button' class='btn-close btn-close-white position-absolute modal-close-button' data-bs-dismiss='modal' aria-label='Close'></button>
+              </div>
+              <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
+                <div class=\"col-8 text-wrap\">
+                  <div class=\"d-flex gap-2\">
+                    <p class='modal-text-rating mb-0'>" . htmlspecialchars($item['date_released']) . "</p>
+                    <p class='modal-text-rating mb-0'>" . htmlspecialchars($item['duration']) . "</p>
+                  </div>
+                  <div class=\"d-flex gap-2 align-items-center\">
+                    <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($item['age_rating']) . "+</p>
+                    <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($item['category']) . "</p>
+                  </div>
+                  <p class='modal-text-rating'>" . htmlspecialchars($item['description']) . "</p>
+                </div>
+                <div class=\"col-4 ps-0 pe-4 text-wrap\">
+                  <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
+                    <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span>
+                    " . htmlspecialchars($item['cast']) . ", more...
+                  </p>
+                  <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
+                    <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span>
+                    {$genres}
+                  </p>
+                </div>
+              </div>
+        ";
+              // --- Series/episodes code (unchanged) ---
+              if ($item['category'] === 'Series') {
+                $seasons_result = mysqli_query($con, "SELECT * FROM tbl_movie_series_seasons WHERE movie_series_id = {$item['movie_series_id']} ORDER BY season_number");
+                $seasons = [];
+                while ($season = mysqli_fetch_assoc($seasons_result)) {
+                  $episodes_result = mysqli_query($con, "SELECT * FROM tbl_movie_series_episodes WHERE season_id = {$season['season_id']} ORDER BY episode_id");
+                  $episodes = [];
+                  while ($ep = mysqli_fetch_assoc($episodes_result)) {
+                    $episodes[] = $ep;
+                  }
+                  $season['episodes'] = $episodes;
+                  $seasons[] = $season;
+                }
+                $recommended_modals .= '
+            <div class="col-12 d-flex justify-content-between align-items-center mx-4" style="width: 100%">
+                <div>
+                    <p class="fs-3 mb-0" style="color: #f4fff8;">Episodes</p>
+                </div>
+                <div class="position-relative" style="min-width:180px; ">
+                    <select style="transform: translateX(-48px);" id="modal-season-select-recommended-' . $item['movie_series_id'] . '" class="form-control me-5">';
+                foreach ($seasons as $s) {
+                  $recommended_modals .= '<option value="season-' . $s['season_id'] . '">' . htmlspecialchars($s['season_title']) . '</option>';
+                }
+                $recommended_modals .= '</select>
+                    <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
+                </div>
+            </div>';
+                foreach ($seasons as $idx => $s) {
+                  $recommended_modals .= '<div class="col-12 mb-4 modal-episodes-block"
+                id="modal-episodes-recommended-' . $item['movie_series_id'] . '-season-' . $s['season_id'] . '"
+                style="' . ($idx === 0 ? '' : 'display:none;') . '">';
+                  foreach ($s['episodes'] as $ep_idx => $ep) {
+                    $recommended_modals .= '
+                        <div class="mx-3 py-2 d-flex gap-2">
+                            <div class="d-flex align-items-center gap-3 me-2 ms-4">
+                                <p class="mb-0 fs-2 db-text-sec">' . ($ep_idx + 1) . '</p>';
+                    if (!empty($ep['episode_video'])) {
+                      $recommended_modals .= '
+                                <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=episode&id=' . $ep['episode_id'] . '">
+                                    <video
+                                        class="position-relative rounded-3 m-0 p-0 video-player video-episode"
+                                        muted
+                                        style="width: 120px; height: 70px; object-fit: cover;">
+                                        <source src="../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </a>';
+                    }
+                    $recommended_modals .= '
+                            </div>
+                            <div class="db-text-sec me-4">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
+                                    <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
+                                </div>
+                                <div>
+                                    <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
+                                </div>
+                            </div>
+                        </div>';
+                  }
+                  if (empty($s['episodes'])) {
+                    $recommended_modals .= '<div class="mx-4 py-2 db-text-sec">No episodes available for this season.</div>';
+                  }
+                  $recommended_modals .= '</div>';
+                }
+                $recommended_modals .= '
+            <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var select = document.getElementById("modal-season-select-recommended-' . $item['movie_series_id'] . '");
+                if (select) {
+                    select.addEventListener("change", function () {
+                        var val = this.value;';
+                foreach ($seasons as $s) {
+                  $recommended_modals .= '
+                        document.getElementById("modal-episodes-recommended-' . $item['movie_series_id'] . '-season-' . $s['season_id'] . '").style.display = (val === "season-' . $s['season_id'] . '") ? "" : "none";';
+                }
+                $recommended_modals .= '
+                    });
+                }
+            });
+            </script>
+            ';
+              }
+              $recommended_modals .= "
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ";
+              ?>
+            <?php endforeach; ?>
+          </div>
+          <div class="next-button-recommended position-absolute"
+            style="right: 0; top: 50%; transform: translateY(-50%);z-index: 400;">
+            <button class="btn border-1 next-chevron-btn-recommended">
+              <i class="fas fa-chevron-right fa-2xl text-white-50"></i>
+            </button>
+          </div>
+          <div class="prev-button-recommended position-absolute"
+            style="left: 0; top: 50%; transform: translateY(-50%); z-index: 400;">
+            <button class="btn border-1 prev-chevron-btn-recommended">
+              <i class="fas fa-chevron-left fa-2xl text-white-50"></i>
             </button>
           </div>
         </div>
       </div>
-
     </section>
-    <!-- END OF RECOMMENDED -->
+    <?php echo $recommended_modals; ?>
+    <!-- END OF SECTION RECOMMENDED -->
+
 
     <!-- START OF MOVIES 2 -->
     <section class="movies-2 mt-80">

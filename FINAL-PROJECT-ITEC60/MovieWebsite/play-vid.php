@@ -1,6 +1,29 @@
 <?php
 include '../includes/db-connection.php';
 
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$type = isset($_GET['type']) ? $_GET['type'] : '';
+
+if ($id && $type === 'movie_series') {
+    $result = mysqli_query($con, "SELECT 
+        g1.genre_name AS genre_1, 
+        g2.genre_name AS genre_2, 
+        g3.genre_name AS genre_3 
+        FROM tbl_movie_series ms
+        LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
+        LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
+        LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+        WHERE ms.movie_series_id = $id LIMIT 1
+    ");
+    if ($row = mysqli_fetch_assoc($result)) {
+        $genre = $row['genre_1'] ?: ($row['genre_2'] ?: $row['genre_3']);
+        if ($genre) {
+            setcookie("recommended_genre", $genre, time() + 60 * 60 * 24 * 7, "/");
+        }
+    }
+}
+
+// Get type and id again in case you want to override defaults
 $type = isset($_GET['type']) ? $_GET['type'] : 'movie_series';
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
@@ -26,7 +49,7 @@ $fullPath = $videoDir . $videoFile;
 if ($videoFile && preg_match('/\.mp4$/i', $videoFile) && file_exists($fullPath)) {
     $videoPath = $fullPath;
 
-    // Increment views (Option 1: Always increment parent on episode view)
+    // Increment views
     if ($type === 'movie_series' || $type === 'top10') {
         if ($id) {
             mysqli_query($con, "UPDATE tbl_movie_series SET views = views + 1 WHERE movie_series_id = $id");
@@ -56,6 +79,7 @@ if ($videoFile && preg_match('/\.mp4$/i', $videoFile) && file_exists($fullPath))
 <head>
   <meta charset="UTF-8">
   <title>Play Video</title>
+  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
   <style>
     body { margin:0; padding:0; overflow: hidden; background-color: #1F2A37;}
     .video-container { width: 100vw; height: 100vh; }

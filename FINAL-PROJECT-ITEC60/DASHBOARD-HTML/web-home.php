@@ -77,11 +77,8 @@ include '../includes/dashboard-header-sidebar.php';
 
 <body>
   <!-- BUTTON GROUP AND ADD BUTTON -->
-  <div class="d-flex flex-md-row flex-column justify-content-between align-items-center p-3">
-    <div class="btn-group border mb-md-0 mb-2" role="group" aria-label="Basic example">
-      <a href="#" type="button" class="btn section-btn active border" data-section="top10">Top 10</a>
-      <a href="#" type="button" class="btn section-btn border" data-section="recommended">Recommended For You</a>
-    </div>
+  <div class="d-flex flex-md-row flex-column justify-content-end align-items-center p-3">
+    
     <div class="p-0 ms-md-2 ms-0 w-auto w-md-auto">
       <a href="web-movie-series.php" class="btn db-bg-primary db-text-sec" id="add-movie-btn">Add Movie/Series</a>
     </div>
@@ -564,30 +561,6 @@ include '../includes/dashboard-header-sidebar.php';
   <script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const buttons = document.querySelectorAll('.section-btn');
-      const sections = {
-        top10: document.getElementById('top10-section'),
-        recommended: document.getElementById('recommended-section'),
-      };
-      Object.entries(sections).forEach(([key, section]) => {
-        if (key === 'top10') {
-          section.style.display = 'block';
-        } else {
-          section.style.display = 'none';
-        }
-      });
-      buttons.forEach(btn => {
-        btn.addEventListener('click', function (e) {
-          e.preventDefault();
-          buttons.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          Object.values(sections).forEach(section => section.style.display = 'none');
-          const sectionKey = btn.getAttribute('data-section');
-          if (sections[sectionKey]) {
-            sections[sectionKey].style.display = 'block';
-          }
-        });
-      });
 
       // DataTable initialization (unchanged)
       if (document.getElementById('table-top-10')) {

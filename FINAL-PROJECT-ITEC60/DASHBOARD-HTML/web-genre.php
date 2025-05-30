@@ -79,8 +79,8 @@ include '../includes/dashboard-header-sidebar.php';
                 <th class="db-text-primary text-align-left" scope="col">#</th>
                 <th class="db-text-primary" scope="col">Title</th>
                 <th class="db-text-primary" scope="col">Genre 1</th>
-                <th class="db-text-primary" scope="col">Genre 2</th>
-                <th class="db-text-primary" scope="col">Genre 3</th>
+                <th class="db-text-primary text-nowrap" scope="col">Genre 2</th>
+                <th class="db-text-primary text-nowrap" scope="col">Genre 3</th>
                 <th class="db-text-primary" scope="col">Description</th>
                 <th class="db-text-primary" scope="col">View</th>
                 <th class="db-text-primary" scope="col">Edit</th>
