@@ -581,6 +581,12 @@ if (isset($_GET['logout'])) {
 
         <div class="trending-images-container d-flex gap-3 position-relative">
           <?php
+
+          $genre_result = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre WHERE genre_name LIKE '%Romance%' LIMIT 1");
+          $genre = mysqli_fetch_assoc($genre_result);
+          $genre_id = $genre ? $genre['genre_id'] : 22; // fallback if not found
+          $genre_name = $genre ? $genre['genre_name'] : "Romance";
+
           $trend_query = mysqli_query(
             $con,
             "SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
@@ -588,7 +594,7 @@ if (isset($_GET['logout'])) {
             LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
             LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
             LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
-            WHERE g1.genre_name = 'Romance' OR g2.genre_name = 'Romance' OR g3.genre_name = 'Romance'
+            WHERE ms.genre_id1 = $genre_id OR ms.genre_id2 = $genre_id OR ms.genre_id2 = $genre_id
             ORDER BY ms.date_released DESC
             LIMIT 7"
           );
@@ -802,6 +808,12 @@ if (isset($_GET['logout'])) {
 
         <div class="action-images-container d-flex gap-3 position-relative">
           <?php
+          
+          $genre_result = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre WHERE genre_name LIKE '%Comedy%' LIMIT 1");
+          $genre = mysqli_fetch_assoc($genre_result);
+          $genre_id = $genre ? $genre['genre_id'] : 4; // fallback if not found
+          $genre_name = $genre ? $genre['genre_name'] : "Comedy";
+
           $comedy_query = mysqli_query(
             $con,
             "SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
@@ -809,7 +821,7 @@ if (isset($_GET['logout'])) {
         LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
         LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
         LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
-        WHERE g1.genre_name = 'Comedy' OR g2.genre_name = 'Comedy' OR g3.genre_name = 'Comedy'
+        WHERE ms.genre_id1 = $genre_id OR ms.genre_id2 = $genre_id OR ms.genre_id3 = $genre_id
         ORDER BY ms.date_released DESC
         LIMIT 7"
           );
@@ -1022,6 +1034,12 @@ if (isset($_GET['logout'])) {
 
             <div class="featured-images-container d-flex gap-3 position-relative">
               <?php
+              $genre_result = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre WHERE genre_name LIKE '%Action%' LIMIT 1");
+              $genre = mysqli_fetch_assoc($genre_result);
+              $genre_id = $genre ? $genre['genre_id'] : 1; // fallback if not found
+              $genre_name = $genre ? $genre['genre_name'] : "Action";
+
+
               $action_query = mysqli_query(
                 $con,
                 "SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
@@ -1029,7 +1047,7 @@ if (isset($_GET['logout'])) {
             LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
             LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
             LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
-            WHERE g1.genre_name = 'Action' OR g2.genre_name = 'Action' OR g3.genre_name = 'Action'
+            WHERE ms.genre_id1 = $genre_id OR ms.genre_id2 = $genre_id OR ms.genre_id3 = $genre_id
             ORDER BY ms.date_released DESC
             LIMIT 8"
               );

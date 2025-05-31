@@ -1,320 +1,227 @@
 <?php
 include '../includes/db-connection.php';
+
+if (isset($_GET['alert'])) {
+  $msg = "";
+  if ($_GET['alert'] == 'added')   $msg = "Genre added successfully!";
+  if ($_GET['alert'] == 'edited')  $msg = "Genre edited successfully!";
+  if ($_GET['alert'] == 'deleted') $msg = "Genre deleted successfully!";
+  if ($msg) {
+    echo "<script>alert('{$msg}');</script>";
+  }
+}
+
+// Handle Add
+if (isset($_POST['add-genre'])) {
+  $genre_name = trim($_POST['genre_name']);
+  if ($genre_name != "") {
+    $stmt = $con->prepare("INSERT INTO tbl_movie_series_genre (genre_name) VALUES (?)");
+    $stmt->bind_param("s", $genre_name);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: web-genre.php?alert=added");  
+    exit;
+  }
+}
+
+// Handle Edit
+if (isset($_POST['edit-genre-modal'])) {
+  $genre_id = intval($_POST['edit-genre-id']);
+  $genre_name = trim($_POST['edit-genre-name']);
+  if ($genre_name != "" && $genre_id > 0) {
+    $stmt = $con->prepare("UPDATE tbl_movie_series_genre SET genre_name = ? WHERE genre_id = ?");
+    $stmt->bind_param("si", $genre_name, $genre_id);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: web-genre.php?alert=edited");  
+    exit;
+  }
+}
+
+// Handle Delete
+if (isset($_POST['delete-genre-btn-modal'])) {
+  $genre_id = intval($_POST['delete-genre-id']);
+  if ($genre_id > 0) {
+    $stmt = $con->prepare("DELETE FROM tbl_movie_series_genre WHERE genre_id = ?");
+    $stmt->bind_param("i", $genre_id);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: web-genre.php?alert=deleted");
+    exit;
+  }
+}
+
+// After all logic that does header(), include UI with possible output.
 include '../includes/dashboard-header-sidebar.php';
-
-// Handle Top 10 delete
-// if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
-//   $delete_id = intval($_POST["delete-id"]);
-//   $delete_query = "DELETE FROM tbl_top10 WHERE top10_id = $delete_id";
-//   $result = mysqli_query($con, $delete_query);
-
-//   if (!$result) {
-//     die("" . mysqli_error($con));
-//   } else {
-//     echo "<script>
-//       alert('Top 10 Deleted Successfully');
-//       window.location.href='web-home.php';
-//     </script>";
-//     exit;
-//   }
-// }
-
-// Handle Trending delete
-// if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-trend-btn-modal"])) {
-//   $delete_id = intval($_POST["delete-id-trend"]);
-//   $delete_query = "DELETE FROM tbl_trend WHERE trend_id = $delete_id";
-//   $result = mysqli_query($con, $delete_query);
-
-//   if (!$result) {
-//     die("" . mysqli_error($con));
-//   } else {
-//     echo "<script>
-//       alert('Trending Deleted Successfully');
-//       window.location.href='web-home.php';
-//     </script>";
-//     exit;
-//   }
-// }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+  <title>Genre Management</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Website - Genre</title>
   <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css">
-  <style>
-    .sidebar-content-item:nth-child(3) {
-      background-color: var(--dashboard-primary);
-    }
-  </style>
-  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css" />
+  <style>
+    input::placeholder { color: #6c757d !important; }
+    .sidebar-content-item:nth-child(3) { background-color: var(--dashboard-primary); }
+  </style>
 </head>
 
 <body>
 
-  <div class="d-flex flex-md-row flex-column justify-content-end align-items-center p-3">
-    <div class="p-0 ms-md-2 ms-0 w-auto w-md-auto">
-      <a href="web-genre-management.php" class="btn db-bg-primary db-text-sec" id="add-movie-btn">Add Genre</a>
-    </div>
-  </div>
-
-  <!-- SECTION ALL MOVIES/SERIES -->
-  <section class="px-3 section-content" id="top10-section" style="display:block;">
-    <div class="card bg-dark">
-      <div class="card-body">
-        <div class="table-task-top db-text-sec">
-          <div class="py-2 ps-3">
-            <p class="m-0 fs-20">Movies/Series</p>
-            <p class="m-0 fs-14" style="transform: translateY(-2px)">List of All Movies/Series</p>
-          </div>
-        </div>
-        <div class="table-responsive mt-2">
-          <table class="table table-hover display" id="table-all-movie">
-            <thead>
-              <tr>
-                <th class="db-text-primary text-align-left" scope="col">#</th>
-                <th class="db-text-primary" scope="col">Title</th>
-                <th class="db-text-primary" scope="col">Genre 1</th>
-                <th class="db-text-primary text-nowrap" scope="col">Genre 2</th>
-                <th class="db-text-primary text-nowrap" scope="col">Genre 3</th>
-                <th class="db-text-primary" scope="col">Description</th>
-                <th class="db-text-primary" scope="col">View</th>
-                <th class="db-text-primary" scope="col">Edit</th>
-                <th class="db-text-primary" scope="col">Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php
-              // Show all movies/series, not just top 10
-              $select = mysqli_query($con, "
-                SELECT 
-                  ms.movie_series_id,
-                  ms.title,
-                  ms.duration,
-                  ms.poster,
-                  ms.video,
-                  ms.modal_poster_title,
-                  ms.date_released,
-                  ms.age_rating,
-                  ms.category,
-                  g1.genre_name AS genre_1,
-                  g2.genre_name AS genre_2,
-                  g3.genre_name AS genre_3,
-                  ms.cast,
-                  ms.description,
-                  ms.views,
-                  ms.date_posted
-                FROM tbl_movie_series ms
-                LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
-                LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
-                LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
-                ORDER BY ms.movie_series_id ASC
-              ");
-
-              while ($row = mysqli_fetch_assoc($select)):
-                // Prepare all fields for data attributes (escaping as needed)
-                $data_attrs = '';
-                foreach([
-                  'movie_series_id', 'title', 'duration', 'poster', 'video', 'modal_poster_title', 'date_released', 'age_rating', 'category',
-                  'genre_1', 'genre_2', 'genre_3', 'cast', 'description', 'views', 'date_posted'
-                ] as $field) {
-                  $value = $row[$field] ?? '';
-                  $data_attrs .= " data-$field=\"".htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')."\"";
-                }
-              ?>
-                <tr>
-                  <th class='db-text-primary text-align-left' scope='row'><?php echo $row['movie_series_id']; ?></th>
-                  <td><?php echo $row['title']; ?></td>
-                  <td><?php echo $row['genre_1']; ?></td>
-                  <td><?php echo $row['genre_2']; ?></td>
-                  <td><?php echo $row['genre_3']; ?></td>
-                  <td class='text-truncate' style='max-width: 100px;' data-bs-toggle='tooltip' data-bs-placement='top'
-                    title='<?php echo htmlspecialchars($row['description']); ?>'><?php echo htmlspecialchars($row['description']); ?></td>
-                  <td>
-                    <a href="#" class='db-text-primary view-btn'
-                      data-bs-toggle='modal' data-bs-target='#modalView'
-                      <?php echo $data_attrs; ?>>
-                      <i class="fas fa-eye"></i>
-                    </a>
-                  </td>
-                  <td>
-                    <a href="web-movie-series.php?id=<?php echo $row['movie_series_id']; ?>&from=web-genre.php" class="db-text-primary">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </a>
-                  </td>
-                  <td>
-                    <button class='btn text-white p-0 border-0 delete-btn-top10' data-bs-toggle='modal'
-                      data-bs-target='#modalDeleteTop10' data-identification='<?php echo $row['movie_series_id'] ?>'>
-                      <i class='fa-solid fa-delete-left text-danger ps-2'></i>
-                    </button>
-                  </td>
-                </tr>
-              <?php endwhile; ?>
-            </tbody>
-          </table>
-        </div>
+    <div class="d-flex justify-content-end align-items-center mb-3">
+      
+      <div class="p-0 ms-md-2 ms-0 w-auto w-md-auto me-4 mt-3">
+        <form class="d-flex gap-2" method="POST">
+          <input type="text" name="genre_name" class="form-control bg-transparent db-text-sec"
+            placeholder="Add new genre" required>
+          <button type="submit" name="add-genre" class="btn db-bg-primary db-text-sec text-nowrap">Add Genre</button>
+        </form>
       </div>
     </div>
-  </section>
 
-
-  <!-- Modal for viewing details (show all values) -->
-  <div class="modal fade" id="modalView" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <form>
-          <div class="modal-header">
-            <h1 class="modal-title fs-5 db-text-sec">Movie/Series Information</h1>
-            <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal"
-              style="filter: invert(1) grayscale(100%) brightness(200%); opacity: 1;"></button>
-          </div>
-          <div class="modal-body px-4">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="form-label db-text-sec">ID</label>
-                <input type="text" class="form-control db-text-sec" id="view-movie_series_id" readonly>
-              </div>
-              <div class="col-md-8">
-                <label class="form-label db-text-sec">Title</label>
-                <input type="text" class="form-control" id="view-title" readonly>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label db-text-sec">Duration</label>
-                <input type="text" class="form-control" id="view-duration" readonly>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label db-text-sec">Poster</label>
-                <input type="text" class="form-control" id="view-poster" readonly>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label db-text-sec">Video</label>
-                <input type="text" class="form-control" id="view-video" readonly>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label db-text-sec">Modal Poster Title</label>
-                <input type="text" class="form-control" id="view-modal_poster_title" readonly>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label db-text-sec">Date Released</label>
-                <input type="text" class="form-control" id="view-date_released" readonly>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label db-text-sec">Age Rating</label>
-                <input type="text" class="form-control" id="view-age_rating" readonly>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label db-text-sec">Category</label>
-                <input type="text" class="form-control" id="view-category" readonly>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label db-text-sec">Genre 1</label>
-                <input type="text" class="form-control" id="view-genre_1" readonly>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label db-text-sec">Genre 2</label>
-                <input type="text" class="form-control" id="view-genre_2" readonly>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label db-text-sec">Genre 3</label>
-                <input type="text" class="form-control" id="view-genre_3" readonly>
-              </div>
-              <div class="col-md-8">
-                <label class="form-label db-text-sec">Cast</label>
-                <input type="text" class="form-control" id="view-cast" readonly>
-              </div>
-              <div class="col-12">
-                <label class="form-label db-text-sec">Description</label>
-                <textarea class="form-control bg-transparent db-text-sec p-2" id="view-description" rows="2" readonly style="border-color: #6c757d;;"></textarea>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label db-text-sec">Views</label>
-                <input type="text" class="form-control" id="view-views" readonly>
-              </div>
-              <div class="col-md-8">
-                <label class="form-label db-text-sec">Date Posted</label>
-                <input type="text" class="form-control" id="view-date_posted" readonly>
-              </div>
+    <!-- ===== START OF GENRES SECTION ===== -->
+    <section class="px-3 section-content" id="genre-section" style="display:block;">
+      <div class="card bg-dark">
+        <div class="card-body">
+          <div class="table-task-top db-text-sec">
+            <div class="py-2 ps-3">
+              <p class="m-0 fs-20">Genres</p>
+              <p class="m-0 fs-14" style="transform: translateY(-2px)">List of All Genres</p>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+          <div class="table-responsive mt-2">
+            <table class="table table-hover display" id="table-genre">
+              <thead>
+                <tr>
+                  <th class="db-text-primary text-center ps-4" scope="col">#</th>
+                  <th class="db-text-primary text-center ps-2" scope="col">Genre Name</th>
+                  <th class="db-text-primary text-center pe-2" scope="col">Edit</th>
+                  <th class="db-text-primary text-center ps-4" scope="col">Delete</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                $genres = mysqli_query($con, "SELECT * FROM tbl_movie_series_genre ORDER BY genre_id ASC");
+                while ($row = mysqli_fetch_assoc($genres)):
+                  ?>
+                  <tr>
+                    <th class="db-text-primary text-center" scope="row"><?php echo $row['genre_id']; ?></th>
+                    <td class="text-center">
+                      <span class="genre-label" id="genre-label-<?php echo $row['genre_id']; ?>">
+                        <?php echo htmlspecialchars($row['genre_name']); ?>
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <a href="javascript:void(0);" class="db-text-primary edit-btn" data-bs-toggle="modal" data-bs-target="#modalEditGenre"
+                        data-id="<?php echo $row['genre_id']; ?>"
+                        data-name="<?php echo htmlspecialchars($row['genre_name']); ?>">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </a>
+                    </td>
+                    <td class="text-center">
+                      <a href="javascript:void(0);" class="text-danger delete-btn" data-bs-toggle="modal" data-bs-target="#modalDeleteGenre"
+                        data-id="<?php echo $row['genre_id']; ?>">
+                        <i class="fa-solid fa-delete-left"></i>
+                      </a>
+                    </td>
+                  </tr>
+                <?php endwhile; ?>
+              </tbody>
+            </table>
           </div>
-        </form>
+        </div>
+      </div>
+    </section>
+    <!-- ===== END OF GENRES SECTION ===== -->
+
+    <!-- ===== START OF MODAL EDIT FOR GENRE ===== -->
+    <div class="modal fade" id="modalEditGenre" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form action="" method="post">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5 db-text-sec">Edit Genre</h1>
+              <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal"
+                style="filter: invert(1) grayscale(100%) brightness(200%); opacity: 1;"></button>
+            </div>
+            <div class="modal-body px-4">
+              <input type="hidden" name="edit-genre-id" id="edit-genre-id">
+              <div class="mb-3">
+                <label for="edit-genre-name" class="form-label db-text-sec">Genre Name</label>
+                <input type="text" name="edit-genre-name" id="edit-genre-name" class="form-control" required>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn db-bg-primary db-text-sec" name="edit-genre-modal"
+                style="color: #f4fff8">Save</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
+    <!-- ===== END OF MODAL EDIT FOR GENRE ===== -->
 
-  <!-- ===== START OF MODAL DELETE TOP10 =====  -->
-  <!-- <div class="modal fade" id="modalDeleteTop10" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <form action="" method="post">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5 db-text-sec">Delete Top 10 Record</h1>
-            <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal"
-              style="filter: invert(1) grayscale(100%) brightness(200%); opacity: 1;"></button>
-          </div>
-          <div class="modal-body px-4">
-            <input type="hidden" name="delete-id" id="delete-id-top10">
-            <h4 class="my-4 db-text-sec">Are you sure you want to delete?</h4>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">NO</button>
-            <button type="submit" class="btn db-bg-primary db-text-sec" name="delete-btn-modal"
-              style="color: #f4fff8">YES</button>
-          </div>
-        </form>
+    <!-- ===== START OF MODAL DELETE FOR GENRE ===== -->
+    <div class="modal fade" id="modalDeleteGenre" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form action="" method="post">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5 db-text-sec">Delete Genre</h1>
+              <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal"
+                style="filter: invert(1) grayscale(100%) brightness(200%); opacity: 1;"></button>
+            </div>
+            <div class="modal-body px-4">
+              <input type="hidden" name="delete-genre-id" id="delete-genre-id">
+              <h4 class="my-4 db-text-sec text-center">Are you sure you want to delete this genre?</h4>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data-bs-dismiss="modal">NO</button>
+              <button type="submit" class="btn db-bg-primary db-text-sec" name="delete-genre-btn-modal"
+                style="color: #f4fff8">YES</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </div> -->
-  <!-- ===== END OF MODAL DELETE TOP10 =====  -->
+    <!-- ===== END OF MODAL DELETE FOR GENRE ===== -->
 
-  <!--  ========== DATA TABLES CDN  ========== -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.min.js"></script>
-  <script>
-    $(document).ready(function () {
-      // DataTable initialization (unchanged)
-      if (document.getElementById('table-all-movie')) {
-        new DataTable('#table-all-movie', {
-          pagingType: 'simple_numbers',
-          responsive: true,
-          language: { search: '_INPUT_', searchPlaceholder: 'Search...' }
-        });
-      }
+    <!--  ========== DATA TABLES CDN  ========== -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://kit.fontawesome.com/3b8c7e1b07.js" crossorigin="anonymous"></script>
 
-      // Delete button logic
-      $('.delete-btn-top10').on('click', function () {
-        var id = $(this).data('identification');
-        $('#delete-id-top10').val(id);
-      });
-      $('.delete-btn-trend').on('click', function () {
-        var id = $(this).data('identification');
-        $('#delete-id-trend').val(id);
-      });
-
-      // View Details Modal population
-      $(document).on('click', '.view-btn', function () {
-        var fields = [
-          'movie_series_id', 'title', 'duration', 'poster', 'video', 'modal_poster_title', 'date_released', 'age_rating', 'category',
-          'genre_1', 'genre_2', 'genre_3', 'cast', 'description', 'views', 'date_posted'
-        ];
-        for (const field of fields) {
-          var val = $(this).data(field) ?? '';
-          if (field === 'description') {
-            $('#view-' + field).val(val);
-          } else {
-            $('#view-' + field).val(val);
-          }
+    <script>
+      $(document).ready(function () {
+        // DataTable initialization
+        if (window.DataTable) {
+          new DataTable('#table-genre', {
+            pagingType: 'simple_numbers',
+            responsive: true,
+            language: { search: '_INPUT_', searchPlaceholder: 'Search...' }
+          });
         }
-      });
-    });
-  </script>
-</body>
 
+        // Edit Modal population
+        $(document).on('click', '.edit-btn', function () {
+          var id = $(this).data('id');
+          var name = $(this).data('name');
+          $('#edit-genre-id').val(id);
+          $('#edit-genre-name').val(name);
+        });
+
+        // Delete Modal population
+        $(document).on('click', '.delete-btn', function () {
+          var id = $(this).data('id');
+          $('#delete-genre-id').val(id);
+        });
+      });
+    </script>
+</body>
 </html>

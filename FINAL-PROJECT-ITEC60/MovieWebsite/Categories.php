@@ -1,3 +1,6 @@
+<?php
+include '../includes/db-connection.php'; // Make sure this points to your DB connection file
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -130,7 +133,7 @@
 
                 </div>
               <button
-                class="navbar-toggler text-light d-lg-none ms-3"
+                class="navbar-toggler text-light d-lg-none ms-2"
                 type="button"
                 data-bs-toggle="offcanvas"
                 data-bs-target="#offcanvasDarkNavbar"
@@ -162,18 +165,18 @@
           <div class="offcanvas-body text-center">
             <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
               <li class="nav-item">
-                <a class="nav-link text-white" aria-current="page" href="FirstProject.html"
+                <a class="nav-link text-white" aria-current="page" href="FirstProject.php"
                   >Home</a
                 >
               </li>
               <li class="nav-item">
-                <a class="nav-link text-white" href="Movies.html">Movies</a>
+                <a class="nav-link text-white" href="Movies.php">Movies</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link text-white" href="Series.html">Series</a>
+                <a class="nav-link text-white" href="Series.php">Series</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link text-primary" href="Categories.html"
+                <a class="nav-link text-primary" href="Categories.php"
                   >Categories</a
                 >
               </li>
@@ -209,35 +212,23 @@
         <div
           class="main-content-bottom-categories d-flex flex-wrap justify-content-center gap-2 gap-md-3"
         >
-          <button class="btn btn-outline-primary rounded-5">Action</button>
-          <button class="btn btn-outline-light rounded-5">Adventure</button>
-          <button class="btn btn-outline-primary rounded-5">Animation</button>
-          <button class="btn btn-outline-light rounded-5">Comedy</button>
-          <button class="btn btn-outline-primary rounded-5">Crime</button>
-          <button class="btn btn-outline-light rounded-5">Documentary</button>
-          <button class="btn btn-outline-primary rounded-5">Drama</button>
-          <button class="btn btn-outline-light rounded-5">Family</button>
-          <button class="btn btn-outline-primary rounded-5">Fantasy</button>
-          <button class="btn btn-outline-light rounded-5">History</button>
-          <button class="btn btn-outline-primary rounded-5">Terror</button>
-          <button class="btn btn-outline-light rounded-5">Music</button>
-          <button class="btn btn-outline-primary rounded-5">Mystery</button>
-          <button class="btn btn-outline-light rounded-5">Science fiction</button>
-          <button class="btn btn-outline-light rounded-5">Cinema TV</button>
-          <button class="btn btn-outline-primary rounded-5">Thriller</button>
-          <button class="btn btn-outline-light rounded-5">War</button>
-          <button class="btn btn-outline-primary rounded-5">Western</button>
-          <button class="btn btn-outline-light rounded-5">Kids</button>
-          <button class="btn btn-outline-primary rounded-5">News</button>
-          <button class="btn btn-outline-light rounded-5">Reality</button>
-          <button class="btn btn-outline-primary rounded-5">
-            Sci-Fi & Fantasy
-          </button>
-          <button class="btn btn-outline-light rounded-5">Soap</button>
-          <button class="btn btn-outline-primary rounded-5">Talk</button>
-          <button class="btn btn-outline-light rounded-5">
-            War & Politics
-          </button>
+          <?php
+            $genre_query = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre ORDER BY genre_name ASC");
+            $btn_styles = ['btn-outline-primary', 'btn-outline-light'];
+            $i = 0;
+            while ($genre = mysqli_fetch_assoc($genre_query)):
+              $style = $btn_styles[$i % 2];
+              // Optional: make the genre name "safe" for HTML and URLs
+              $genre_name = htmlspecialchars($genre['genre_name']);
+              $genre_id = (int)$genre['genre_id'];
+          ?>
+            <button class="btn <?php echo $style; ?> rounded-5" data-genre-id="<?php echo $genre_id; ?>">
+              <?php echo $genre_name; ?>
+            </button>
+          <?php
+              $i++;
+            endwhile;
+          ?>
         </div>
       </div>
     </main>
@@ -257,7 +248,7 @@
         <p>© 2025 CineVault. All rights reserved.</p>
       </div>
     </footer>
-    <!-- START OF FOOTER -->
+    <!-- END OF FOOTER -->
     <script src="header-scroll.js"></script>
   </body>
 </html>

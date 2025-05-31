@@ -491,15 +491,15 @@ while ($m = mysqli_fetch_assoc($seriesViewsQuery)) {
           {
             label: 'Movie Views',
             data: <?php echo json_encode(array_values($bar_views_movie_data)); ?>,
-            backgroundColor: 'rgba(80, 140, 220, 0.8)',
-            borderColor: 'rgba(80, 140, 220, 1)',
+            backgroundColor: 'rgba(96, 126, 188, 0.8)',
+            borderColor: 'rgba(120, 170, 250, 0.7)',
             borderWidth: 1
           },
           {
             label: 'Series Views',
             data: <?php echo json_encode(array_values($bar_views_series_data)); ?>,
-            backgroundColor: 'rgba(54, 162, 235, 0.7)',
-            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(120, 170, 250, 0.7)',
+            borderColor: 'rgba(120, 170, 250, 1)',
             borderWidth: 1
           }
         ]

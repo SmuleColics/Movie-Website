@@ -79,7 +79,7 @@ if ($is_edit) {
             }
         }
     } else {
-        echo "<script>alert('Record not found.'); window.location.href='web-home.php';</script>";
+        echo "<script>alert('Record not found.'); window.location.href='web-movies.php';</script>";
         exit();
     }
 }
@@ -368,7 +368,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
             }
             echo "<script>
                     alert('$msg');
-                    window.location.href='web-home.php';
+                    window.location.href='web-movies.php';
                 </script>";
             exit();
         }
@@ -409,7 +409,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
 <body>
   
 <main class="container-lg p-0 overflow-hidden">
-    <?php $from = isset($_GET['from']) ? $_GET['from'] : 'web-home.php';  ?>
+    <?php $from = isset($_GET['from']) ? $_GET['from'] : 'web-movies.php';  ?>
     <a href="<?php echo htmlspecialchars($from); ?>" class="btn db-bg-primary text-white ms-3 mt-3">
       <i class="fa-solid fa-chevron-left"></i> Go Back
     </a>
@@ -462,13 +462,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
                         <div class="col">
                             <label for="duration" class="db-text-sec fs-18 form-label">Duration</label><br>
                             <input type="text" name="duration" id="duration" class="form-control file-trending"
-                                   placeholder="1hr 30mins" value="<?php echo htmlspecialchars($record['duration'] ?? ''); ?>">
+                                   placeholder="1hr 30min" value="<?php echo htmlspecialchars($record['duration'] ?? ''); ?>">
                             <p class="fs-12 text-danger mt-1 mb-2"><?php if (!$valid_duration) echo "Duration must be at least 2 characters long"; ?></p>
                         </div>
                         <div class="col">
                             <label for="date-released" class="db-text-sec fs-18 form-label text-nowrap">Date Released</label><br>
                             <input type="number" name="date-released" id="date-released" class="form-control file-trending"
-                                   placeholder="0" value="<?php echo htmlspecialchars($record['date_released'] ?? ''); ?>">
+                                   placeholder="2022" value="<?php echo htmlspecialchars($record['date_released'] ?? ''); ?>">
                             <p class="fs-12 text-danger mt-1 mb-2"><?php
                             if (!$valid_date_released) { echo "Date Released can not be empty";
                             } elseif (!$valid_date_released_time) { echo "Invalid Date Released Time"; } ?></p>
@@ -476,7 +476,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
                         <div class="col">
                             <label for="age-rating" class="db-text-sec fs-18 form-label text-nowrap ">Age Rating</label><br>
                             <input type="number" name="age-rating" id="age-rating" class="form-control file-trending"
-                                   placeholder="0" value="<?php echo htmlspecialchars($record['age_rating'] ?? ''); ?>">
+                                   placeholder="13" value="<?php echo htmlspecialchars($record['age_rating'] ?? ''); ?>">
                             <p class="fs-12 text-danger mt-1 mb-2"><?php
                             if (!$valid_age_rating) { echo "Age rating can not be empty";
                             } elseif (!$valid_age_rating_age) { echo "Invalid age rating"; } ?></p>

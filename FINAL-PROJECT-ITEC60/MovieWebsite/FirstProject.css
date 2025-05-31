@@ -11,7 +11,6 @@
 
 }
 
-
 body {
   height: 4350px;
   background-color: var(--movie-bg);
@@ -29,7 +28,7 @@ body {
 }
 
 nav {
-  height: 55px;
+  height: 60px !important;
 }
 
 .search {
@@ -68,6 +67,8 @@ input:focus {
 
 .navbar-toggler {
   border-color: #fff;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 .fa-gear {
@@ -400,6 +401,17 @@ footer {
   .footer-long-text {
     width: 100%;
   }
+
+  .top-10-images:hover .play-button-top-10 {
+     opacity: 1; /* Show on hover */
+    transform: translate(-90%, -50%) scale(1.2) !important; 
+    cursor: pointer;
+    z-index: 200;
+  }
+
+  /* .right-header {
+    transform: translateY(-80px) !important;
+  } */
 }
 
 /* FONTS */
@@ -486,7 +498,7 @@ img, .top-10-text, .trending-img, .action-movies-img, .featured-img, .popular-im
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
 }
 
-.trending-images:hover .play-button, .comedy-images:hover .play-button-comedy, .featured-images:hover .play-button-featured, .popular-images:hover .play-button-popular, .top-10-hover:hover .play-button-top-10 {
+.trending-images:hover .play-button, .comedy-images:hover .play-button-comedy, .featured-images:hover .play-button-featured, .popular-images:hover .play-button-popular, .top-10-images:hover .play-button-top-10 {
   opacity: 1; /* Show on hover */
   transform: translate(-50%, -50%) scale(1.2); 
   cursor: pointer;
