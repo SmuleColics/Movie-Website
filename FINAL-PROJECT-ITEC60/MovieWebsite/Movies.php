@@ -1,14 +1,5 @@
 <?php
-include '../includes/db-connection.php';
-
-session_start();
-
-if (isset($_GET['logout'])) {
-  session_unset();
-  session_destroy();
-  header('Location: ../LANDING-PAGE/LandingPageMovie.php');
-  exit();
-}
+include 'CineVault-header.php';
 ?>
 
 <!DOCTYPE html>
@@ -32,290 +23,175 @@ if (isset($_GET['logout'])) {
 </head>
 
 <body class="bg-dark">
-  <!-- START OF HEADER -->
-  <nav id="navbar" class="navbar navbar-dark fixed-top">
-    <div class="container-fluid">
-      <header class="d-flex justify-content-between align-items-center w-100 px-md-5 bg-transparent">
-        <div class="left-header">
-          <a class="navbar-brand fw-semibold" href="#">Cine<span class="text-primary">Vault</span></a>
-        </div>
-
-        <div class="middle-header position-relative d-none d-lg-block">
-          <ul class="d-flex list-unstyled fs-18 m-0">
-            <li>
-              <a href="FirstProject.php" class="text-decoration-none text-white fw-bold me-2">Home</a>
-            </li>
-            <li>
-              <a href="Movies.php" class="text-decoration-none text-primary fw-bold mx-2">Movies</a>
-            </li>
-            <li>
-              <a href="Series.php" class="text-decoration-none text-white fw-bold mx-2">Series</a>
-            </li>
-            <li>
-              <a href="Categories.php" class="text-decoration-none text-white fw-bold ms-2">Categories</a>
-            </li>
-          </ul>
-        </div>
-
-        <div class="right-header d-flex">
-          <div class="d-flex align-items-center">
-            <div class="search-container">
-              <input class="search rounded-5 bg-transparent text-white" type="text" placeholder="Search..." />
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </div>
-            <!-- ========== PROFILE MENU ========== -->
-            <div class="dropdown-center">
-
-              <button class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="header-user rounded-circle flexbox-align ms-1" style="padding: 11px; color: #f4fff8;">
-                  <i class="fa-solid fa-user db-text-sec fs-18"></i>
-                </div>
-              </button>
-
-              <ul class="dropdown-menu dropdown-menu-dark mt-1 profile-dropdown" style="transform: translateX(-130px);">
-                <li class="dropdown-profile-top d-flex mb-1" style="height: 50px;">
-                  <a class="dropdown-item d-flex align-items-center" href="">
-
-                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center ms-1"
-                      style="height: 32px; width: 32px; transform: translateX(-9px);">
-                      <i class="fa-solid fa-user db-text-sec fs-18"></i>
-                    </div>
-
-                    <div class="dropdown-profile-text" style="margin-left: -4px;">
-                      <p class="fs-18 view-profile-text" style="transform: translateY(10px)">Manage Profile</p>
-                      <p class="m-0 fs-14 db-text-secondary" style="transform: translateY(-10px)">User</p>
-                    </div>
-                  </a>
-                </li>
-                <li class="mb-1">
-                  <a class="dropdown-item d-flex align-items-center" href="#">
-                    <i class="fa-solid fa-question ms-1 me-2 fs-22"></i>
-                    <span class="fs-18 d-inline-block ms-1">Help & Support</span>
-                  </a>
-                </li>
-                <li class="mb-1" style="transform: translateX(-12px);">
-                  <a class="dropdown-item d-flex align-items-center" href="#">
-                    <i class="fa-solid fa-gear me-2 fs-22 "></i>
-                    <span class="fs-18 d-inline-block">Settings</span>
-                  </a>
-                </li>
-                <li class="mb-1">
-                  <a href="../LANDING-PAGE/LandingPageMovie.php" class="dropdown-item d-flex align-items-center">
-                    <i class="fa-solid fa-right-from-bracket me-2 fs-22"></i>
-                    <span class="fs-18 d-inline-block">Log out</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-          </div>
-          <!-- ========== END PROFILE MENU ========== -->
-          <button class="navbar-toggler text-light d-lg-none ms-2" type="button" data-bs-toggle="offcanvas"
-            data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-        </div>
-    </div>
-    </header>
-
-    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar"
-      aria-labelledby="offcanvasDarkNavbarLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">
-          Cine<span class="text-primary">Vault</span>
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body text-center">
-        <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-          <li class="nav-item">
-            <a class="nav-link text-white" aria-current="page" href="FirstProject.php">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-primary" href="Movies.php">Movies</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="Series.php">Series</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" href="Categories.php">Categories</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-    </div>
-  </nav>
-  <!-- END OF HEADER -->
 
   <!-- START OF THE MAIN CONTENT -->
   <main>
+
     <!-- START OF SECTION WALLPAPER -->
-    <section id="section-wallpaper-movies" class="section-wallpaper">
-      <!-- data-bs-ride="carousel" -->
+    <section class="section-wallpaper">
       <div id="carouselExampleControls" class="carousel slide carousel-fade" data-bs-ride="carousel">
-
         <div class="carousel-inner">
-          <div class="carousel-item active position-relative">
-
-            <img src="../Images/VenomWallpaper.jpg" class="d-block w-100 wallpaper" alt="Sonic Wallpaper">
-
-            <div class="wallpaper-description text-primary">
-
-              <div class="wallpaper-left text-white d-flex flex-column">
-                <div class="d-flex justify-content-center">
-                  <img class="sonic-title-img" src="../Images/venomTitle.png" alt="Sonic Title">
-                </div>
-                <div class="wallpaper-ratings d-flex align-items-center justify-content-center my-2 my-md-4">
-                  <div class="rating-year">
-                    2024
+          <?php
+          $carousel_modals = "";
+          $carousel_query = mysqli_query($con, "
+        SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
+        FROM tbl_movie_series ms
+        LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
+        LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
+        LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+        WHERE ms.category = 'Movie'
+          AND ms.poster LIKE '%MovieCarousel%'
+        ORDER BY ms.date_posted DESC
+        LIMIT 3
+      ");
+          $active = true;
+          while ($row = mysqli_fetch_assoc($carousel_query)):
+            $movie_series_id = $row['movie_series_id'];
+            $desc = htmlspecialchars($row['description']);
+            $maxlen = 110;
+            if (function_exists('mb_substr')) {
+              if (mb_strlen($desc) > $maxlen) {
+                $desc = mb_substr($desc, 0, $maxlen) . '...';
+              }
+            } else {
+              if (strlen($desc) > $maxlen) {
+                $desc = substr($desc, 0, $maxlen) . '...';
+              }
+            }
+            $genres = htmlspecialchars($row['genre_1']);
+            if (!empty($row['genre_2']))
+              $genres .= ', ' . htmlspecialchars($row['genre_2']);
+            if (!empty($row['genre_3']))
+              $genres .= ', ' . htmlspecialchars($row['genre_3']);
+            ?>
+            <div class="carousel-item<?php if ($active) {
+              echo ' active';
+              $active = false;
+            } ?> position-relative">
+              <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($row['poster']); ?>"
+                class="d-block w-100 wallpaper" alt="<?php echo htmlspecialchars($row['title']); ?> Wallpaper">
+              <div class="wallpaper-description text-primary">
+                <div class="wallpaper-left text-white d-flex flex-column">
+                  <div class="d-flex justify-content-center">
+                    <img class="sonic-title-img"
+                      src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($row['modal_poster_title']); ?>"
+                      alt="<?php echo htmlspecialchars($row['title']); ?> Title">
                   </div>
-                  <span class="mx-2 text-white-50">|</span>
-                  <div class="rating-points d-flex">
-                    16+
+                  <div class="wallpaper-ratings d-flex align-items-center justify-content-center my-2 my-md-4">
+                    <div class="rating-year">
+                      <?php echo htmlspecialchars($row['date_released']); ?>
+                    </div>
+                    <span class="mx-2 text-white-50">|</span>
+                    <div class="rating-points d-flex">
+                      <?php echo htmlspecialchars($row['age_rating']); ?>+
+                    </div>
+                    <span class="mx-2 text-white-50">|</span>
+                    <div class="rating-gender text-nowrap">
+                      <?php echo htmlspecialchars($row['category']); ?>
+                    </div>
+                    <div class="wallpaper-line bg-secondary mx-3"></div>
                   </div>
-                  <span class="mx-2 text-white-50">|</span>
-                  <div class="rating-gender text-nowrap">
-                    Sci-Fi
+                  <div class="rating-text">
+                    <?php echo $desc; ?>
                   </div>
-                  <div class="wallpaper-line bg-secondary mx-3"></div>
                 </div>
-                <div class="rating-text">
-                  <p>Eddie and Venom are on the run. Hunted by both of their worlds and with the net closing in, the duo
-                    are forced into a devastating decision that will bring...</p>
-                </div>
-              </div>
-
-              <div class="wallpaper-right mt-1">
-
-                <div class="wallpaper-watch d-none d-md-block">
-                  <div class="d-flex align-items-center gap-3">
-                    <button class="btn btn-outline-primary rounded-circle">
-                      <i class="fa-solid fa-play"></i>
+                <div class="wallpaper-right mt-1">
+                  <div class="wallpaper-watch d-none d-md-block">
+                    <div class="d-flex align-items-center gap-3">
+                      <!-- More Info Button with transform style -->
+                      <button class="btn d-flex db-text-sec text-nowrap align-items-center rounded-2"
+                        style="background: rgba(255,255,255,0.15); border: none; width: fit-content; font-size: 16px; height: fit-content; transform: translate(280px, 30px); z-index: 300;"
+                        data-bs-toggle="modal" data-bs-target="#modal-carousel-<?php echo $movie_series_id; ?>">
+                        <i class="fa-solid fa-info-circle me-1"></i> More Info
+                      </button>
+                      <button class="btn btn-outline-primary rounded-circle"
+                        onclick="window.location.href='play-vid.php?video=<?php echo urlencode($row['video']); ?>&type=movie_series&id=<?php echo $row['movie_series_id']; ?>'">
+                        <i class="fa-solid fa-play"></i>
+                      </button>
+                      <p class="watch-now fs-2 fw-bold text-white m-0 text-nowrap" style="transform: translateY(-10px)">
+                        WATCH NOW!</p>
+                    </div>
+                  </div>
+                  <div class="wallpaper-watch-s d-md-none d-flex flex-column gap-2">
+                    <button class="btn btn-primary rounded-5 mt-3 watch-now-small"
+                      onclick="window.location.href='play-vid.php?video=<?php echo urlencode($row['video']); ?>&type=movie_series&id=<?php echo $row['movie_series_id']; ?>'">
+                      <i class="fa-solid fa-play mx-1"></i>
+                      <span>Watch Now</span>
                     </button>
-                    <p class="watch-now fs-2 fw-bold text-white m-0">WATCH NOW!</p>
+                    <!-- More Info Button for mobile -->
+                    <button class="btn d-flex db-text-sec text-nowrap align-items-center rounded-2"
+                      style="background: rgba(255,255,255,0.15); border: none; width: fit-content; font-size: 16px; height: fit-content; position: relative; transform: translate(12px, 10px); z-index: 300;"
+                      data-bs-toggle="modal" data-bs-target="#modal-carousel-<?php echo $movie_series_id; ?>">
+                      <i class="fa-solid fa-info-circle me-1"></i> More Info
+                    </button>
                   </div>
                 </div>
-
-                <div class="wallpaper-watch-s d-md-none">
-                  <button class="btn btn-primary rounded-5 watch-now-small">
-                    <i class="fa-solid fa-play mx-1"></i>
-                    <span>Watch Now</span>
-                  </button>
-                </div>
-
               </div>
-
             </div>
-
-          </div>
-
-          <div class="carousel-item">
-
-            <img src="../Images/KravenWallpaper.jpg" class="d-block w-100 wallpaper" alt="Captain America Wallpaper">
-
-            <div class="wallpaper-description text-primary">
-
-              <div class="wallpaper-left text-white d-flex flex-column">
-                <div class="d-flex justify-content-center">
-                  <img class="sonic-title-img" src="../Images/kravenTitle.png" alt="Captain America Title">
-                </div>
-                <div class="wallpaper-ratings d-flex align-items-center my-2 my-md-4">
-                  <div class="rating-year">
-                    2024
-                  </div>
-                  <span class="mx-2 text-white-50">|</span>
-                  <div class="rating-points d-flex">
-                    16+
-                  </div>
-                  <span class="mx-2 text-white-50">|</span>
-                  <div class="rating-gender text-nowrap">
-                    Sci-Fi
-                  </div>
-                  <div class="wallpaper-line bg-secondary mx-3"></div>
-                </div>
-                <div class="rating-text d-block">
-                  Kraven Kravinoff's complex relationship with his ruthless gangster father, Nikolai, starts him down a
-                  path of vengeance with brutal consequences, motivating him to become not only the greatest...
-                </div>
-              </div>
-
-              <div class="wallpaper-right mt-1">
-
-                <div class="wallpaper-watch d-none d-md-block">
-                  <div class="d-flex align-items-center gap-3">
-                    <button class="btn btn-outline-primary rounded-circle">
-                      <i class="fa-solid fa-play"></i>
-                    </button>
-                    <p class="watch-now fs-2 fw-bold text-white m-0">WATCH NOW!</p>
-                  </div>
-                </div>
-
-                <div class="wallpaper-watch-s d-md-none">
-                  <button class="btn btn-primary rounded-5 watch-now-small">
-                    <i class="fa-solid fa-play mx-1"></i>
-                    <span>Watch Now</span>
+            <?php
+            // Carousel modal for this item
+            $carousel_modals .= "
+      <div class='modal fade' id='modal-carousel-{$movie_series_id}' tabindex='-1' aria-labelledby='exampleModalLabel-carousel-{$movie_series_id}' aria-hidden='true'>
+        <div class='modal-dialog modal-dialog-centered modal-lg modal-dark border-3'>
+          <div class='modal-content bg-dark modals'>
+            <div class='modal-body'>
+              <div class='modal-body-content'>
+                <div class='modal-pic-container m-0 position-relative'>
+                  <video
+                    class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
+                    autoplay
+                    muted
+                    loop
+                  >
+                    <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($row['video']) . "\" type=\"video/mp4\">
+                    Your browser does not support the video tag.
+                  </video>";
+            if (!empty($row['modal_poster_title'])) {
+              $carousel_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($row['modal_poster_title']) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
+            } else {
+              $carousel_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($row['title']) . "</p>";
+            }
+            $carousel_modals .= "
+                  <a href=\"play-vid.php?video=" . urlencode($row['video']) . "&type=movie_series&id=" . $movie_series_id . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
+                    <i class=\"fa-solid fa-play me-1\"></i> Play
+                  </a>
+                  <button class=\"volume-control bg-transparent position-absolute\">
+                    <i class=\"fa-solid fa-volume-xmark volume-icon\"></i>
                   </button>
+                  <button type='button' class='btn-close btn-close-white position-absolute modal-close-button' data-bs-dismiss='modal' aria-label='Close'></button>
                 </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          <div class="carousel-item">
-            <img src="../Images/PandaPlanWallpaper.jpg" class="d-block w-100 wallpaper" alt="Moana Wallpaper">
-
-            <div class="wallpaper-description text-primary">
-
-              <div class="wallpaper-left text-white d-flex flex-column">
-                <div class="d-flex justify-content-center">
-                  <img class="sonic-title-img" src="../Images/pandaPlanTitle.png" alt="Moana Title">
-                </div>
-                <div class="wallpaper-ratings d-flex align-items-center my-2 my-md-4">
-                  <div class="rating-year">
-                    2024
+                <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
+                  <div class=\"col-8 text-wrap\">
+                    <div class=\"d-flex gap-2\">
+                      <p class='modal-text-rating mb-0'>" . htmlspecialchars($row['date_released']) . "</p>
+                      <p class='modal-text-rating mb-0'>" . htmlspecialchars($row['duration']) . "</p>
+                    </div>
+                    <div class=\"d-flex gap-2 align-items-center\">
+                      <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($row['age_rating']) . "+</p>
+                      <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($row['category']) . "</p>
+                    </div>
+                    <p class='modal-text-rating'>" . htmlspecialchars($row['description']) . "</p>
                   </div>
-                  <span class="mx-2 text-white-50">|</span>
-                  <div class="rating-points d-flex">
-                    16+
+                  <div class=\"col-4 ps-0 pe-4 text-wrap\">
+                    <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
+                      <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span>
+                      " . htmlspecialchars($row['cast']) . ", more...
+                    </p>
+                    <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
+                      <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span>
+                      {$genres}
+                    </p>
                   </div>
-                  <span class="mx-2 text-white-50">|</span>
-                  <div class="rating-gender text-nowrap">
-                    Sci-Fi
-                  </div>
-                  <div class="wallpaper-line bg-secondary mx-3"></div>
-                </div>
-                <div class="rating-text d-block">
-                  International action star Jackie Chan is invited to the adoption ceremony of a rare baby panda, but
-                  after an international crime syndicate attempts to...
                 </div>
               </div>
-
-              <div class="wallpaper-right mt-3">
-
-                <div class="wallpaper-watch d-none d-md-block">
-                  <div class="d-flex align-items-center gap-3">
-                    <button class="btn btn-outline-primary rounded-circle">
-                      <i class="fa-solid fa-play"></i>
-                    </button>
-                    <p class="watch-now fs-2 fw-bold text-white m-0">WATCH NOW!</p>
-                  </div>
-                </div>
-
-                <div class="wallpaper-watch-s d-md-none">
-                  <button class="btn btn-primary rounded-5 watch-now-small">
-                    <i class="fa-solid fa-play mx-1"></i>
-                    <span>Watch Now</span>
-                  </button>
-                </div>
-
-              </div>
-
             </div>
           </div>
         </div>
-
+      </div>
+      ";
+          endwhile;
+          ?>
+        </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls"
           data-bs-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -326,11 +202,10 @@ if (isset($_GET['logout'])) {
           <span class="carousel-control-next-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Next</span>
         </button>
-
       </div>
-
+      <?php echo $carousel_modals; ?>
     </section>
-    <!-- START OF SECTION WALLPAPER -->
+    <!-- END OF SECTION WALLPAPER -->
 
     <!-- START OF SECTION TOP 10 MOVIES-->
     <?php
@@ -345,6 +220,10 @@ if (isset($_GET['logout'])) {
   LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
   LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
   WHERE ms.category = 'Movie'
+    AND ms.poster NOT LIKE '%HomeCarousel%'
+    AND ms.poster NOT LIKE '%MovieCarousel%'
+    AND ms.poster NOT LIKE '%SeriesCarousel%'
+    AND ms.poster NOT LIKE '%HomeWallpaper%'
   ORDER BY ms.views DESC LIMIT 10
 ");
     $top10_rank = 1;
@@ -478,12 +357,12 @@ if (isset($_GET['logout'])) {
 
     <!-- START OF SECTION ADVENTURE MOVIES -->
     <section id="section-popular-adventure-movies" class="section-trending ms-md-5 ms-3">
-      <?php 
-    $genre_result = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre WHERE genre_name LIKE '%Adventure%' LIMIT 1");
-            $genre = mysqli_fetch_assoc($genre_result);
-            $genre_id = $genre ? $genre['genre_id'] : 2; // fallback if not found
-            $genre_name = $genre ? $genre['genre_name'] : "Adventure";
-    ?>
+      <?php
+      $genre_result = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre WHERE genre_name LIKE '%Adventure%' LIMIT 1");
+      $genre = mysqli_fetch_assoc($genre_result);
+      $genre_id = $genre ? $genre['genre_id'] : 2; // fallback if not found
+      $genre_name = $genre ? $genre['genre_name'] : "Adventure";
+      ?>
       <div id="dropdown-popular-adventure" class="trending-this-week d-flex justify-content-between">
         <p class="trending-text text-white fs-24 fw-bold">Adventure Movies</p>
       </div>
@@ -506,6 +385,10 @@ if (isset($_GET['logout'])) {
         LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
         WHERE (ms.genre_id1 = $genre_id OR ms.genre_id2 = $genre_id OR ms.genre_id3 = $genre_id)
           AND ms.category = 'Movie'
+          AND ms.poster NOT LIKE '%HomeCarousel%'
+          AND ms.poster NOT LIKE '%MovieCarousel%'
+          AND ms.poster NOT LIKE '%SeriesCarousel%'
+          AND ms.poster NOT LIKE '%HomeWallpaper%'
         ORDER BY ms.date_released DESC
         LIMIT 8"
           );
@@ -616,11 +499,11 @@ if (isset($_GET['logout'])) {
     <!-- END OF SECTION ADVENTURE MOVIES -->
 
     <!-- START OF SECTION THRILLER -->
-    <?php 
+    <?php
     $genre_result = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre WHERE genre_name LIKE '%Thriller%' LIMIT 1");
-            $genre = mysqli_fetch_assoc($genre_result);
-            $genre_id = $genre ? $genre['genre_id'] : 16; // fallback if not found
-            $genre_name = $genre ? $genre['genre_name'] : "Thriller";
+    $genre = mysqli_fetch_assoc($genre_result);
+    $genre_id = $genre ? $genre['genre_id'] : 16; // fallback if not found
+    $genre_name = $genre ? $genre['genre_name'] : "Thriller";
     ?>
 
     <section id="section-thriller" class="ms-md-5 ms-3" style="margin-top: 60px;">
@@ -636,18 +519,21 @@ if (isset($_GET['logout'])) {
         </div>
         <div class="action-images-container d-flex gap-3 position-relative">
           <?php
-
           $thriller_query = mysqli_query(
             $con,
             "SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
-          FROM tbl_movie_series ms
-          LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
-          LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
-          LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
-          WHERE (ms.genre_id1 = $genre_id OR ms.genre_id2 = $genre_id OR ms.genre_id3 = $genre_id)
-            AND ms.category = 'Movie'
-          ORDER BY ms.date_released DESC
-          LIMIT 7"
+      FROM tbl_movie_series ms
+      LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
+      LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
+      LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+      WHERE (ms.genre_id1 = $genre_id OR ms.genre_id2 = $genre_id OR ms.genre_id3 = $genre_id)
+        AND ms.category = 'Movie'
+        AND ms.poster NOT LIKE '%HomeCarousel%'
+        AND ms.poster NOT LIKE '%MovieCarousel%'
+        AND ms.poster NOT LIKE '%SeriesCarousel%'
+        AND ms.poster NOT LIKE '%HomeWallpaper%'
+      ORDER BY ms.date_released DESC
+      LIMIT 7"
           );
           $thriller_modals = "";
           while ($row = mysqli_fetch_assoc($thriller_query)):
@@ -758,11 +644,11 @@ if (isset($_GET['logout'])) {
 
     <!-- START OF SECTION SCI-FI  -->
     <section class="section-featured text-white ms-md-5 ms-3">
-      <?php 
+      <?php
       $genre_result = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre WHERE genre_name LIKE '%Sci-Fi%' LIMIT 1");
-              $genre = mysqli_fetch_assoc($genre_result);
-              $genre_id = $genre ? $genre['genre_id'] : 14; // fallback if not found
-              $genre_name = $genre ? $genre['genre_name'] : "Sci-Fi";
+      $genre = mysqli_fetch_assoc($genre_result);
+      $genre_id = $genre ? $genre['genre_id'] : 14; // fallback if not found
+      $genre_name = $genre ? $genre['genre_name'] : "Sci-Fi";
       ?>
       <div class="featured-container">
         <div class="featured-top">
@@ -781,14 +667,18 @@ if (isset($_GET['logout'])) {
               $scifi_query = mysqli_query(
                 $con,
                 "SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
-              FROM tbl_movie_series ms
-              LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
-              LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
-              LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
-              WHERE (ms.genre_id1 = $genre_id OR ms.genre_id2 = $genre_id OR ms.genre_id3 = $genre_id)
-                AND ms.category = 'Movie'
-              ORDER BY ms.date_released DESC
-              LIMIT 8"
+      FROM tbl_movie_series ms
+      LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
+      LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
+      LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+      WHERE (ms.genre_id1 = $genre_id OR ms.genre_id2 = $genre_id OR ms.genre_id3 = $genre_id)
+        AND ms.category = 'Movie'
+        AND ms.poster NOT LIKE '%HomeCarousel%'
+        AND ms.poster NOT LIKE '%MovieCarousel%'
+        AND ms.poster NOT LIKE '%SeriesCarousel%'
+        AND ms.poster NOT LIKE '%HomeWallpaper%'
+      ORDER BY ms.date_released DESC
+      LIMIT 8"
               );
               $scifi_modals = "";
               while ($row = mysqli_fetch_assoc($scifi_query)):
@@ -899,37 +789,53 @@ if (isset($_GET['logout'])) {
     <?php echo $scifi_modals; ?>
     <!-- END OF SECTION SCI-FI  -->
 
-    <!-- START OF MOVIES 1 -->
+
+    <!-- START OF PRINCESS MONONOKE -->
     <section class="movies-1 mt-80">
-        <img src="../Images/PrincessMononoke.jpg" class="d-block w-100 wallpaper-lotr bg-danger" alt="Sonic Wallpaper">
+      <div>
+        <?php
+        // Fetch the movie/series for HomeWallpaper3
+        $wallpaper3_query = mysqli_query($con, "
+        SELECT * FROM tbl_movie_series
+        WHERE poster LIKE '%HomeWallpaper3%'
+        LIMIT 1
+      ");
+        $wallpaper3 = mysqli_fetch_assoc($wallpaper3_query);
+        if ($wallpaper3):
+          ?>
+          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper3['poster']); ?>"
+            class="d-block w-100 wallpaper-lotr bg-danger"
+            alt="<?php echo htmlspecialchars($wallpaper3['title']); ?> Wallpaper">
 
-        <div
-          class="wallpaper-description-tem d-flex flex-column justify-content-end align-items-end position-relative me-5">
+          <div
+            class="wallpaper-description-tem d-flex flex-column justify-content-end align-items-end position-relative me-5">
 
-          <div class="d-flex justify-content-center">
-            <img class="tem-title-img position-relative mb-1" src="../Images/PrincessMononokeTitle.png"
-              alt="Sonic Title">
+            <div class="d-flex justify-content-center">
+              <img class="tem-title-img position-relative mb-1"
+                src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper3['modal_poster_title']); ?>"
+                alt="<?php echo htmlspecialchars($wallpaper3['title']); ?> Title">
+            </div>
+
+            <div class="rating-text-tem my-4 position-relative text-white">
+              <p><?php echo htmlspecialchars($wallpaper3['description']); ?></p>
+            </div>
+
+            <div class="watch-now-tem position-relative">
+              <button class="btn btn-primary rounded-5 watch-now-small"
+                onclick="window.location.href='play-vid.php?video=<?php echo urlencode($wallpaper3['video']); ?>&type=movie_series&id=<?php echo $wallpaper3['movie_series_id']; ?>'">
+                <i class="fa-solid fa-play mx-1"></i>
+                <span>Watch Now</span>
+              </button>
+            </div>
+
           </div>
-
-          <div class="rating-text-tem my-4 position-relative text-white">
-            <p>Ashitaka, a prince of the disappearing Emishi people, is cursed by a demonized boar god and must journey
-              to the west to find a cure. Along the way, he encounters San, a young human woman fighting</p>
-          </div>
-
-          <div class="watch-now-tem position-relative">
-            <button class="btn btn-primary rounded-5 watch-now-small">
-              <i class="fa-solid fa-play mx-1"></i>
-              <span>Watch Now</span>
-            </button>
-          </div>
-
-        </div>
-
+        <?php endif; ?>
+      </div>
     </section>
-    <!-- END OF MOVIES 1 -->
+    <!-- END OF PRINCESS MONONOKE-->
 
     <!-- START OF SECTION DRAMA -->
-    <?php 
+    <?php
     $genre_result = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre WHERE genre_name LIKE '%Drama%' LIMIT 1");
     $genre = mysqli_fetch_assoc($genre_result);
     $genre_id = $genre ? $genre['genre_id'] : 7; // fallback if not found
@@ -948,19 +854,23 @@ if (isset($_GET['logout'])) {
         </div>
         <div class="action-images-container d-flex gap-3 position-relative">
           <?php
-          
+
 
           $drama_query = mysqli_query(
             $con,
             "SELECT ms.*, g1.genre_name AS genre_1, g2.genre_name AS genre_2, g3.genre_name AS genre_3
-          FROM tbl_movie_series ms
-          LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
-          LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
-          LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
-          WHERE (ms.genre_id1 = $genre_id OR ms.genre_id2 = $genre_id OR ms.genre_id3 = $genre_id)
-            AND ms.category = 'Movie'
-          ORDER BY ms.date_released DESC
-          LIMIT 7"
+      FROM tbl_movie_series ms
+      LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
+      LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
+      LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+      WHERE (ms.genre_id1 = $genre_id OR ms.genre_id2 = $genre_id OR ms.genre_id3 = $genre_id)
+        AND ms.category = 'Movie'
+        AND ms.poster NOT LIKE '%HomeCarousel%'
+        AND ms.poster NOT LIKE '%MovieCarousel%'
+        AND ms.poster NOT LIKE '%SeriesCarousel%'
+        AND ms.poster NOT LIKE '%HomeWallpaper%'
+      ORDER BY ms.date_released DESC
+      LIMIT 7"
           );
           $drama_modals = "";
           while ($row = mysqli_fetch_assoc($drama_query)):
@@ -1064,44 +974,54 @@ if (isset($_GET['logout'])) {
             <i class="fas fa-chevron-right fa-2xl text-white-50"></i>
           </button>
         </div>
-      
+
     </section>
     <?php echo $drama_modals; ?>
     <!-- END OF SECTION DRAMA -->
 
-    <!-- START OF MOVIES 2 -->
+
+    <!-- START OF INTERSTELLAR -->
     <section class="movies-2">
       <div>
+        <?php
+        // Fetch the movie/series for HomeWallpaper4
+        $wallpaper4_query = mysqli_query($con, "
+      SELECT * FROM tbl_movie_series
+      WHERE poster LIKE '%HomeWallpaper4%'
+      LIMIT 1
+    ");
+        $wallpaper4 = mysqli_fetch_assoc($wallpaper4_query);
+        if ($wallpaper4):
+          ?>
+          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper4['poster']); ?>"
+            class="d-block w-100 wallpaper-lotr" alt="<?php echo htmlspecialchars($wallpaper4['title']); ?> Wallpaper">
 
-        <img src="../Images/Stellar.jpg" class="d-block w-100 wallpaper-lotr" alt="Sonic Wallpaper">
+          <div
+            class="wallpaper-description-lotr d-flex flex-column justify-content-end align-items-end position-relative me-5">
 
-        <div
-          class="wallpaper-description-lotr d-flex flex-column justify-content-end align-items-end position-relative me-5">
+            <div class="d-flex justify-content-center">
+              <img class="lotr-title-img position-relative mb-1"
+                src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper4['modal_poster_title']); ?>"
+                alt="<?php echo htmlspecialchars($wallpaper4['title']); ?> Title">
+            </div>
 
-          <div class="d-flex justify-content-center">
-            <img class="lotr-title-img position-relative mb-1" src="../Images/InterstellarTitle.png" alt="Sonic Title">
+            <div class="rating-text-lotr my-4 position-relative text-white">
+              <p><?php echo htmlspecialchars($wallpaper4['description']); ?></p>
+            </div>
+
+            <div class="watch-now-lotr position-relative">
+              <button class="btn btn-primary rounded-5 watch-now-small"
+                onclick="window.location.href='play-vid.php?video=<?php echo urlencode($wallpaper4['video']); ?>&type=movie_series&id=<?php echo $wallpaper4['movie_series_id']; ?>'">
+                <i class="fa-solid fa-play mx-1"></i>
+                <span>Watch Now</span>
+              </button>
+            </div>
+
           </div>
-
-          <div class="rating-text-lotr my-4 position-relative text-white">
-            <p>The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the
-              limitations on human space travel and conquer the vast distances involved in an interstellar voyage.
-            </p>
-          </div>
-
-          <div class="watch-now-lotr position-relative">
-            <button class="btn btn-primary rounded-5 watch-now-small">
-              <i class="fa-solid fa-play mx-1"></i>
-              <span>Watch Now</span>
-            </button>
-          </div>
-
-        </div>
-
-      </div>
-
+        <?php endif; ?>
       </div>
     </section>
-    <!-- END OF MOVIES 2 -->
+    <!-- END OF INTERSTELLAR -->
   </main>
   <!-- END OF THE MAIN CONTENT -->
 

@@ -426,6 +426,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
                 </div>
                 <!-- ====== FULL FORM FIELDS START ====== -->
                 <form method="post" enctype="multipart/form-data" id="movie-series-form">
+              
                     <div class="row mt-3 mb-2">
                         <div class="col-12">
                             <label for="poster" class="db-text-sec fs-18 form-label">Upload Poster</label><br>
@@ -549,9 +550,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
                             <p class="fs-12 text-danger mt-1 mb-2"><?php if (!$valid_description) echo "Description can not be empty"; ?></p>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-end mb-3">
-                        <button type="submit" name="submit-btn" class="btn db-bg-primary text-white ms-3 mt-3"><?php echo $is_edit ? 'Update' : 'Add'; ?> Movie/Series</button>
-                    </div>
+                    <!-- WHEN THE CATEGORY IS MOVIE THIS BUTTON WILL APPEAR AS ADD MOVIE -->
+            
+                    <div id="submit-btn-placeholder-top"></div>
+                    <div id="submit-btn-container" class="d-flex justify-content-end mb-3">
+                      <button type="submit" name="submit-btn" class="btn db-bg-primary text-white ms-3 mt-3">
+                          <?php echo $is_edit ? 'Update' : 'Add'; ?> Movie/Series
+                      </button>
+                  </div>
                     <!-- ====== FULL FORM FIELDS END ====== -->
 
                     <!-- SEASONS/EPISODES SECTION -->
@@ -658,6 +664,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
                         <div class="d-flex gap-2 mt-3">
                             <button type="button" class="btn db-text-sec" id="add-season-btn" style="border:1px solid #607EBC;">Add More Season</button>
                         </div>
+                        <!-- WHEN THE CATEGORY IS SERIES THIS BUTTON WILL APPEAR AS ADD SERIES -->
+                        <!-- Replace both submit button blocks with this: -->
+                        
+                    </div>
                     </div>
                 </form>
 
@@ -764,6 +774,23 @@ $(document).ready(function () {
         } else {
             $('.section-add-episodes').hide();
         }
+    });
+
+    function moveSubmitButton() {
+      var cat = $('#category').val();
+      if (cat === 'Movie') {
+          $('#submit-btn-container').appendTo('#submit-btn-placeholder-top');
+      } else {
+          $('.section-add-episodes').append($('#submit-btn-container'));
+      }
+    }
+
+    // On page load
+    moveSubmitButton();
+
+    // On category change
+    $('#category').on('change', function () {
+        moveSubmitButton();
     });
 
     // Add Episode Button (add new blank episode row for given season)

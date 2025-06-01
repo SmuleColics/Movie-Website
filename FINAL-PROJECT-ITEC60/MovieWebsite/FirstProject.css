@@ -257,6 +257,7 @@ input:focus {
   margin-top: 80px;
 }
 
+/* TRENDING MOVIES */   
 /* ACTION MOVIES */
 
 .action-movies-img, .featured-img, .popular-img {
@@ -506,11 +507,11 @@ img, .top-10-text, .trending-img, .action-movies-img, .featured-img, .popular-im
 }
 
 .nav-link:hover, .navigation-links:hover {
-  color: var(--bg-primary) !important;
+  color: #607EBC !important;
 }
 
 .middle-header a:hover {
-  color: var(--bg-primary) !important;
+  color: #607EBC !important;
 }
 
 .movies-2 {
