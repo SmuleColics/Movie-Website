@@ -2,40 +2,22 @@
 include '../includes/db-connection.php';
 include '../includes/dashboard-header-sidebar.php';
 
-// Handle Top 10 delete
-// if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
-//   $delete_id = intval($_POST["delete-id"]);
-//   $delete_query = "DELETE FROM tbl_top10 WHERE top10_id = $delete_id";
-//   $result = mysqli_query($con, $delete_query);
+// Handle Movie/Series delete
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
+  $delete_id = intval($_POST["delete-id"]);
+  $delete_query = "DELETE FROM tbl_movie_series WHERE movie_series_id = $delete_id";
+  $result = mysqli_query($con, $delete_query);
 
-//   if (!$result) {
-//     die("" . mysqli_error($con));
-//   } else {
-//     echo "<script>
-//       alert('Top 10 Deleted Successfully');
-//       window.location.href='web-home.php';
-//     </script>";
-//     exit;
-//   }
-// }
-
-// Handle Trending delete
-// if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-trend-btn-modal"])) {
-//   $delete_id = intval($_POST["delete-id-trend"]);
-//   $delete_query = "DELETE FROM tbl_trend WHERE trend_id = $delete_id";
-//   $result = mysqli_query($con, $delete_query);
-
-//   if (!$result) {
-//     die("" . mysqli_error($con));
-//   } else {
-//     echo "<script>
-//       alert('Trending Deleted Successfully');
-//       window.location.href='web-home.php';
-//     </script>";
-//     exit;
-//   }
-// }
-
+  if (!$result) {
+    die("Delete failed: " . mysqli_error($con));
+  } else {
+    echo "<script>
+      alert('Movie/Series Deleted Successfully');
+      window.location.href='web-movies.php';
+    </script>";
+    exit;
+  }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -57,7 +39,6 @@ include '../includes/dashboard-header-sidebar.php';
 <body>
 
   <div class="d-flex justify-content-end align-items-center p-3">
-    
     <div class="p-0 ms-md-2 ms-0 w-auto w-md-auto">
       <a href="web-movie-series.php" class="btn db-bg-primary db-text-sec" id="add-movie-btn">Add Movie/Series</a>
     </div>
@@ -90,7 +71,6 @@ include '../includes/dashboard-header-sidebar.php';
             </thead>
             <tbody>
               <?php
-              // Show all movies/series, not just top 10
               $select = mysqli_query($con, "
                 SELECT 
                   ms.movie_series_id,
@@ -117,7 +97,6 @@ include '../includes/dashboard-header-sidebar.php';
               ");
 
               while ($row = mysqli_fetch_assoc($select)):
-                // Prepare all fields for data attributes (escaping as needed)
                 $data_attrs = '';
                 foreach([
                   'movie_series_id', 'title', 'duration', 'poster', 'video', 'modal_poster_title', 'date_released', 'age_rating', 'category',
@@ -148,8 +127,8 @@ include '../includes/dashboard-header-sidebar.php';
                       </a>
                   </td>
                   <td>
-                    <button class='btn text-white p-0 border-0 delete-btn-top10' data-bs-toggle='modal'
-                      data-bs-target='#modalDeleteTop10' data-identification='<?php echo $row['movie_series_id'] ?>'>
+                    <button class='btn text-white p-0 border-0 delete-btn' data-bs-toggle='modal'
+                      data-bs-target='#modalDelete' data-identification='<?php echo $row['movie_series_id'] ?>'>
                       <i class='fa-solid fa-delete-left text-danger ps-2'></i>
                     </button>
                   </td>
@@ -161,7 +140,6 @@ include '../includes/dashboard-header-sidebar.php';
       </div>
     </div>
   </section>
-
 
   <!-- Modal for viewing details (show all values) -->
   <div class="modal fade" id="modalView" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
@@ -229,7 +207,7 @@ include '../includes/dashboard-header-sidebar.php';
               </div>
               <div class="col-12">
                 <label class="form-label db-text-sec">Description</label>
-                <textarea class="form-control bg-transparent db-text-sec p-2" id="view-description" rows="2" readonly style="border-color: #6c757d;;"></textarea>
+                <textarea class="form-control bg-transparent db-text-sec p-2" id="view-description" rows="2" readonly style="border-color: #6c757d;"></textarea>
               </div>
               <div class="col-md-4">
                 <label class="form-label db-text-sec">Views</label>
@@ -249,19 +227,19 @@ include '../includes/dashboard-header-sidebar.php';
     </div>
   </div>
 
-  <!-- ===== START OF MODAL DELETE TOP10 =====  -->
-  <!-- <div class="modal fade" id="modalDeleteTop10" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+  <!-- ===== START OF MODAL DELETE =====  -->
+  <div class="modal fade" id="modalDelete" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <form action="" method="post">
           <div class="modal-header">
-            <h1 class="modal-title fs-5 db-text-sec">Delete Top 10 Record</h1>
+            <h1 class="modal-title fs-5 db-text-sec">Delete Movie/Series</h1>
             <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal"
               style="filter: invert(1) grayscale(100%) brightness(200%); opacity: 1;"></button>
           </div>
           <div class="modal-body px-4">
-            <input type="hidden" name="delete-id" id="delete-id-top10">
-            <h4 class="my-4 db-text-sec">Are you sure you want to delete?</h4>
+            <input type="hidden" name="delete-id" id="delete-id" required>
+            <h4 class="my-4 db-text-sec">Are you sure you want to delete this movie/series?</h4>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">NO</button>
@@ -271,8 +249,8 @@ include '../includes/dashboard-header-sidebar.php';
         </form>
       </div>
     </div>
-  </div> -->
-  <!-- ===== END OF MODAL DELETE TOP10 =====  -->
+  </div>
+  <!-- ===== END OF MODAL DELETE =====  -->
 
   <!--  ========== DATA TABLES CDN  ========== -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -280,7 +258,7 @@ include '../includes/dashboard-header-sidebar.php';
   <script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.min.js"></script>
   <script>
     $(document).ready(function () {
-      // DataTable initialization (unchanged)
+      // DataTable initialization
       if (document.getElementById('table-all-movie')) {
         new DataTable('#table-all-movie', {
           pagingType: 'simple_numbers',
@@ -289,14 +267,10 @@ include '../includes/dashboard-header-sidebar.php';
         });
       }
 
-      // Delete button logic
-      $('.delete-btn-top10').on('click', function () {
+      // Use delegated event binding for delete button
+      $(document).on('click', '.delete-btn', function () {
         var id = $(this).data('identification');
-        $('#delete-id-top10').val(id);
-      });
-      $('.delete-btn-trend').on('click', function () {
-        var id = $(this).data('identification');
-        $('#delete-id-trend').val(id);
+        $('#delete-id').val(id);
       });
 
       // View Details Modal population
