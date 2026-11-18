@@ -1,0 +1,8 @@
+# Uploaded files are media only. Never run anything here as code.
+<FilesMatch "\.(php\d?|phtml|phar|pht|phps|cgi|pl|py|sh|htaccess)$">
+  Require all denied
+</FilesMatch>
+<IfModule php_module>
+  php_flag engine off
+</IfModule>
+Options -ExecCGI -Indexes

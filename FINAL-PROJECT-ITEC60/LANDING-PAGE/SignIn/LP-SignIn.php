@@ -1,6 +1,5 @@
 <?php
 include 'db-con.php';
-session_start();
 ?>
 
 <!DOCTYPE html>
@@ -43,20 +42,30 @@ session_start();
         $valid_approval = true;
 
         if (isset($_POST['signin-button'])) {
-          $email = filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL);
-          $pass = filter_input(INPUT_POST, "password", FILTER_SANITIZE_EMAIL);
+          $email = strtolower(trim((string) ($_POST['email'] ?? '')));
+          $pass = (string) ($_POST['password'] ?? '');
 
-          $email = mysqli_real_escape_string($con, $email);
+          $stmt = $con->prepare("SELECT * FROM tbl_signup_acc WHERE signup_email = ? LIMIT 1");
+          $stmt->bind_param("s", $email);
+          $stmt->execute();
+          $row = $stmt->get_result()->fetch_assoc();
+          $stmt->close();
 
-          // Find user by email
-          $result = mysqli_query($con, "SELECT * FROM tbl_signup_acc WHERE signup_email = '$email'");
-          if ($row = mysqli_fetch_assoc($result)) {
-            if ($row['is_archived'] == 1) {
+          if (cv_too_many_attempts($con, 'member', $email)) {
+            $pass_error = "Too many failed sign-in attempts. Please wait 15 minutes and try again.";
+            $valid_pass = false;
+          } elseif (!$row || !cv_check_password($con, 'tbl_signup_acc', 'signup_id', 'signup_password', $row, $pass)) {
+            // Same message whether the email or the password is wrong.
+            cv_record_failure($con, 'member', $email);
+            $pass_error = "The email or password you entered is incorrect.";
+            $valid_pass = false;
+          } elseif ($row['is_archived'] == 1) {
               $email_error = "Your account has been archived. Please contact support.";
               $valid_email = false;
-            } else {
+          } else {
+              cv_clear_failures($con, 'member', $email);
               // Check payment/approval status
-              $signup_id = $row['signup_id'];
+              $signup_id = (int) $row['signup_id'];
               $paymentResult = mysqli_query($con, "SELECT status FROM tbl_payment WHERE signup_id = $signup_id LIMIT 1");
               $paymentRow = mysqli_fetch_assoc($paymentResult);
 
@@ -69,25 +78,14 @@ session_start();
               } elseif ($paymentRow['status'] !== "approved") {
                 $approval_error = "Your account is not approved yet. Please complete payment or wait for admin approval.";
                 $valid_approval = false;
-              } elseif (!password_verify($pass, $row['signup_password'])) {
-                $pass_error = "The password you’ve entered is incorrect.";
-                $valid_pass = false;
               } else {
-                $_SESSION['user_id'] = $row['signup_id'];
-                $_SESSION['user_email'] = $row['signup_email'];
-                $_SESSION['is_logged_in'] = true;
-
-                // Redirect
-                echo "<script>
-                        alert('Login successful!');
-                        window.location.href = '../../MovieWebsite/FirstProject.php';
-                      </script>";
-                exit;
+                cv_login_session([
+                  'user_id' => (int) $row['signup_id'],
+                  'user_email' => $row['signup_email'],
+                  'is_logged_in' => true,
+                ]);
+                cv_alert_redirect('Login successful!', '../../MovieWebsite/FirstProject.php');
               }
-            }
-          } else {
-            $email_error = "The email or mobile number you entered isn’t connected to an account. Find your account and log in.";
-            $valid_email = false;
           }
         }
         ?>

@@ -1,5 +1,4 @@
 <?php
-session_start();
 include 'db-con.php';
 
 $first_name_error = "";
@@ -18,12 +17,11 @@ $first_name = $last_name = $mobile_number = $email = "";
 
 if (isset($_POST["signup-btn"])) {
   // Sanitize and assign
-  $first_name = trim($_POST["first_name"]);
-  $last_name = trim($_POST["last_name"]);
-  $mobile_number = trim($_POST["mobile_number"]);
-  $email = filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL);
-  $email = mysqli_real_escape_string($con, $email);
-  $pass = filter_input(INPUT_POST, "password", FILTER_SANITIZE_EMAIL);
+  $first_name = trim((string) ($_POST["first_name"] ?? ''));
+  $last_name = trim((string) ($_POST["last_name"] ?? ''));
+  $mobile_number = trim((string) ($_POST["mobile_number"] ?? ''));
+  $email = strtolower(trim((string) ($_POST["email"] ?? '')));
+  $pass = (string) ($_POST["password"] ?? '');
 
   // First name validation
   if (!preg_match('/^[A-Za-z]{2,}$/', $first_name)) {
@@ -44,12 +42,15 @@ if (isset($_POST["signup-btn"])) {
   }
 
   // Email validation
-  $check_query = mysqli_query($con, "SELECT signup_email FROM tbl_signup_acc WHERE signup_email = '$email' LIMIT 1");
-  $check_pending = mysqli_query($con, "SELECT signup_email FROM tbl_signup_pending WHERE signup_email = '$email' LIMIT 1");
+  $stmt = $con->prepare("SELECT 1 FROM tbl_signup_acc WHERE signup_email = ? UNION SELECT 1 FROM tbl_signup_pending WHERE signup_email = ? LIMIT 1");
+  $stmt->bind_param("ss", $email, $email);
+  $stmt->execute();
+  $email_taken = (bool) $stmt->get_result()->fetch_assoc();
+  $stmt->close();
   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $email_error = "Invalid email format";
     $valid_email = false;
-  } elseif (mysqli_num_rows($check_query) > 0 || mysqli_num_rows($check_pending) > 0) {
+  } elseif ($email_taken) {
     $email_error = "This email is already registered or pending approval. Please use a different one.";
     $valid_email = false;
   }
@@ -74,11 +75,7 @@ if (isset($_POST["signup-btn"])) {
     $_SESSION['pending_id'] = $pending_id;
     $_SESSION['pending_email'] = $email;
 
-    echo "<script>
-            alert('Account created successfully! Please complete your payment to continue.');
-            window.location.href = 'LP-Payment.php';
-          </script>";
-    exit;
+    cv_alert_redirect('Account created successfully! Please complete your payment to continue.', 'LP-Payment.php');
   }
 }
 ?>

@@ -1,1 +1,2 @@
-move FINAL-PROJECT-ITEC60\.gitignore .gitignore
+# Local secrets (passwords, API keys). Copy config.example.php to config.php.
+FINAL-PROJECT-ITEC60/includes/config.php

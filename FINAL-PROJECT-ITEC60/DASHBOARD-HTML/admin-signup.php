@@ -1,27 +1,29 @@
   <?php
-  session_start();
   include '../includes/db-connection.php';
 
   $email_error = $pass_error = $mobile_error = $fname_error = $mname_error = $lname_error = $fb_error = "";
   $valid_email = $valid_pass = $valid_mobile = $valid_fname = $valid_mname = $valid_lname = $valid_fb = true;
 
   if (isset($_POST['admin-signup-btn'])) {
-    $email = filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL);
-    $email = mysqli_real_escape_string($con, $email);
+    $email = strtolower(trim((string) ($_POST['email'] ?? '')));
 
-    $mobile = trim($_POST['mobile']);
-    $fname = trim($_POST['fname']);
-    $mname = trim($_POST['mname']);
-    $lname = trim($_POST['lname']);
-    $fb_acc = trim($_POST['fb-acc']);
-    $pword = $_POST['pword'];
+    $mobile = trim((string) ($_POST['mobile'] ?? ''));
+    $fname = trim((string) ($_POST['fname'] ?? ''));
+    $mname = trim((string) ($_POST['mname'] ?? ''));
+    $lname = trim((string) ($_POST['lname'] ?? ''));
+    $fb_acc = trim((string) ($_POST['fb-acc'] ?? ''));
+    $pword = (string) ($_POST['pword'] ?? '');
 
     // Email Validation
-    $check_query = mysqli_query($con, "SELECT email FROM tbl_admin_acc WHERE email = '$email' LIMIT 1");
+    $stmt = $con->prepare("SELECT email FROM tbl_admin_acc WHERE email = ? LIMIT 1");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $email_taken = (bool) $stmt->get_result()->fetch_assoc();
+    $stmt->close();
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
       $email_error = "Invalid email format";
       $valid_email = false;
-    } elseif (mysqli_num_rows($check_query) > 0) {
+    } elseif ($email_taken) {
       $email_error = "This email is already registered. Please use a different one.";
       $valid_email = false;
     }
@@ -59,16 +61,16 @@
 
     if ($valid_email && $valid_pass && $valid_mobile && $valid_fname && $valid_mname && $valid_lname && $valid_fb) {
       $hashed_pass = password_hash($pword, PASSWORD_DEFAULT);
-      $insert = mysqli_query($con, "INSERT INTO tbl_admin_acc 
+      $stmt = $con->prepare("INSERT INTO tbl_admin_acc
         (email, mobile, first_name, middle_name, last_name, facebook_acc, password)
-        VALUES 
-        ('$email', '$mobile', '$fname', '$mname', '$lname', '$fb_acc', '$hashed_pass')");
+        VALUES (?, ?, ?, ?, ?, ?, ?)");
+      $stmt->bind_param("sssssss", $email, $mobile, $fname, $mname, $lname, $fb_acc, $hashed_pass);
+      $insert = $stmt->execute();
+      $stmt->close();
 
       if ($insert) {
-        echo "<script>
-          alert('Admin account successfully created!');
-          window.location.href = 'admin-signin.php';
-        </script>";
+        // Only a signed-in admin can reach this page, so go back to the dashboard.
+        cv_alert_redirect('Admin account successfully created!', 'dashboard.php');
       } else {
         echo "<script>alert('Something went wrong. Please try again.');</script>";
       }

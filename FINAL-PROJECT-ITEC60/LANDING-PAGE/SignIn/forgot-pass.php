@@ -1,59 +1,51 @@
 <?php
-session_start();
 include 'db-con.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require '../PHPMailer/src/Exception.php';
-require '../PHPMailer/src/PHPMailer.php';
-require '../PHPMailer/src/SMTP.php';
 
 $email_error = "";
 $email_value = "";
 $valid_email = true;
 
 if (isset($_POST['send-code-button'])) {
-    $email = trim($_POST['email']);
-    $email_value = htmlspecialchars($email);
+    $email = strtolower(trim((string) ($_POST['email'] ?? '')));
+    $email_value = e($email);
 
-    // Validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $email_error = "Please enter a valid email address.";
         $valid_email = false;
+    } elseif (cv_too_many_attempts($con, 'reset-send', $email, 3)) {
+        $email_error = "Too many code requests. Please wait 15 minutes and try again.";
+        $valid_email = false;
     } else {
-        $result = mysqli_query($con, "SELECT * FROM tbl_signup_acc WHERE signup_email='$email' LIMIT 1");
-        if (mysqli_num_rows($result) == 1) {
-            $reset_code = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+        $stmt = $con->prepare("SELECT signup_id FROM tbl_signup_acc WHERE signup_email = ? AND is_archived = 0 LIMIT 1");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $account = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if ($account) {
+            // 6 random digits from a secure source. Only a hash is stored.
+            $reset_code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $code_hash = password_hash($reset_code, PASSWORD_DEFAULT);
             $expires = date('Y-m-d H:i:s', strtotime('+15 minutes'));
-            mysqli_query($con, "UPDATE tbl_signup_acc SET reset_code='$reset_code', reset_expires='$expires' WHERE signup_email='$email'");
 
-            // Send email
-            $mail = new PHPMailer(true);
-            try {
-                $mail->isSMTP();
-                $mail->Host = 'smtp.gmail.com';
-                $mail->SMTPAuth = true;
-                $mail->Username = 'oxy467777@gmail.com'; // Change to your Gmail
-                $mail->Password = 'qnee ctax qhdw eebc'; // Change to your App Password
-                $mail->SMTPSecure = 'ssl';
-                $mail->Port = 465;
+            $stmt = $con->prepare("UPDATE tbl_signup_acc SET reset_code = ?, reset_expires = ?, reset_attempts = 0 WHERE signup_id = ?");
+            $stmt->bind_param("ssi", $code_hash, $expires, $account['signup_id']);
+            $stmt->execute();
+            $stmt->close();
 
-                $mail->setFrom('oxy467777@gmail.com', 'CineVault');
-                $mail->addAddress($email);
+            cv_record_failure($con, 'reset-send', $email); // counts requests, not failures
 
-                $mail->isHTML(true);
-                $mail->Subject = "CineVault Password Reset Code";
-                $mail->Body    = "Your 4-digit password reset code is: <b>$reset_code</b>";
-
-                $mail->send();
+            $mailError = cv_send_mail(
+                $email,
+                "CineVault Password Reset Code",
+                "Your 6-digit password reset code is: <b>$reset_code</b><br>It expires in 15 minutes."
+            );
+            if ($mailError === null) {
                 $_SESSION['reset_email'] = $email;
-                echo "<script>alert('The verification code has been sent to your email'); window.location.href='reset-password.php';</script>";
-                exit;
-            } catch (Exception $e) {
-                $email_error = "Email could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                $valid_email = false;
+                cv_alert_redirect('The verification code has been sent to your email', 'reset-password.php');
             }
+            $email_error = $mailError;
+            $valid_email = false;
         } else {
             $email_error = "Email does not exist in our records.";
             $valid_email = false;

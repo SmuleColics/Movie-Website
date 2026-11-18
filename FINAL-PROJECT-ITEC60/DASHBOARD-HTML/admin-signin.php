@@ -1,5 +1,4 @@
 <?php
-session_start();
 include '../includes/db-connection.php';
 
 $email_error = "";
@@ -8,30 +7,32 @@ $valid_email = true;
 $valid_pass = true;
 
 if (isset($_POST['admin-signin-btn'])) {
-  $email = filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL);
-  $pass = filter_input(INPUT_POST, "password", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+  $email = strtolower(trim((string) ($_POST['email'] ?? '')));
+  $pass = (string) ($_POST['password'] ?? '');
 
-  $email = mysqli_real_escape_string($con, $email);
+  $stmt = $con->prepare("SELECT * FROM tbl_admin_acc WHERE email = ? LIMIT 1");
+  $stmt->bind_param("s", $email);
+  $stmt->execute();
+  $row = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
 
-  $result = mysqli_query($con, "SELECT * FROM tbl_admin_acc WHERE email = '$email'");
-
-  if ($row = mysqli_fetch_assoc($result)) {
-    if (password_verify($pass, $row['password'])) {
-      $_SESSION['admin_id'] = $row['admin_id'];
-      $_SESSION['admin_email'] = $row['email']; 
-      $_SESSION['admin_logged_in'] = true;
-
-      echo "<script>
-                window.location.href = 'dashboard.php';
-              </script>";
-      exit;
-    } else {
-      $pass_error = "The password you’ve entered is incorrect.";
-      $valid_pass = false;
-    }
+  if (cv_too_many_attempts($con, 'admin', $email)) {
+    $pass_error = "Too many failed sign-in attempts. Please wait 15 minutes and try again.";
+    $valid_pass = false;
+  } elseif ($row && cv_check_password($con, 'tbl_admin_acc', 'admin_id', 'password', $row, $pass)) {
+    cv_clear_failures($con, 'admin', $email);
+    cv_login_session([
+      'admin_id' => (int) $row['admin_id'],
+      'admin_email' => $row['email'],
+      'admin_logged_in' => true,
+    ]);
+    header('Location: dashboard.php');
+    exit;
   } else {
-    $email_error = "The email or mobile number you entered isn’t connected to an account.";
-    $valid_email = false;
+    // Same message whether the email or the password is wrong.
+    cv_record_failure($con, 'admin', $email);
+    $pass_error = "The email or password you entered is incorrect.";
+    $valid_pass = false;
   }
 }
 ?>
@@ -101,10 +102,6 @@ if (isset($_POST['admin-signin-btn'])) {
           </div>
           <div class="mb-4">
             <a href="../LANDING-PAGE/SignIn/forgot-pass.php" class="text-white text-decoration-none" href="#" >Forgot Your Password?</a></div>
-          <p class="text-start text-white" style="padding-left: 28px;">
-            <span class="box-text">New to CineVault?</span>
-            <a href="admin-signup.php" class="text-decoration-none signup-now text-primary">Sign up now.</a>
-          </p>
         </form>
       </div>
 

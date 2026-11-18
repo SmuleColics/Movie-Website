@@ -1,5 +1,4 @@
 <?php
-ob_start();
 include '../includes/dashboard-header-sidebar.php';
 include '../includes/db-connection.php';
 
@@ -89,12 +88,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
     $valid_poster = $valid_video = $valid_modal_poster_title = $valid_age_rating = true;
 
     // Poster (optional for edit, required for add)
+    // Uploads: only real images/videos are accepted, saved under random names.
     if (isset($_FILES['poster']) && $_FILES['poster']['error'] === UPLOAD_ERR_OK) {
-        $file_poster = $_FILES['poster']['name'];
-        $temp_name = $_FILES['poster']['tmp_name'];
-        $file_poster_path = 'MOVIE_SERIES_TITLE/' . $file_poster;
-        if (!move_uploaded_file($temp_name, $file_poster_path)) {
+        $file_poster = cv_store_upload($_FILES['poster']['tmp_name'], $_FILES['poster']['name'], CV_IMAGE_TYPES, 'MOVIE_SERIES_TITLE', $upload_err);
+        if ($file_poster === null) {
             $valid_poster = false;
+            $file_upload_error = "Poster: $upload_err";
+        } else {
+            $file_poster_path = 'MOVIE_SERIES_TITLE/' . $file_poster;
         }
     } else {
         $file_poster = $is_edit ? $record['poster'] : '';
@@ -104,12 +105,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
 
     // Video (optional for edit, required for add)
     if (isset($_FILES['video']) && $_FILES['video']['error'] === UPLOAD_ERR_OK && !is_array($_FILES['video']['name'])) {
-        $file_video = $_FILES['video']['name'];
-        $temp_name1 = $_FILES['video']['tmp_name'];
-        $file_video_path = 'MOVIE_SERIES_VIDEO/' . $file_video;
-        if (!move_uploaded_file($temp_name1, $file_video_path)) {
+        $file_video = cv_store_upload($_FILES['video']['tmp_name'], $_FILES['video']['name'], CV_VIDEO_TYPES, 'MOVIE_SERIES_VIDEO', $upload_err);
+        if ($file_video === null) {
             $valid_video = false;
-            $file_upload_error = "Video upload failed (move error).";
+            $file_upload_error = "Video: $upload_err";
+        } else {
+            $file_video_path = 'MOVIE_SERIES_VIDEO/' . $file_video;
         }
     } else {
         $file_video = $is_edit ? $record['video'] : '';
@@ -119,11 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
 
     // Modal Poster Title
     if (isset($_FILES['modal-poster-title']) && $_FILES['modal-poster-title']['error'] === UPLOAD_ERR_OK) {
-        $file_modal_poster_title = $_FILES['modal-poster-title']['name'];
-        $temp_name2 = $_FILES['modal-poster-title']['tmp_name'];
-        $file_modal_poster_title_path = 'MOVIE_SERIES_TITLE/' . $file_modal_poster_title;
-        if (!move_uploaded_file($temp_name2, $file_modal_poster_title_path)) {
+        $file_modal_poster_title = cv_store_upload($_FILES['modal-poster-title']['tmp_name'], $_FILES['modal-poster-title']['name'], CV_IMAGE_TYPES, 'MOVIE_SERIES_TITLE', $upload_err);
+        if ($file_modal_poster_title === null) {
             $valid_modal_poster_title = false;
+            $file_upload_error = "Title image: $upload_err";
+        } else {
+            $file_modal_poster_title_path = 'MOVIE_SERIES_TITLE/' . $file_modal_poster_title;
         }
     } else {
         $file_modal_poster_title = $is_edit ? $record['modal_poster_title'] : '';
@@ -147,8 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
 
     // Validate date released
     if (isset($_POST['date-released']) && $_POST['date-released'] !== '') {
-        $temp = $_POST['date-released'];
-        if ($temp <= 2025 && $temp >= 1950) {
+        $temp = (int) $_POST['date-released'];
+        if ($temp <= (int) date('Y') + 1 && $temp >= 1900) {
             $date_released = $temp;
         } else {
             $valid_date_released_time = false;
@@ -159,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
 
     // Validate age rating
     if (isset($_POST['age-rating']) && $_POST['age-rating'] !== '') {
-        $tempo = $_POST['age-rating'];
+        $tempo = (int) $_POST['age-rating'];
         if ($tempo >= 1 && $tempo <= 18) {
             $age_rating = $tempo;
         } else {
@@ -170,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
     }
 
     // Category
-    $category = $_POST['category'] ?? '';
+    $category = ($_POST['category'] ?? '') === 'Series' ? 'Series' : 'Movie';
 
     // Genres (IDs)
     $genre_id1 = intval($_POST['first-genre'] ?? 0);
@@ -351,13 +353,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
                         }
                         $ep_video_name = '';
                         if ($video !== '' && isset($video_tmps[$eidx]) && $video_tmps[$eidx]) {
-                            $ep_video_name = $video;
-                            $ep_video_tmp = $video_tmps[$eidx];
-                            $ep_video_path = 'MOVIE_SERIES_EPISODE/' . $ep_video_name;
-                            move_uploaded_file($ep_video_tmp, $ep_video_path);
-                        } else if ($existing !== '') {
-                            $ep_video_name = $existing;
+                            $ep_video_name = (string) cv_store_upload($video_tmps[$eidx], $video, CV_VIDEO_TYPES, 'MOVIE_SERIES_EPISODE', $upload_err);
                         }
+                        if ($ep_video_name === '' && $existing !== '') {
+                            // Keep only a plain file name, never a path.
+                            $ep_video_name = basename($existing);
+                        }
+                        $ep_video_name = mysqli_real_escape_string($con, $ep_video_name);
                         $ep_title_esc = mysqli_real_escape_string($con, $title_ep);
                         $ep_desc_esc = mysqli_real_escape_string($con, $desc);
                         $ep_duration_esc = mysqli_real_escape_string($con, $duration_ep);
@@ -383,7 +385,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
             unlink($file_modal_poster_title_path);
         }
     }
-    ob_end_flush();
+
 }
 ?>
 <!DOCTYPE html>
@@ -893,6 +895,7 @@ $(document).ready(function () {
         $.ajax({
             url: window.location.href,
             type: 'POST',
+            headers: { 'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content') },
             data: { delete_season_id: season_id }
         }).always(function () {
             $('#modalDeleteSeason').modal('hide');

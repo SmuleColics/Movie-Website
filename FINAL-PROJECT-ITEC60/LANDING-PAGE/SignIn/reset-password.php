@@ -1,5 +1,4 @@
 <?php
-session_start();
 include 'db-con.php';
 
 $code_error = "";
@@ -10,6 +9,7 @@ $new_pass_value = "";
 $confirm_pass_value = "";
 $valid_code = true;
 $valid_pass = true;
+$max_code_tries = 5;
 
 // Redirect if no email in session
 if (!isset($_SESSION['reset_email'])) {
@@ -20,34 +20,46 @@ if (!isset($_SESSION['reset_email'])) {
 $email = $_SESSION['reset_email'];
 
 if (isset($_POST['reset-pass-button'])) {
-    $reset_code_value = trim($_POST['reset_code']);
-    $new_pass_value = $_POST['new_password'];
-    $confirm_pass_value = $_POST['confirm_password'];
+    $reset_code_value = trim((string) ($_POST['reset_code'] ?? ''));
+    $new_pass_value = (string) ($_POST['new_password'] ?? '');
+    $confirm_pass_value = (string) ($_POST['confirm_password'] ?? '');
 
-    // Fetch stored code and expiry
-    $query = mysqli_query($con, "SELECT reset_code, reset_expires FROM tbl_signup_acc WHERE signup_email='$email' LIMIT 1");
-    $row = mysqli_fetch_assoc($query);
+    $stmt = $con->prepare("SELECT signup_id, reset_code, reset_expires, reset_attempts FROM tbl_signup_acc WHERE signup_email = ? LIMIT 1");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
 
     $now = date('Y-m-d H:i:s');
     if (!$row || !$row['reset_code'] || !$row['reset_expires'] || $row['reset_expires'] < $now) {
         $code_error = "Reset code expired or invalid. Please request a new code.";
         $valid_code = false;
-    } elseif ($reset_code_value !== $row['reset_code']) {
-        $code_error = "Incorrect reset code.";
+    } elseif ((int) $row['reset_attempts'] >= $max_code_tries) {
+        $code_error = "Too many wrong codes. Please request a new code.";
         $valid_code = false;
-    } elseif (strlen($new_pass_value) < 6) {
-        $pass_error = "Password must be at least 6 characters.";
+    } elseif (!password_verify($reset_code_value, $row['reset_code'])) {
+        // Count the wrong try. After 5, the code stops working.
+        $stmt = $con->prepare("UPDATE tbl_signup_acc SET reset_attempts = reset_attempts + 1 WHERE signup_id = ?");
+        $stmt->bind_param("i", $row['signup_id']);
+        $stmt->execute();
+        $stmt->close();
+        $left = $max_code_tries - (int) $row['reset_attempts'] - 1;
+        $code_error = $left > 0 ? "Incorrect reset code. $left tries left." : "Too many wrong codes. Please request a new code.";
+        $valid_code = false;
+    } elseif (strlen($new_pass_value) < 8) {
+        $pass_error = "Password must be at least 8 characters.";
         $valid_pass = false;
     } elseif ($new_pass_value !== $confirm_pass_value) {
         $pass_error = "Passwords do not match.";
         $valid_pass = false;
     } else {
-        // Update password, clear reset_code & reset_expires
         $hashed = password_hash($new_pass_value, PASSWORD_DEFAULT);
-        mysqli_query($con, "UPDATE tbl_signup_acc SET signup_password='$hashed', reset_code=NULL, reset_expires=NULL WHERE signup_email='$email'");
+        $stmt = $con->prepare("UPDATE tbl_signup_acc SET signup_password = ?, reset_code = NULL, reset_expires = NULL, reset_attempts = 0 WHERE signup_id = ?");
+        $stmt->bind_param("si", $hashed, $row['signup_id']);
+        $stmt->execute();
+        $stmt->close();
         unset($_SESSION['reset_email']);
-        echo "<script>alert('Password reset successful!'); window.location.href='LP-SignIn.php';</script>";
-        exit;
+        cv_alert_redirect('Password reset successful!', 'LP-SignIn.php');
     }
 }
 ?>
@@ -201,13 +213,13 @@ if (isset($_POST['reset-pass-button'])) {
               type="text"
               name="reset_code"
               id="reset_code"
-              maxlength="4"
+              maxlength="6"
               placeholder=" "
               required
               value="<?php echo htmlspecialchars($reset_code_value); ?>"
               autocomplete="off"
             >
-            <label for="reset_code">4-digit code</label>
+            <label for="reset_code">6-digit code</label>
           </div>
           <?php if(!$valid_code): ?>
             <p class="code-error-msg"><?php echo $code_error ?></p>

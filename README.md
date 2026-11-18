@@ -24,43 +24,38 @@ This project is a **Movie/Series Management Dashboard** built with PHP, MySQL, B
 
 ## Setup Instructions
 
-1. **Clone the repository:**
+1. **Clone the repository** into your XAMPP `htdocs` folder:
    ```bash
-   git clone https://github.com/yourusername/movie-dashboard.git
-   cd movie-dashboard
+   git clone https://github.com/SmuleColics/Movie-Website.git
    ```
 
-2. **Import the Database:**
-   - Import the provided SQL file into your MySQL server.
-   - Make sure your tables have the correct foreign key constraints with `ON DELETE CASCADE`.
+2. **Import the database** (in phpMyAdmin or the MySQL command line):
+   - Create a database named `db_finalproject`.
+   - Import `FINAL-PROJECT-ITEC60/ROMANCE_DOWNLOAD/COMEDY_DOWNLOAD/db_finalproject.sql`.
+   - Then import `FINAL-PROJECT-ITEC60/database/update-2026-11.sql`. It adds the tables and columns the old dump is missing.
 
-3. **Configure Database Connection:**
-   - Edit `includes/db-connection.php` and set your MySQL credentials.
+3. **Create your settings file:**
+   - Copy `FINAL-PROJECT-ITEC60/includes/config.example.php` to `config.php` in the same folder.
+   - Fill in your MySQL login and a Gmail App Password for the reset and approval emails.
+   - `config.php` is ignored by git, so your passwords never reach GitHub.
 
-4. **Run Locally:**
-   - Place the project folder in your XAMPP/htdocs or your web server's root.
-   - Start Apache and MySQL.
-   - Visit `http://localhost/movie-dashboard/DASHBOARD-HTML/web-movies.php` in your browser.
+4. **Run locally:**
+   - Start Apache and MySQL in XAMPP.
+   - Website: `http://localhost/Movie-Website/FINAL-PROJECT-ITEC60/LANDING-PAGE/LandingPageMovie.php`
+   - Admin: `http://localhost/Movie-Website/FINAL-PROJECT-ITEC60/DASHBOARD-HTML/admin-signin.php`
 
 ## Folder Structure
 
 ```
-/DASHBOARD-HTML
-  ├── web-movies.php
-  ├── web-movie-series.php
-  └── ... (other dashboard pages)
-  
-/includes
-  ├── db-connection.php
-  └── dashboard-header-sidebar.php
-
-/DASHBOARD-CSS
-  └── dashboard.css
+FINAL-PROJECT-ITEC60/
+  DASHBOARD-HTML/   admin pages (movies, series, genres, accounts)
+  DASHBOARD-CSS/    admin styles
+  LANDING-PAGE/     public landing page, sign in, sign up, payment, password reset
+  MovieWebsite/     member pages (browse, search, play, profile)
+  includes/         database connection, security setup, config
+  database/         schema updates
+  libs/             FPDF for the payment report
 ```
-
-## Screenshots
-
-![Dashboard Screenshot](screenshot.png)
 
 ## Credits
 

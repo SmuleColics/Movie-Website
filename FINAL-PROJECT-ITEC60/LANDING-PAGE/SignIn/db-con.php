@@ -1,7 +1,3 @@
-<?php 
-  $con = mysqli_connect("localhost", "root", "", "db_finalproject" );
-
-  if (!$con) {
-    die("Connection Error: " . mysqli_connect_error());
-  } 
-?>
+<?php
+// One shared connection and security setup for the whole site.
+require __DIR__ . '/../../includes/db-connection.php';

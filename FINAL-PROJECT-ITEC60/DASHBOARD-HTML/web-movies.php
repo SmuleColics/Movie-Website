@@ -108,10 +108,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
               ?>
                 <tr>
                   <th class='db-text-primary text-align-left' scope='row'><?php echo $row['movie_series_id']; ?></th>
-                  <td><?php echo $row['title']; ?></td>
-                  <td><?php echo $row['genre_1']; ?></td>
-                  <td><?php echo $row['genre_2']; ?></td>
-                  <td><?php echo $row['genre_3']; ?></td>
+                  <td><?php echo e($row['title']); ?></td>
+                  <td><?php echo e($row['genre_1']); ?></td>
+                  <td><?php echo e($row['genre_2']); ?></td>
+                  <td><?php echo e($row['genre_3']); ?></td>
                   <td class='text-truncate' style='max-width: 100px;' data-bs-toggle='tooltip' data-bs-placement='top'
                     title='<?php echo htmlspecialchars($row['description']); ?>'><?php echo htmlspecialchars($row['description']); ?></td>
                   <td>

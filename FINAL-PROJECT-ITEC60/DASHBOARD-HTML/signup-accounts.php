@@ -2,105 +2,83 @@
 include '../includes/dashboard-header-sidebar.php';
 include '../includes/db-connection.php';
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require '../LANDING-PAGE/PHPMailer/src/Exception.php';
-require '../LANDING-PAGE/PHPMailer/src/PHPMailer.php';
-require '../LANDING-PAGE/PHPMailer/src/SMTP.php';
-
 // Handle Approve POST (for pending accounts)
 if (isset($_POST['approve_id'])) {
-  $pending_id = intval($_POST['approve_id']);
-  $pending = mysqli_query($con, "SELECT * FROM tbl_signup_pending WHERE pending_id=$pending_id");
-  if ($row = mysqli_fetch_assoc($pending)) {
-    // Insert into tbl_signup_acc
+  $pending_id = (int) $_POST['approve_id'];
+  $stmt = $con->prepare("SELECT * FROM tbl_signup_pending WHERE pending_id = ?");
+  $stmt->bind_param("i", $pending_id);
+  $stmt->execute();
+  $row = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  if ($row) {
+    $con->begin_transaction();
+
     $stmt = $con->prepare("INSERT INTO tbl_signup_acc (first_name, last_name, mobile_number, signup_email, signup_password) VALUES (?, ?, ?, ?, ?)");
     $stmt->bind_param("sssss", $row['first_name'], $row['last_name'], $row['mobile_number'], $row['signup_email'], $row['signup_password']);
     $stmt->execute();
     $signup_id = $stmt->insert_id;
     $stmt->close();
 
-    // Insert payment as approved
-    $payment_amount = 99;
-    $reference_no = $row['reference_no'];
-    $date_created = date('Y-m-d H:i:s');
-    mysqli_query($con, "INSERT INTO tbl_payment (signup_id, payment_amount, reference_no, date_created, status) VALUES ($signup_id, $payment_amount, '$reference_no', '$date_created', 'approved')");
+    $payment_amount = (int) ($row['payment_amount'] ?? 99);
+    $stmt = $con->prepare("INSERT INTO tbl_payment (signup_id, payment_amount, reference_no, status) VALUES (?, ?, ?, 'approved')");
+    $stmt->bind_param("iis", $signup_id, $payment_amount, $row['reference_no']);
+    $stmt->execute();
+    $stmt->close();
 
-    // Remove from pending
-    mysqli_query($con, "DELETE FROM tbl_signup_pending WHERE pending_id=$pending_id");
+    $stmt = $con->prepare("DELETE FROM tbl_signup_pending WHERE pending_id = ?");
+    $stmt->bind_param("i", $pending_id);
+    $stmt->execute();
+    $stmt->close();
 
-    // Send approval email
-    $to = $row['signup_email'];
-    $mail = new PHPMailer(true);
-    try {
-      $mail->isSMTP();
-      $mail->Host = 'smtp.gmail.com';
-      $mail->SMTPAuth = true;
-      $mail->Username = 'oxy467777@gmail.com';
-      $mail->Password = 'qnee ctax qhdw eebc';
-      $mail->SMTPSecure = 'ssl';
-      $mail->Port = 465;
+    $con->commit();
 
-      $mail->setFrom('oxy467777@gmail.com', 'CineVault Admin');
-      $mail->addAddress($to);
-
-      $mail->isHTML(true);
-      $mail->Subject = "CineVault Account Approved";
-      $mail->Body    = "Your CineVault account payment has been <b>approved</b>! You may now log in.";
-
-      $mail->send();
-      echo "<script>alert('Account approved and email sent.'); window.location.href='signup-accounts.php';</script>";
-      exit;
-    } catch (Exception $e) {
-      echo "<script>alert('Account approved, but email could not be sent. Mailer Error: {$mail->ErrorInfo}'); window.location.href='signup-accounts.php';</script>";
-      exit;
-    }
+    $mailError = cv_send_mail(
+      $row['signup_email'],
+      "CineVault Account Approved",
+      "Your CineVault account payment has been <b>approved</b>! You may now log in."
+    );
+    cv_alert_redirect(
+      $mailError ? "Account approved, but the email was not sent. $mailError" : 'Account approved and email sent.',
+      'signup-accounts.php'
+    );
   }
 }
 
 // Handle Deny POST (for pending accounts)
 if (isset($_POST['deny_id'])) {
-  $pending_id = intval($_POST['deny_id']);
-  $pending = mysqli_query($con, "SELECT * FROM tbl_signup_pending WHERE pending_id=$pending_id");
-  if ($row = mysqli_fetch_assoc($pending)) {
-    $to = $row['signup_email'];
-    mysqli_query($con, "DELETE FROM tbl_signup_pending WHERE pending_id=$pending_id");
+  $pending_id = (int) $_POST['deny_id'];
+  $stmt = $con->prepare("SELECT signup_email FROM tbl_signup_pending WHERE pending_id = ?");
+  $stmt->bind_param("i", $pending_id);
+  $stmt->execute();
+  $row = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
 
-    $mail = new PHPMailer(true);
-    try {
-      $mail->isSMTP();
-      $mail->Host = 'smtp.gmail.com';
-      $mail->SMTPAuth = true;
-      $mail->Username = 'oxy467777@gmail.com';
-      $mail->Password = 'qnee ctax qhdw eebc';
-      $mail->SMTPSecure = 'ssl';
-      $mail->Port = 465;
+  if ($row) {
+    $stmt = $con->prepare("DELETE FROM tbl_signup_pending WHERE pending_id = ?");
+    $stmt->bind_param("i", $pending_id);
+    $stmt->execute();
+    $stmt->close();
 
-      $mail->setFrom('oxy467777@gmail.com', 'CineVault Admin');
-      $mail->addAddress($to);
-
-      $mail->isHTML(true);
-      $mail->Subject = "CineVault Account Denied";
-      $mail->Body    = "Sorry, your CineVault account payment was <b>not approved</b>. Please check your reference number or contact support for assistance.";
-
-      $mail->send();
-      echo "<script>alert('Account denied and email sent.'); window.location.href='signup-accounts.php';</script>";
-      exit;
-    } catch (Exception $e) {
-      echo "<script>alert('Account denied, but email could not be sent. Mailer Error: {$mail->ErrorInfo}'); window.location.href='signup-accounts.php';</script>";
-      exit;
-    }
+    $mailError = cv_send_mail(
+      $row['signup_email'],
+      "CineVault Account Denied",
+      "Sorry, your CineVault account payment was <b>not approved</b>. Please check your reference number or contact support for assistance."
+    );
+    cv_alert_redirect(
+      $mailError ? "Account denied, but the email was not sent. $mailError" : 'Account denied and email sent.',
+      'signup-accounts.php'
+    );
   }
 }
 
 // Handle Archive (Delete) POST (for already approved accounts)
 if (isset($_POST['modal-delete-button'])) {
   $delete_id = (int) $_POST['delete-id'];
-  $archive_query = mysqli_query($con, "UPDATE tbl_signup_acc SET is_archived=1 WHERE signup_id=$delete_id");
-  if ($archive_query) {
-    echo "<script>alert('Account archived successfully.'); window.location.href = 'signup-accounts.php';</script>";
-    exit;
+  $stmt = $con->prepare("UPDATE tbl_signup_acc SET is_archived = 1 WHERE signup_id = ?");
+  $stmt->bind_param("i", $delete_id);
+  if ($stmt->execute()) {
+    cv_alert_redirect('Account archived successfully.', 'signup-accounts.php');
   }
 }
 ?>

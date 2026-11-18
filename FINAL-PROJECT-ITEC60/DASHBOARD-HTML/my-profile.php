@@ -20,11 +20,11 @@ $marital_status = $row['marital_status'];
 $nationality = $row['nationality'];
 
 // Assign "Not Assigned" if empty
-$employee_id_disp = !empty($employee_id) ? $employee_id : "Not Assigned";
-$department_disp = !empty($department) ? $department : "Not Assigned";
-$gender_disp = !empty($gender) ? $gender : "Not Assigned";
-$marital_status_disp = !empty($marital_status) ? $marital_status : "Not Assigned";
-$nationality_disp = !empty($nationality) ? $nationality : "Not Assigned";
+$employee_id_disp = !empty($employee_id) ? e($employee_id) : "Not Assigned";
+$department_disp = !empty($department) ? e($department) : "Not Assigned";
+$gender_disp = !empty($gender) ? e($gender) : "Not Assigned";
+$marital_status_disp = !empty($marital_status) ? e($marital_status) : "Not Assigned";
+$nationality_disp = !empty($nationality) ? e($nationality) : "Not Assigned";
 
 ?>
 

@@ -2,7 +2,6 @@
 include 'CineVault-header.php';
 include '../includes/db-connection.php';
 
-session_start();
 $user_id = $_SESSION['user_id'] ?? null;
 $user = null;
 $alert = "";
@@ -12,9 +11,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update-profile'])) {
     $first_name = trim($_POST['first_name'] ?? '');
     $last_name = trim($_POST['last_name'] ?? '');
     $mobile = trim($_POST['mobile_number'] ?? '');
-    $email = trim($_POST['signup_email'] ?? '');
+    $email = strtolower(trim($_POST['signup_email'] ?? ''));
 
-    if ($user_id && $first_name && $last_name && $mobile && $email) {
+    // Same rules as sign up, and the email must not belong to someone else.
+    $stmt = $con->prepare("SELECT 1 FROM tbl_signup_acc WHERE signup_email = ? AND signup_id <> ? UNION SELECT 1 FROM tbl_signup_pending WHERE signup_email = ? LIMIT 1");
+    $stmt->bind_param("sis", $email, $user_id, $email);
+    $stmt->execute();
+    $email_taken = (bool) $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if (!preg_match("/^[A-Za-z][A-Za-z .'-]{1,99}$/", $first_name) || !preg_match("/^[A-Za-z][A-Za-z .'-]{1,99}$/", $last_name)) {
+        $alert = "Names may only use letters, spaces, dots, dashes and apostrophes.";
+    } elseif (!preg_match('/^\d{11}$/', $mobile)) {
+        $alert = "Mobile number must be exactly 11 digits.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $alert = "Please enter a valid email address.";
+    } elseif ($email_taken) {
+        $alert = "That email is already used by another account.";
+    } elseif ($user_id) {
         $stmt = $con->prepare("UPDATE tbl_signup_acc SET first_name=?, last_name=?, mobile_number=?, signup_email=? WHERE signup_id=?");
         $stmt->bind_param("ssssi", $first_name, $last_name, $mobile, $email, $user_id);
         $stmt->execute();
