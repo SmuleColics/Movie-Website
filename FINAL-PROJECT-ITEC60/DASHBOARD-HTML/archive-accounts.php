@@ -11,16 +11,13 @@ include '../includes/db-connection.php';
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Company Profile</title>
   <!-- ========== CSS LINK ========== -->
-  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css">
+  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <!-- ===== DATA TABLES CDN ===== -->
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css">
   <!-- ========== Bootstrap 5.3 CSS  ========== -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
-    .sidebar-content-item:nth-child(4) {
-      background-color: var(--dashboard-primary);
-    }
 
     .sidebar-collapse-acc:nth-child(1) {
       background-color: var(--dashboard-primary);
@@ -35,7 +32,7 @@ include '../includes/db-connection.php';
     }
 
     .bg-primary {
-      background: #607BEC;
+      background: #C9A24B;
     }
   </style>
 </head>
@@ -64,26 +61,24 @@ include '../includes/db-connection.php';
               <thead>
                 <tr>
                   <th class="db-text-primary text-align-left" scope="col">#</th>
+                  <th class="db-text-primary" scope="col">Name</th>
                   <th class="db-text-primary" scope="col">Email</th>
-                  <th class="db-text-primary" scope="col">Cash Tendered</th>
-                  <th class="db-text-primary" scope="col">Reference No.</th>
-                  <th class="db-text-primary" scope="col">Date Created</th>
+                  <th class="db-text-primary" scope="col">Date Joined</th>
                   <th class="db-text-primary" scope="col">Restore</th>
                 </tr>
               </thead>
               <tbody>
                 <?php
-                $result = mysqli_query($con, "SELECT s.signup_id, s.signup_email, p.payment_amount, p.reference_no, p.date_created FROM tbl_signup_acc AS s JOIN tbl_payment AS p ON s.signup_id = p.signup_id WHERE s.is_archived=1");
+                $result = mysqli_query($con, "SELECT signup_id, first_name, last_name, signup_email, date_created FROM tbl_signup_acc WHERE is_archived = 1 ORDER BY date_created DESC");
                 while ($row = mysqli_fetch_assoc($result)) {
-                  $signup_id = $row['signup_id'];
+                  $signup_id = (int) $row['signup_id'];
                   $signup_email = $row['signup_email'];
                   ?>
                   <tr>
                     <th class="db-text-primary text-align-left" scope="row"><?php echo $signup_id ?></th>
-                    <td> <?php echo htmlspecialchars($signup_email) ?> </td>
-                    <td class="text-center"> <?php echo $row['payment_amount'] ?> </td>
-                    <td class="text-center"> <?php echo htmlspecialchars($row['reference_no']) ?> </td>
-                    <td> <?php echo $row['date_created'] ?> </td>
+                    <td> <?php echo e(trim($row['first_name'] . ' ' . $row['last_name'])) ?> </td>
+                    <td> <?php echo e($signup_email) ?> </td>
+                    <td> <?php echo e(date('M j, Y g:i A', strtotime($row['date_created']))) ?> </td>
                     <td>
                       <button class="btn text-white p-0 border-0 restore-btn" data-restore-id="<?php echo $signup_id ?>"
                         data-bs-toggle="modal" data-bs-target="#signupRestoreModal">

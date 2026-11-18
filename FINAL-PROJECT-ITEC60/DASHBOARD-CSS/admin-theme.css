@@ -1,0 +1,259 @@
+/*
+ * CineVault admin theme. Loaded by the admin header for every admin page.
+ *
+ * Layered dark slate instead of near-black everywhere:
+ *   frame (top bar + sidebar)  darkest, holds the page together
+ *   page background            a step lighter
+ *   cards and tables           lighter again, so content stands out
+ * Rules are scoped to body.cv-admin with !important because each page loads
+ * its own Bootstrap/dashboard.css after the header.
+ */
+:root {
+  --adm-frame: #120F0B;
+  --adm-page: #1E1913;
+  --adm-card: #2A2219;
+  --adm-row: #3A3022;
+  --adm-row-hover: #3D3224;
+  --adm-border: #4A3E2C;
+  --adm-muted: #B3A68C;
+  --adm-text: #F1E8D4;
+  --adm-primary: #C9A24B;
+}
+
+/* ---------- Layers ---------- */
+body.cv-admin {
+  background-color: var(--adm-page) !important;
+  --bs-dark-rgb: 35, 44, 62;            /* .bg-dark cards */
+  --bs-body-bg: var(--adm-page);
+}
+
+body.cv-admin nav.navbar.fixed-top,
+body.cv-admin aside.sidebar,
+body.cv-admin #dashboard-offcanvas,
+body.cv-admin #dashboard-offcanvas .offcanvas-header,
+body.cv-admin #dashboard-offcanvas .offcanvas-body {
+  background-color: var(--adm-frame) !important;
+}
+
+body.cv-admin nav.navbar.fixed-top {
+  border-bottom: 1px solid var(--adm-border);
+}
+
+body.cv-admin aside.sidebar {
+  border-right: 1px solid var(--adm-border);
+}
+
+body.cv-admin .card,
+body.cv-admin .card.bg-dark {
+  background-color: var(--adm-card) !important;
+  border: 1px solid var(--adm-border) !important;
+  border-radius: 12px;
+}
+
+/* Tables */
+body.cv-admin table thead tr th,
+body.cv-admin table thead tr td {
+  background-color: var(--adm-card) !important;
+  color: var(--adm-primary) !important;
+  border-color: var(--adm-border) !important;
+}
+
+body.cv-admin table tbody tr td,
+body.cv-admin table tbody tr th {
+  background-color: var(--adm-row) !important;
+  color: var(--adm-text) !important;
+  border-color: var(--adm-border) !important;
+}
+
+body.cv-admin table tbody tr:hover td,
+body.cv-admin table tbody tr:hover th {
+  background-color: var(--adm-row-hover) !important;
+}
+
+body.cv-admin .modal-content {
+  background-color: var(--adm-card) !important;
+  border: 1px solid var(--adm-border);
+}
+
+body.cv-admin .form-control,
+body.cv-admin .form-select {
+  border-color: var(--adm-border);
+}
+
+body.cv-admin .dt-search input,
+body.cv-admin .dt-length select {
+  background-color: var(--adm-row) !important;
+  border-color: var(--adm-border) !important;
+  color: var(--adm-text) !important;
+}
+
+/* ---------- Clickable dashboard cards ---------- */
+.cv-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 12px;
+}
+
+.cv-card-link .card {
+  transition: transform .15s, border-color .15s, box-shadow .15s;
+}
+
+.cv-card-link:hover .card,
+.cv-card-link:focus-visible .card {
+  transform: translateY(-3px);
+  border-color: var(--adm-primary) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .35);
+}
+
+.cv-card-link:focus-visible {
+  outline: 2px solid var(--adm-primary);
+  outline-offset: 3px;
+}
+
+.cv-card-go {
+  margin-left: auto;
+  opacity: .6;
+  transition: opacity .15s, transform .15s;
+}
+
+.cv-card-link:hover .cv-card-go {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+/* ---------- Signed-in account chip ---------- */
+.cv-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  border: 1px solid var(--adm-border);
+  background: rgba(255, 255, 255, .04);
+  color: var(--adm-text);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+
+.cv-account:hover,
+.cv-account[aria-expanded="true"] {
+  background: rgba(201, 162, 75, .18);
+  border-color: var(--adm-primary);
+}
+
+.cv-account-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--adm-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .5px;
+}
+
+.cv-account-avatar-lg {
+  width: 46px;
+  height: 46px;
+  font-size: 17px;
+}
+
+.cv-account-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+
+.cv-account-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.cv-account-role {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: #E6CF96;
+}
+
+.cv-account-chevron {
+  font-size: 11px;
+  color: var(--adm-muted);
+}
+
+.cv-account-menu {
+  min-width: 280px;
+  margin-top: 10px !important;
+  padding: 8px;
+  background: var(--adm-card) !important;
+  border: 1px solid var(--adm-border);
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .45);
+}
+
+.cv-account-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 4px;
+}
+
+.cv-account-head-text p {
+  margin: 0;
+}
+
+.cv-account-head-name {
+  font-weight: 600;
+  color: #fff;
+}
+
+.cv-account-head-email {
+  font-size: 13px;
+  color: var(--adm-muted);
+  word-break: break-all;
+}
+
+.cv-account-head-role {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(201, 162, 75, .25);
+  color: #EBDDB8;
+}
+
+.cv-account-menu .dropdown-divider {
+  border-color: var(--adm-border);
+}
+
+.cv-account-menu .dropdown-item {
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+/* Bell and notification menu styles live in ../shared/notifications.css (shared with the member site). */
+
+/* Small screens: hide the name/role text, keep the avatar. */
+@media (max-width: 575px) {
+  .cv-account-text,
+  .cv-account-chevron {
+    display: none;
+  }
+  .cv-account {
+    padding: 3px;
+  }
+}
+
+/* Sign-out popup keeps its own colours on admin pages. */
+body.cv-admin #cvLogoutModal .modal-content {
+  background: var(--adm-card) !important;
+}

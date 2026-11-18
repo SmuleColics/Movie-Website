@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let top10ScrollStep = 500;
   if (top10Slider && top10NextButton && top10PrevButton) {
     top10Slider.style.transition = "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
-    function getTop10MaxScroll() { return top10Slider.scrollWidth - top10Slider.clientWidth; }
+    function getTop10MaxScroll() { return top10Slider.scrollWidth - top10Slider.clientWidth + 56; } // +56: room after the last poster
     function updateTop10Buttons() {
       if (top10ScrollAmount <= 0) {
         top10PrevButton.closest(".prev-button-top10").style.display = "none";

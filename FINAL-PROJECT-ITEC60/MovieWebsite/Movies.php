@@ -14,7 +14,7 @@ include 'CineVault-header.php';
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="FirstProject.css">
+  <link rel="stylesheet" href="FirstProject.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="Override.css">
@@ -39,9 +39,8 @@ include 'CineVault-header.php';
         LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
         LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
         LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
-        WHERE ms.category = 'Movie'
-          AND ms.poster LIKE '%MovieCarousel%'
-        ORDER BY ms.date_posted DESC
+        WHERE ms.feature_slot LIKE 'movies-%'
+        ORDER BY ms.feature_slot
         LIMIT 3
       ");
           $active = true;
@@ -68,7 +67,7 @@ include 'CineVault-header.php';
               echo ' active';
               $active = false;
             } ?> position-relative">
-              <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($row['poster']); ?>"
+              <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($row['backdrop'] ?: $row['poster']); ?>"
                 class="d-block w-100 wallpaper" alt="<?php echo htmlspecialchars($row['title']); ?> Wallpaper">
               <div class="wallpaper-description text-primary">
                 <div class="wallpaper-left text-white d-flex flex-column">
@@ -91,7 +90,7 @@ include 'CineVault-header.php';
                     </div>
                     <div class="wallpaper-line bg-secondary mx-3"></div>
                   </div>
-                  <div class="rating-text">
+                  <div class="rating-text cv-full-desc" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="cv-desc-tooltip" data-bs-title="<?php echo htmlspecialchars($row['description'], ENT_QUOTES); ?>">
                     <?php echo $desc; ?>
                   </div>
                 </div>
@@ -139,11 +138,11 @@ include 'CineVault-header.php';
                 <div class='modal-pic-container m-0 position-relative'>
                   <video
                     class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-                    autoplay
+                    data-cv-autoplay preload=none
                     muted
                     loop
                   >
-                    <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($row['video']) . "\" type=\"video/mp4\">
+                    <source src=\"" . htmlspecialchars(cv_video_src($row['video'])) . "\" type=\"video/mp4\">
                     Your browser does not support the video tag.
                   </video>";
             if (!empty($row['modal_poster_title'])) {
@@ -235,7 +234,7 @@ include 'CineVault-header.php';
           <p class="top-10-top-text">TOP 10</p>
           <div class="ms-3 fs-2 movies-today-text">
             <p class="movies-text">MOVIES</p>
-            <p class="today-text">TODAY</p>
+            <p class="today-text">ALL TIME</p>
           </div>
         </div>
         <div class="top10-featured-wrapper position-relative">
@@ -263,7 +262,7 @@ include 'CineVault-header.php';
               $top10_description = $row['description'];
               ?>
               <div class="top-10-images position-relative">
-                <p class="top-10-text"><?php echo $top10_rank; ?></p>
+                <p class="top-10-text<?php echo $top10_rank >= 10 ? ' is-double' : ''; ?>"><?php echo $top10_rank; ?></p>
                 <a href="#" data-bs-toggle="modal" data-bs-target="#modal-top10-<?php echo $movie_series_id ?>">
                   <div class="top-10-hover position-relative">
                     <img class="top-10-img rounded-3"
@@ -290,11 +289,11 @@ include 'CineVault-header.php';
           <div class='modal-pic-container m-0 position-relative'>
             <video
               class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-              autoplay
+              data-cv-autoplay preload=none
               muted
               loop
             >
-              <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($top10_video) . "\" type=\"video/mp4\">
+              <source src=\"" . htmlspecialchars(cv_video_src($top10_video)) . "\" type=\"video/mp4\">
               Your browser does not support the video tag.
             </video>";
               if (!empty($top10_modal_poster_title)) {
@@ -390,7 +389,7 @@ include 'CineVault-header.php';
           AND ms.poster NOT LIKE '%SeriesCarousel%'
           AND ms.poster NOT LIKE '%HomeWallpaper%'
         ORDER BY ms.date_released DESC
-        LIMIT 8"
+        LIMIT 20"
           );
           $adventure_modals = "";
           while ($row = mysqli_fetch_assoc($adventure_query)):
@@ -435,11 +434,11 @@ include 'CineVault-header.php';
                 <div class='modal-pic-container m-0 position-relative'>
                   <video
                     class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-                    autoplay
+                    data-cv-autoplay preload=none
                     muted
                     loop
                   >
-                    <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($video) . "\" type=\"video/mp4\">
+                    <source src=\"" . htmlspecialchars(cv_video_src($video)) . "\" type=\"video/mp4\">
                     Your browser does not support the video tag.
                   </video>";
             if (!empty($modal_poster_title)) {
@@ -533,7 +532,7 @@ include 'CineVault-header.php';
         AND ms.poster NOT LIKE '%SeriesCarousel%'
         AND ms.poster NOT LIKE '%HomeWallpaper%'
       ORDER BY ms.date_released DESC
-      LIMIT 7"
+      LIMIT 20"
           );
           $thriller_modals = "";
           while ($row = mysqli_fetch_assoc($thriller_query)):
@@ -578,11 +577,11 @@ include 'CineVault-header.php';
           <div class='modal-pic-container m-0 position-relative'>
             <video
               class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-              autoplay
+              data-cv-autoplay preload=none
               muted
               loop
             >
-              <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($thriller_video) . "\" type=\"video/mp4\">
+              <source src=\"" . htmlspecialchars(cv_video_src($thriller_video)) . "\" type=\"video/mp4\">
               Your browser does not support the video tag.
             </video>";
             if (!empty($thriller_modal_poster_title)) {
@@ -645,7 +644,7 @@ include 'CineVault-header.php';
     <!-- START OF SECTION SCI-FI  -->
     <section class="section-featured text-white ms-md-5 ms-3">
       <?php
-      $genre_result = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre WHERE genre_name LIKE '%Sci-Fi%' LIMIT 1");
+      $genre_result = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre WHERE genre_id = 14 LIMIT 1");
       $genre = mysqli_fetch_assoc($genre_result);
       $genre_id = $genre ? $genre['genre_id'] : 14; // fallback if not found
       $genre_name = $genre ? $genre['genre_name'] : "Sci-Fi";
@@ -678,7 +677,7 @@ include 'CineVault-header.php';
         AND ms.poster NOT LIKE '%SeriesCarousel%'
         AND ms.poster NOT LIKE '%HomeWallpaper%'
       ORDER BY ms.date_released DESC
-      LIMIT 8"
+      LIMIT 20"
               );
               $scifi_modals = "";
               while ($row = mysqli_fetch_assoc($scifi_query)):
@@ -723,11 +722,11 @@ include 'CineVault-header.php';
           <div class='modal-pic-container m-0 position-relative'>
             <video
               class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-              autoplay
+              data-cv-autoplay preload=none
               muted
               loop
             >
-              <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($scifi_video) . "\" type=\"video/mp4\">
+              <source src=\"" . htmlspecialchars(cv_video_src($scifi_video)) . "\" type=\"video/mp4\">
               Your browser does not support the video tag.
             </video>";
                 if (!empty($scifi_modal_poster_title)) {
@@ -797,13 +796,13 @@ include 'CineVault-header.php';
         // Fetch the movie/series for HomeWallpaper3
         $wallpaper3_query = mysqli_query($con, "
         SELECT * FROM tbl_movie_series
-        WHERE poster LIKE '%HomeWallpaper3%'
+        WHERE feature_slot = 'banner3'
         LIMIT 1
       ");
         $wallpaper3 = mysqli_fetch_assoc($wallpaper3_query);
         if ($wallpaper3):
           ?>
-          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper3['poster']); ?>"
+          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper3['backdrop'] ?: $wallpaper3['poster']); ?>"
             class="d-block w-100 wallpaper-lotr bg-danger"
             alt="<?php echo htmlspecialchars($wallpaper3['title']); ?> Wallpaper">
 
@@ -870,7 +869,7 @@ include 'CineVault-header.php';
         AND ms.poster NOT LIKE '%SeriesCarousel%'
         AND ms.poster NOT LIKE '%HomeWallpaper%'
       ORDER BY ms.date_released DESC
-      LIMIT 7"
+      LIMIT 20"
           );
           $drama_modals = "";
           while ($row = mysqli_fetch_assoc($drama_query)):
@@ -915,11 +914,11 @@ include 'CineVault-header.php';
           <div class='modal-pic-container m-0 position-relative'>
             <video
               class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-              autoplay
+              data-cv-autoplay preload=none
               muted
               loop
             >
-              <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($drama_video) . "\" type=\"video/mp4\">
+              <source src=\"" . htmlspecialchars(cv_video_src($drama_video)) . "\" type=\"video/mp4\">
               Your browser does not support the video tag.
             </video>";
             if (!empty($drama_modal_poster_title)) {
@@ -987,13 +986,13 @@ include 'CineVault-header.php';
         // Fetch the movie/series for HomeWallpaper4
         $wallpaper4_query = mysqli_query($con, "
       SELECT * FROM tbl_movie_series
-      WHERE poster LIKE '%HomeWallpaper4%'
+      WHERE feature_slot = 'banner4'
       LIMIT 1
     ");
         $wallpaper4 = mysqli_fetch_assoc($wallpaper4_query);
         if ($wallpaper4):
           ?>
-          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper4['poster']); ?>"
+          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper4['backdrop'] ?: $wallpaper4['poster']); ?>"
             class="d-block w-100 wallpaper-lotr" alt="<?php echo htmlspecialchars($wallpaper4['title']); ?> Wallpaper">
 
           <div
@@ -1027,8 +1026,7 @@ include 'CineVault-header.php';
 
   <footer>
     <div class="footer text-white d-flex justify-content-between mx-5 align-items-center">
-      <p class="footer-long-text">This site does not store any files on it's server, It only links to the media which is
-        hosted on 3rd party services like YouTube, Dailymotion, Ok.ru, Vidsrc and more.</p>
+      <p class="footer-long-text">Movie and series details and images come from <a class="text-white" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB. Free classic films stream from the <a class="text-white" href="https://archive.org/" target="_blank" rel="noopener">Internet Archive</a>.</p>
       <p>© 2025 CineVault. All rights reserved.</p>
     </div>
   </footer>
@@ -1036,7 +1034,7 @@ include 'CineVault-header.php';
 </body>
 
 <script src="header-scroll.js"></script>
-<script src="video-player.js"></script>
-<script src="poster-slide.js"></script>
+<script src="video-player.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>
+<script src="poster-slide.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>
 
 </html>

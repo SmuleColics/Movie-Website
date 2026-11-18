@@ -1,0 +1,208 @@
+/*
+ * Notification bell, shared by the admin top bar and the member top bar
+ * so both look and behave the same. Loaded by includes/dashboard-header-sidebar.php
+ * and MovieWebsite/CineVault-header.php.
+ */
+:root {
+  --nt-frame: #120F0B;
+  --nt-card: #221C15;
+  --nt-row-hover: #2C241A;
+  --nt-border: #3F3527;
+  --nt-muted: #B3A68C;
+  --nt-text: #F1E8D4;
+  --nt-primary: #C9A24B;
+}
+
+/* ---------- Bell ---------- */
+.cv-bell {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--nt-text);
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+}
+
+.cv-bell:hover,
+.cv-bell[aria-expanded="true"] {
+  background: rgba(201, 162, 75, .25);
+}
+
+.cv-bell-badge {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #dc3545;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 19px;
+  text-align: center;
+  border: 2px solid var(--nt-frame);
+}
+
+.cv-bell-badge[hidden] {
+  display: none;
+}
+
+/* The menu hangs from the bell's right edge and never runs past the screen. */
+.cv-notif-menu {
+  width: 360px;
+  max-width: calc(100vw - 24px);
+  margin-top: 10px !important;
+  padding: 0;
+  overflow: hidden;
+  background: var(--nt-card) !important;
+  border: 1px solid var(--nt-border);
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .45);
+}
+
+.cv-notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--nt-border);
+  color: #fff;
+  font-weight: 600;
+}
+
+.cv-notif-read-all {
+  font-size: 13px;
+  font-weight: 500;
+  color: #E6CF96;
+  text-decoration: none;
+}
+
+.cv-notif-read-all:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.cv-notif-read-all[hidden] {
+  display: none;
+}
+
+.cv-notif-list {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.cv-notif-item {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 12px 34px 12px 16px;
+  color: var(--nt-text);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, .05);
+}
+
+.cv-notif-item:hover {
+  background: var(--nt-row-hover);
+  color: #fff;
+}
+
+.cv-notif-item.unread {
+  background: rgba(201, 162, 75, .10);
+}
+
+.cv-notif-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201, 162, 75, .22);
+  color: #E6CF96;
+}
+
+.cv-notif-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cv-notif-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.cv-notif-item.unread .cv-notif-title {
+  font-weight: 700;
+  color: #fff;
+}
+
+.cv-notif-detail {
+  font-size: 13px;
+  color: var(--nt-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cv-notif-time {
+  font-size: 12px;
+  color: var(--nt-muted);
+  margin-top: 2px;
+}
+
+.cv-notif-dot {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 9px;
+  height: 9px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: #dc3545;
+  display: none;
+}
+
+.cv-notif-item.unread .cv-notif-dot {
+  display: block;
+}
+
+.cv-notif-empty {
+  color: var(--nt-muted);
+}
+
+.cv-notif-view-all {
+  display: block;
+  padding: 10px;
+  text-align: center;
+  font-size: 13px;
+  color: #E6CF96;
+  text-decoration: none;
+  border-top: 1px solid var(--nt-border);
+}
+
+.cv-notif-view-all:hover {
+  color: #fff;
+  background: var(--nt-row-hover);
+}
+
+
+/* Badge: centre the number exactly (line-height alone left it slightly off). */
+.cv-bell-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0 5px;
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
+}

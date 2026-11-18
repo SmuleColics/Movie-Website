@@ -92,7 +92,7 @@
       crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="../DASHBOARD-CSS/admin-signup.css">
+    <link rel="stylesheet" href="../DASHBOARD-CSS/admin-signup.css?v=<?php echo CV_ASSET_VERSION; ?>">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -209,8 +209,8 @@
             </div>
           </form>
           <p class="text-start ms-30 mt-3">
-            <span class="box-text">Already Have An Account?</span>
-            <a href="admin-signin.php" class="text-primary text-decoration-none signin-now">Sign in now.</a>
+            <span class="box-text">Done adding admins?</span>
+            <a href="dashboard.php" class="text-primary text-decoration-none signin-now">Back to dashboard.</a>
           </p>
           <div />
       </section>

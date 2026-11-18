@@ -174,8 +174,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save-changes'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Company Profile</title>
   <!-- ========== CSS LINK ========== -->
-  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css">
-  <!-- <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css"> -->
+  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css?v=<?php echo CV_ASSET_VERSION; ?>">
+  <!-- <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css?v=<?php echo CV_ASSET_VERSION; ?>"> -->
   <style>
     .text-error {
       transform: translateY(-16px);
@@ -193,16 +193,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save-changes'])) {
     }
 
     select.edit-inputs {
-      background-color: #212529 !important;
-      color: #f4fff8 !i mportant;
+      background-color: #1F1A14 !important;
+      color: #F3EAD6 !i mportant;
       border: 1px solid #ced4da;
       height: 28px;
     }
 
     /* For some browsers, you can try to style the options as well: */
     select.edit-inputs option {
-      background-color: #212529;
-      color: #f4fff8;
+      background-color: #1F1A14;
+      color: #F3EAD6;
     }
   </style>
 </head>
@@ -369,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save-changes'])) {
           if ($delete_query) {
             echo "<script>
                   alert('Your account has been deleted. You have been automatically logged out.');
-                  window.location.href = 'admin-signin.php';
+                  window.location.href = '../LANDING-PAGE/SignIn/LP-SignIn.php';
                 </script>";
           }
         }

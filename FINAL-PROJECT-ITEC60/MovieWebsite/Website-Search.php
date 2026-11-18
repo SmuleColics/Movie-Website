@@ -11,7 +11,7 @@ include 'CineVault-header.php';
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="feature-js.css">
-  <link rel="stylesheet" href="FirstProject.css">
+  <link rel="stylesheet" href="FirstProject.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -113,11 +113,11 @@ include 'CineVault-header.php';
             <div class='modal-pic-container m-0 position-relative'>
               <video
                 class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-                autoplay
+                data-cv-autoplay preload=none
                 muted
                 loop
               >
-                <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($video) . "\" type=\"video/mp4\">
+                <source src=\"" . htmlspecialchars(cv_video_src($video)) . "\" type=\"video/mp4\">
                 Your browser does not support the video tag.
               </video>";
             if (!empty($modal_poster_title)) {
@@ -198,10 +198,10 @@ include 'CineVault-header.php';
                     $comedy_modals .= '
                             <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=episode&id=' . $ep['episode_id'] . '">
                                 <video
-                                    class="position-relative rounded-3 m-0 p-0 video-player video-episode"
+                                    class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                     muted
                                     style="width: 120px; height: 70px; object-fit: cover;">
-                                    <source src="../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
+                                    <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
                             </a>';
@@ -259,10 +259,10 @@ include 'CineVault-header.php';
   </main>
   <footer style="margin-top: 270px;">
     <div class="footer text-white d-flex justify-content-between mx-5 align-items-center">
-      <p class="footer-long-text">This site does not store any files on it's server, It only links to the media which is
-        hosted on 3rd party services like YouTube, Dailymotion, Ok.ru, Vidsrc and more.</p>
+      <p class="footer-long-text">Movie and series details and images come from <a class="text-white" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB. Free classic films stream from the <a class="text-white" href="https://archive.org/" target="_blank" rel="noopener">Internet Archive</a>.</p>
       <p>© 2025 CineVault. All rights reserved.</p>
     </div>
   </footer>
+  <script src="video-player.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>
 </body>
 </html>

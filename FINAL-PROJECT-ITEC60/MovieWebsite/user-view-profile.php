@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update-profile'])) {
     $email = strtolower(trim($_POST['signup_email'] ?? ''));
 
     // Same rules as sign up, and the email must not belong to someone else.
-    $stmt = $con->prepare("SELECT 1 FROM tbl_signup_acc WHERE signup_email = ? AND signup_id <> ? UNION SELECT 1 FROM tbl_signup_pending WHERE signup_email = ? LIMIT 1");
-    $stmt->bind_param("sis", $email, $user_id, $email);
+    $stmt = $con->prepare("SELECT 1 FROM tbl_signup_acc WHERE signup_email = ? AND signup_id <> ? LIMIT 1");
+    $stmt->bind_param("si", $email, $user_id);
     $stmt->execute();
     $email_taken = (bool) $stmt->get_result()->fetch_assoc();
     $stmt->close();
@@ -60,12 +60,12 @@ $email = $user['signup_email'] ?? '';
   <title>Profile</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="FirstProject.css" />
+  <link rel="stylesheet" href="FirstProject.css?v=<?php echo CV_ASSET_VERSION; ?>" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="Override.css" />
   <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css">
-  <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css">
+  <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
   <style>
     body { height: fit-content !important; }
@@ -175,11 +175,7 @@ $email = $user['signup_email'] ?? '';
   </div>
   <footer>
     <div id="footer-categories" class="footer text-white d-flex justify-content-between mx-5 align-items-center">
-      <p class="footer-long-text">
-        This site does not store any files on its server, It only links to
-        the media which is hosted on 3rd party services like YouTube,
-        Dailymotion, Ok.ru, Vidsrc and more.
-      </p>
+      <p class="footer-long-text">Movie and series details and images come from <a class="text-white" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB. Free classic films stream from the <a class="text-white" href="https://archive.org/" target="_blank" rel="noopener">Internet Archive</a>.</p>
       <p>© 2025 CineVault. All rights reserved.</p>
     </div>
   </footer>

@@ -1,13 +1,13 @@
 :root {
-  --dashboard-primary: #607EBC; /* STEEL BLUE */
-  --dashboard-secondary: #D1E0D7; /* SOFT MINT */
-  --bg-body: #161b22;
-  --border-color: #30363d;
+  --dashboard-primary: #C9A24B; /* BRASS */
+  --dashboard-secondary: #E6D6B0; /* CREAM */
+  --bg-body: #15120E;
+  --border-color: #3D3326;
   --placeholder-color: #9198A1;
   --secondary-color: #6c757d;
-  --dark: #343a40;
-  --header-color: #181818;
-  --db-text-sec: #f4fff8;
+  --dark: #2E271E;
+  --header-color: #17130F;
+  --db-text-sec: #F3EAD6;
 }
 
 body {
@@ -61,3 +61,29 @@ body {
   font-size: 24px !important;
 }
 
+
+/* ========== Thin scrollbars that blend into the dark background ==========
+   Same style as the member pages (FirstProject.css): no visible track,
+   a soft handle that brightens on hover. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .22) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .22);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, .4);
+}

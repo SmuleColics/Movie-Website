@@ -2,23 +2,16 @@
 include '../includes/db-connection.php';
 include '../includes/dashboard-header-sidebar.php';
 
-// USERS: Count distinct non-archived accounts with at least one approved payment
-$result = mysqli_query($con, "
-  SELECT COUNT(DISTINCT s.signup_id)
-  FROM tbl_signup_acc s
-  JOIN tbl_payment p ON s.signup_id = p.signup_id
-  WHERE p.status = 'approved' AND s.is_archived = 0
-");
+// MEMBERS: membership is free, so every non-archived account counts
+$result = mysqli_query($con, "SELECT COUNT(*) FROM tbl_signup_acc WHERE is_archived = 0");
 $row = mysqli_fetch_array($result);
 
-// REVENUE: Sum all approved payments for non-archived accounts
-$revenue_query = mysqli_query($con, "
-  SELECT SUM(p.payment_amount)
-  FROM tbl_payment p
-  JOIN tbl_signup_acc s ON p.signup_id = s.signup_id
-  WHERE p.status = 'approved' AND s.is_archived = 0
+// NEW THIS MONTH: accounts created since the 1st of this month
+$new_members_query = mysqli_query($con, "
+  SELECT COUNT(*) FROM tbl_signup_acc
+  WHERE is_archived = 0 AND date_created >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
 ");
-$revenue = mysqli_fetch_array($revenue_query);
+$new_members = mysqli_fetch_array($new_members_query);
 
 // MOVIES/SERIES: All (no archive filter, just content listing)
 $movie_query = mysqli_query($con, "SELECT COUNT(*) FROM tbl_movie_series WHERE category = 'Movie'");
@@ -27,16 +20,15 @@ $movie = mysqli_fetch_array($movie_query);
 $series_query = mysqli_query($con, "SELECT COUNT(*) FROM tbl_movie_series WHERE category = 'Series'");
 $series = mysqli_fetch_array($series_query);
 
-// LINE CHART: Approved, non-archived signups by payment date (one per day per signup)
+// LINE CHART: non-archived sign ups by day of the week they joined
 $users_quantity = array(0, 0, 0, 0, 0, 0, 0);
 $sql = mysqli_query($con, "
-  SELECT DATE(p.date_created) as paydate
-  FROM tbl_payment p
-  JOIN tbl_signup_acc s ON p.signup_id = s.signup_id
-  WHERE p.status = 'approved' AND s.is_archived = 0
+  SELECT DATE(date_created) AS joindate
+  FROM tbl_signup_acc
+  WHERE is_archived = 0
 ");
 while ($row_day = mysqli_fetch_assoc($sql)) {
-  $day_index = date('w', strtotime($row_day['paydate']));
+  $day_index = date('w', strtotime($row_day['joindate']));
   $users_quantity[$day_index]++;
 }
 $labels = array("Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat");
@@ -54,10 +46,10 @@ $pie_labels = [];
 $pie_data = [];
 $pie_colors = [];
 $genre_color_map = [
-  "Action" => "rgb(96, 123, 236)",  // Base color
+  "Action" => "rgb(201, 162, 75)",  // Base color
   "Comedy" => "rgb(106, 133, 246)", // Slightly brighter
-  "Drama" => "rgb(86, 113, 226)",  // Slightly darker
-  "Thriller" => "rgb(91, 118, 231)",  // Slight variation
+  "Drama" => "rgb(169, 133, 58)",  // Slightly darker
+  "Thriller" => "rgb(185, 147, 64)",  // Slight variation
   "Romance" => "rgb(101, 128, 241)", // Softened tone
   "Sci-Fi" => "rgb(111, 138, 251)", // Lighter and cooler
   "Horror" => "rgb(76, 103, 216)",  // Darker, moodier shade
@@ -90,7 +82,7 @@ foreach (array_slice($view_genre_counts, 0, 5, true) as $gid => $cnt) {
 if (empty($pie_labels)) {
   $pie_labels = ['Action', 'Comedy', 'Drama'];
   $pie_data = [5, 10, 8];
-  $pie_colors = ['rgb(96, 126, 188)', 'rgb(120, 170, 250)', 'rgb(80, 140, 220)'];
+  $pie_colors = ['rgb(201, 162, 75)', 'rgb(120, 170, 250)', 'rgb(80, 140, 220)'];
 }
 
 // BAR CHART: Number of movies and series per genre (all genres shown)
@@ -180,32 +172,30 @@ while ($m = mysqli_fetch_assoc($seriesViewsQuery)) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Main Dashboard</title>
-  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css">
-  <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css">
+  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css?v=<?php echo CV_ASSET_VERSION; ?>">
+  <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-    .sidebar-content-item:nth-child(1) {
-      background-color: var(--dashboard-primary);
-    }
   </style>
 </head>
 
 <body>
   <main class="container-lg p-0 overflow-hidden">
     <div class="me-3 mt-3 p-0 ms-md-2 ms-0 w-auto w-md-auto d-flex justify-content-end">
-      <a class="btn db-bg-primary db-text-sec" href="../libs/generate-payment-report.php" target="_blank"><i class="fa-solid fa-download"></i> Generate Report</a>
+      <a class="btn db-bg-primary db-text-sec" href="../libs/generate-member-report.php" target="_blank"><i class="fa-solid fa-download"></i> Generate Report</a>
     </div>
     <!-- CARD SECTION -->
     <section class="card-section p-3">
       <div class="row g-3">
         <!-- USERS -->
         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+          <a class="cv-card-link" href="signup-accounts.php" aria-label="View all members">
           <div class="card bg-dark">
             <div class="card-body">
               <div class="card-top d-flex align-items-center justify-content-between">
                 <div class="card-top-left">
-                  <div class="card-icon-container flexbox-align" style="background-color: #607BEC;">
+                  <div class="card-icon-container flexbox-align" style="background-color: #C9A24B;">
                     <i class="fa-solid fa-user db-card-icon"></i>
                   </div>
                 </div>
@@ -219,43 +209,47 @@ while ($m = mysqli_fetch_assoc($seriesViewsQuery)) {
               <div class="card-divider my-3"></div>
               <div class="card-bottom d-flex align-items-center gap-2 db-text-secondary fs-12">
                 <i class="fa-solid fa-clock"></i>
-                <p class="m-0">Total Approved Users</p>
+                <p class="m-0">Total Active Members</p>
               </div>
             </div>
           </div>
+          </a>
         </div>
-        <!-- REVENUE -->
+        <!-- NEW THIS MONTH -->
         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+          <a class="cv-card-link" href="signup-accounts.php" aria-label="View members">
           <div class="card bg-dark">
             <div class="card-body">
               <div class="card-top d-flex align-items-center justify-content-between">
                 <div class="card-top-left">
-                  <div class="card-icon-container flexbox-align" style="background-color: #607BEC;">
-                    <i class="fa-solid fa-peso-sign db-card-icon"></i>
+                  <div class="card-icon-container flexbox-align" style="background-color: #C9A24B;">
+                    <i class="fa-solid fa-user-plus db-card-icon"></i>
                   </div>
                 </div>
                 <div class="card-top-right w-100 text-end mt-3 db-text-sec">
-                  <h6 class="card-subtitle fs-14 mb-1">Revenue</h6>
+                  <h6 class="card-subtitle fs-14 mb-1">New This Month</h6>
                   <h5 class="card-title fs-24">
-                    ₱<?php echo isset($revenue[0]) && $revenue[0] !== null ? number_format($revenue[0], 2) : '0.00'; ?>
+                    <?php echo (int) ($new_members[0] ?? 0); ?>
                   </h5>
                 </div>
               </div>
               <div class="card-divider my-3"></div>
               <div class="card-bottom d-flex align-items-center gap-2 db-text-secondary fs-12">
                 <i class="fa-solid fa-clock"></i>
-                <p class="m-0">Total Revenue (Approved, Active)</p>
+                <p class="m-0">Members who joined in <?php echo date('F'); ?></p>
               </div>
             </div>
           </div>
+          </a>
         </div>
         <!-- MOVIES -->
         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+          <a class="cv-card-link" href="web-movies.php?category=Movie" aria-label="View movies">
           <div class="card bg-dark">
             <div class="card-body">
               <div class="card-top d-flex align-items-center justify-content-between">
                 <div class="card-top-left">
-                  <div class="card-icon-container flexbox-align" style="background-color: #607BEC;">
+                  <div class="card-icon-container flexbox-align" style="background-color: #C9A24B;">
                     <i class="fa-solid fa-film db-card-icon"></i>
                   </div>
                 </div>
@@ -272,14 +266,16 @@ while ($m = mysqli_fetch_assoc($seriesViewsQuery)) {
               </div>
             </div>
           </div>
+          </a>
         </div>
         <!-- SERIES -->
         <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+          <a class="cv-card-link" href="web-movies.php?category=Series" aria-label="View series">
           <div class="card bg-dark">
             <div class="card-body">
               <div class="card-top d-flex align-items-center justify-content-between">
                 <div class="card-top-left">
-                  <div class="card-icon-container flexbox-align" style="background-color: #607BEC;">
+                  <div class="card-icon-container flexbox-align" style="background-color: #C9A24B;">
                     <i class="fa-solid fa-video db-card-icon"></i>
                   </div>
                 </div>
@@ -296,6 +292,7 @@ while ($m = mysqli_fetch_assoc($seriesViewsQuery)) {
               </div>
             </div>
           </div>
+          </a>
         </div>
       </div>
     </section>
@@ -311,8 +308,8 @@ while ($m = mysqli_fetch_assoc($seriesViewsQuery)) {
             </center>
             <div class="card-body">
               <div class="card-chart-top db-text-sec">
-                <h6 class="card-subtitle fs-18">Daily Approved Users</h6>
-                <h5 class="card-title text-start fs-14 db-text-secondary">Approved users activity this week</h5>
+                <h6 class="card-subtitle fs-18">New Members by Day</h6>
+                <h5 class="card-title text-start fs-14 db-text-secondary">Members who joined, by day of the week</h5>
               </div>
               <div class="card-divider my-3"></div>
               <div class="card-chart-bottom db-text-secondary d-flex align-items-center gap-2 fs-14">
@@ -394,11 +391,11 @@ while ($m = mysqli_fetch_assoc($seriesViewsQuery)) {
       data: {
         labels: <?php echo json_encode($labels); ?>,
         datasets: [{
-          label: 'Daily Approved Users',
+          label: 'New Members',
           data: <?php echo json_encode($users_quantity); ?>,
           fill: false,
-          borderColor: '#607EBC',
-          backgroundColor: '#607EBC',
+          borderColor: '#C9A24B',
+          backgroundColor: '#C9A24B',
           tension: 0.1
         }]
       },
@@ -409,7 +406,7 @@ while ($m = mysqli_fetch_assoc($seriesViewsQuery)) {
           legend: { labels: { color: 'white' } },
           title: {
             display: true,
-            text: 'Approved User Activity Over Time',
+            text: 'Member Sign Ups by Day of the Week',
             color: 'white'
           }
         },
@@ -460,15 +457,15 @@ while ($m = mysqli_fetch_assoc($seriesViewsQuery)) {
           {
             label: 'Movies',
             data: <?php echo json_encode(array_values($bar_movie_data)); ?>,
-            backgroundColor: 'rgba(96, 126, 188, 0.8)',
-            borderColor: 'rgba(96, 126, 188, 1)',
+            backgroundColor: 'rgba(201, 162, 75, 0.8)',
+            borderColor: 'rgba(201, 162, 75, 1)',
             borderWidth: 1
           },
           {
             label: 'Series',
             data: <?php echo json_encode(array_values($bar_series_data)); ?>,
-            backgroundColor: 'rgba(120, 170, 250, 0.7)',
-            borderColor: 'rgba(120, 170, 250, 1)',
+            backgroundColor: 'rgba(221, 185, 99, 0.7)',
+            borderColor: 'rgba(221, 185, 99, 1)',
             borderWidth: 1
           }
         ]
@@ -500,15 +497,15 @@ while ($m = mysqli_fetch_assoc($seriesViewsQuery)) {
           {
             label: 'Movie Views',
             data: <?php echo json_encode(array_values($bar_views_movie_data)); ?>,
-            backgroundColor: 'rgba(96, 126, 188, 0.8)',
-            borderColor: 'rgba(120, 170, 250, 0.7)',
+            backgroundColor: 'rgba(201, 162, 75, 0.8)',
+            borderColor: 'rgba(221, 185, 99, 0.7)',
             borderWidth: 1
           },
           {
             label: 'Series Views',
             data: <?php echo json_encode(array_values($bar_views_series_data)); ?>,
-            backgroundColor: 'rgba(120, 170, 250, 0.7)',
-            borderColor: 'rgba(120, 170, 250, 1)',
+            backgroundColor: 'rgba(221, 185, 99, 0.7)',
+            borderColor: 'rgba(221, 185, 99, 1)',
             borderWidth: 1
           }
         ]

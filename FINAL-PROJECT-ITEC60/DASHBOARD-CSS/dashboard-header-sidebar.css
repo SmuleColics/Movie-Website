@@ -1,5 +1,5 @@
 :root {
-    --db-bg-primary: #607EBC; /* STEEL BLUE */
+    --db-bg-primary: #C9A24B; /* BRASS */
 }
 
 body {
@@ -53,7 +53,7 @@ body {
 }
 
 #bell-container:hover #button-bell {
-  background-color: #607EBC !important;
+  background-color: #C9A24B !important;
 }
 
 .badge-bell:hover {
@@ -202,3 +202,13 @@ body {
 
 /* ========== MAIN CONTENT ==========*/
 
+
+/* Current page in the sidebar (set by includes/dashboard-header-sidebar.php). */
+.sidebar-content-item.is-active {
+  background-color: var(--dashboard-primary);
+}
+.sidebar-content-item.is-active .sidebar-anchor,
+.sidebar-content-item.is-active .material-symbols-outlined,
+.sidebar-content-item.is-active .sidebar-text {
+  color: #1A140C !important;
+}

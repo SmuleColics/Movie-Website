@@ -61,12 +61,11 @@ include '../includes/dashboard-header-sidebar.php';
   <title>Genre Management</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css">
+  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css" />
   <style>
     input::placeholder { color: #6c757d !important; }
-    .sidebar-content-item:nth-child(3) { background-color: var(--dashboard-primary); }
   </style>
 </head>
 
@@ -158,7 +157,7 @@ include '../includes/dashboard-header-sidebar.php';
             <div class="modal-footer">
               <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
               <button type="submit" class="btn db-bg-primary db-text-sec" name="edit-genre-modal"
-                style="color: #f4fff8">Save</button>
+                style="color: #F3EAD6">Save</button>
             </div>
           </form>
         </div>
@@ -183,7 +182,7 @@ include '../includes/dashboard-header-sidebar.php';
             <div class="modal-footer">
               <button type="button" class="btn btn-danger" data-bs-dismiss="modal">NO</button>
               <button type="submit" class="btn db-bg-primary db-text-sec" name="delete-genre-btn-modal"
-                style="color: #f4fff8">YES</button>
+                style="color: #F3EAD6">YES</button>
             </div>
           </form>
         </div>

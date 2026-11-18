@@ -22,7 +22,31 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".modal").forEach(function (modal) {
     // When modal is shown
     modal.addEventListener("shown.bs.modal", function () {
-      //console.log('Modal shown');
+      // Previews load only when a title is opened, so a page full of titles
+      // doesn't start streaming every movie at once.
+      const preview = modal.querySelector("video[data-cv-autoplay]");
+      if (preview) {
+        if (!preview.dataset.cvStarted) {
+          preview.dataset.cvStarted = "1";
+          preview.preload = "auto";
+          // Long films: skip the opening credits and show a scene.
+          preview.addEventListener("loadedmetadata", function () {
+            if (preview.duration > 1200) preview.currentTime = Math.min(300, preview.duration * 0.15);
+          }, { once: true });
+          preview.load();
+        }
+        preview.play().catch(function () {});
+      }
+      modal.querySelectorAll("video.video-episode").forEach(function (ep) {
+        if (ep.preload === "none") {
+          ep.preload = "metadata";
+          ep.addEventListener("loadedmetadata", function () {
+            if (ep.duration > 120) ep.currentTime = Math.min(90, ep.duration * 0.1); // a frame, not the black intro
+          }, { once: true });
+          ep.load();
+        }
+      });
+
       const video = modal.querySelector(".video-player");
       const volumeBtn = modal.querySelector(".volume-control");
       const volumeIcon = volumeBtn
@@ -43,6 +67,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const video = modal.querySelector(".video-player");
       // Mute the video no matter what
       if (video) video.muted = true;
+      const preview = modal.querySelector("video[data-cv-autoplay]");
+      if (preview) preview.pause();
 
       // Always set the icon to muted state, if it exists
       const volumeBtn = modal.querySelector(".volume-control");

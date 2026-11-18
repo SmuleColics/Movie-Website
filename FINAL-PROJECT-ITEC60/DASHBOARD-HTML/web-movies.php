@@ -1,6 +1,8 @@
 <?php
 include '../includes/db-connection.php';
 include '../includes/dashboard-header-sidebar.php';
+// ?category=Movie or ?category=Series shows just that kind (sidebar Movies / Series).
+$cv_category = in_array($_GET['category'] ?? '', ['Movie', 'Series'], true) ? $_GET['category'] : '';
 
 // Handle Movie/Series delete
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
@@ -26,11 +28,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Website - Genre</title>
-  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css">
+  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <style>
-    .sidebar-content-item:nth-child(2) {
-      background-color: var(--dashboard-primary);
-    }
   </style>
   <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.min.css" />
@@ -40,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
 
   <div class="d-flex justify-content-end align-items-center p-3">
     <div class="p-0 ms-md-2 ms-0 w-auto w-md-auto">
-      <a href="web-movie-series.php" class="btn db-bg-primary db-text-sec" id="add-movie-btn">Add Movie/Series</a>
+      <a href="web-movie-series.php<?php echo $cv_category === 'Series' ? '?category=Series' : ''; ?>" class="btn db-bg-primary db-text-sec" id="add-movie-btn"><?php echo $cv_category === 'Series' ? 'Add Series' : ($cv_category === 'Movie' ? 'Add Movie' : 'Add Movie/Series'); ?></a>
     </div>
   </div>
 
@@ -49,9 +48,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
     <div class="card bg-dark">
       <div class="card-body">
         <div class="table-task-top db-text-sec">
-          <div class="py-2 ps-3">
-            <p class="m-0 fs-20">Movies/Series</p>
-            <p class="m-0 fs-14" style="transform: translateY(-2px)">List of All Movies/Series</p>
+          <?php
+          // ?category=Movie or ?category=Series (from the dashboard cards) shows just that kind.
+          $cv_category = in_array($_GET['category'] ?? '', ['Movie', 'Series'], true) ? $_GET['category'] : '';
+          ?>
+          <div class="py-2 ps-3 d-flex flex-wrap align-items-center justify-content-between gap-2 pe-3">
+            <div>
+              <p class="m-0 fs-20"><?php echo $cv_category === 'Movie' ? 'Movies' : ($cv_category === 'Series' ? 'Series' : 'Movies/Series'); ?></p>
+              <p class="m-0 fs-14" style="transform: translateY(-2px)">
+                <?php echo $cv_category ? 'Showing ' . ($cv_category === 'Movie' ? 'movies' : 'series') . ' only' : 'List of All Movies/Series'; ?>
+              </p>
+            </div>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Show">
+              <a href="web-movies.php" class="btn <?php echo $cv_category === '' ? 'btn-light' : 'btn-outline-light'; ?>">All</a>
+              <a href="web-movies.php?category=Movie" class="btn <?php echo $cv_category === 'Movie' ? 'btn-light' : 'btn-outline-light'; ?>">Movies</a>
+              <a href="web-movies.php?category=Series" class="btn <?php echo $cv_category === 'Series' ? 'btn-light' : 'btn-outline-light'; ?>">Series</a>
+            </div>
           </div>
         </div>
         <div class="table-responsive mt-2">
@@ -93,6 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
                 LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
                 LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
                 LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
+                " . ($cv_category ? "WHERE ms.category = '" . $cv_category . "'" : "") . "
                 ORDER BY ms.movie_series_id ASC
               ");
 
@@ -112,8 +125,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
                   <td><?php echo e($row['genre_1']); ?></td>
                   <td><?php echo e($row['genre_2']); ?></td>
                   <td><?php echo e($row['genre_3']); ?></td>
-                  <td class='text-truncate' style='max-width: 100px;' data-bs-toggle='tooltip' data-bs-placement='top'
-                    title='<?php echo htmlspecialchars($row['description']); ?>'><?php echo htmlspecialchars($row['description']); ?></td>
+                  <td class='text-truncate' style='max-width: 100px;'><?php echo htmlspecialchars($row['description']); ?></td>
                   <td>
                     <a href="#" class='db-text-primary view-btn'
                       data-bs-toggle='modal' data-bs-target='#modalView'
@@ -244,7 +256,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
           <div class="modal-footer">
             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">NO</button>
             <button type="submit" class="btn db-bg-primary db-text-sec" name="delete-btn-modal"
-              style="color: #f4fff8">YES</button>
+              style="color: #F3EAD6">YES</button>
           </div>
         </form>
       </div>

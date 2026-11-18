@@ -11,6 +11,13 @@ if (defined('CV_BOOTSTRAPPED')) {
 }
 define('CV_BOOTSTRAPPED', true);
 
+/* ---------- Time zone ----------
+ * PHP and MySQL must agree, or "5 minutes ago", reset-code expiry and
+ * Remember me expiry drift by hours. XAMPP ships PHP on Europe/Berlin.
+ */
+date_default_timezone_set(cv_config('timezone', 'Asia/Manila'));
+$con->query("SET time_zone = '" . $con->real_escape_string(date('P')) . "'");
+
 /* ---------- Errors ---------- */
 ini_set('display_errors', cv_config('debug') ? '1' : '0');
 error_reporting(E_ALL);
@@ -34,10 +41,81 @@ if (!headers_sent()) {
     header('Referrer-Policy: strict-origin-when-cross-origin');
 }
 
+/* ---------- Asset version ----------
+ * Added to CSS/JS links as ?v=... so browsers fetch fresh copies.
+ * Change this whenever a .css or .js file changes. */
+const CV_ASSET_VERSION = '20261118.23';
+
 /* ---------- Small helpers ---------- */
 function e($value)
 {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
+/* ---------- Video sources ----------
+ * A movie/episode video is either an uploaded file name (kept in
+ * DASHBOARD-HTML/<folder>/) or a free stream link from the Internet Archive
+ * (public domain films). Only archive.org links are trusted. */
+function cv_is_stream_url($value)
+{
+    return is_string($value)
+        && preg_match('#^https://(archive\.org|[a-z0-9-]+\.archive\.org)/download/[^\s"\'<>\\\\]+$#i', $value) === 1
+        && strlen($value) <= 255;
+}
+
+function cv_video_src($value, $folder = 'MOVIE_SERIES_VIDEO')
+{
+    if (cv_is_stream_url($value)) {
+        return $value;
+    }
+    return '../DASHBOARD-HTML/' . $folder . '/' . basename((string) $value);
+}
+
+/* ---------- Member "new arrivals" bell ----------
+ * The newest titles, each marked read or unread for this member. */
+const CV_ARRIVALS_SHOWN = 8;
+
+function cv_member_arrivals($con, $memberId)
+{
+    $limit = CV_ARRIVALS_SHOWN;
+    $stmt = $con->prepare(
+        "SELECT m.movie_series_id, m.title, m.category, m.date_released, m.date_posted,
+                (r.movie_series_id IS NOT NULL) AS is_read
+         FROM tbl_movie_series m
+         LEFT JOIN tbl_member_notif_reads r ON r.movie_series_id = m.movie_series_id AND r.signup_id = ?
+         ORDER BY m.date_posted DESC, m.movie_series_id DESC
+         LIMIT $limit"
+    );
+    $stmt->bind_param('i', $memberId);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    return $rows;
+}
+
+function cv_member_unread_arrivals($con, $memberId)
+{
+    $n = 0;
+    foreach (cv_member_arrivals($con, $memberId) as $row) {
+        $n += $row['is_read'] ? 0 : 1;
+    }
+    return $n;
+}
+
+// "5 minutes ago" style times (used by the notification bells).
+function cv_time_ago($datetime)
+{
+    $diff = time() - strtotime($datetime);
+    if ($diff < 60) {
+        return 'Just now';
+    }
+    foreach ([['year', 31536000], ['month', 2592000], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60]] as [$unit, $secs]) {
+        if ($diff >= $secs) {
+            $n = (int) floor($diff / $secs);
+            return $n . ' ' . $unit . ($n === 1 ? '' : 's') . ' ago';
+        }
+    }
+    return 'Just now';
 }
 
 function cv_client_ip()
@@ -81,12 +159,34 @@ ob_start(function ($html) {
         '$0' . $field,
         $html
     );
-    return preg_replace(
+    $html = preg_replace(
         '/<head\b[^>]*>/i',
         '$0<meta name="csrf-token" content="' . e(csrf_token()) . '">',
         $html,
         1
     );
+    // Vintage theme on every page, admin included (not the PDF reports or
+    // the full-screen player). Added last in <head> so it wins over page CSS.
+    $rel = cv_relative_script();
+    if (stripos($html, '</head>') !== false
+        && !preg_match('#^libs/#i', $rel)
+        && $rel !== 'MovieWebsite/play-vid.php') {
+        $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+        $base = substr($script, 0, strlen($script) - strlen($rel));
+        $theme = '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+            . '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&display=swap">'
+            . '<link rel="stylesheet" href="' . e($base . 'shared/vintage-theme.css?v=' . CV_ASSET_VERSION) . '">';
+        $html = preg_replace('#</head>#i', $theme . '$0', $html, 1);
+    }
+    // Show a waiting flash message (see cv_flash) on the first real page.
+    if (!empty($_SESSION['cv_flash']) && preg_match('/<body\b[^>]*>/i', $html)) {
+        $flash = $_SESSION['cv_flash'];
+        unset($_SESSION['cv_flash']);
+        $alert = cv_flash_html($flash);
+        // callback form, so a "$" in the message is never read as a regex group
+        $html = preg_replace_callback('/<body\b[^>]*>/i', fn($m) => $m[0] . $alert, $html, 1);
+    }
+    return $html;
 });
 
 /* ---------- Login guards ---------- */
@@ -116,7 +216,7 @@ function cv_require_admin($con)
             echo json_encode(['error' => 'Not signed in']);
             exit;
         }
-        header('Location: ../DASHBOARD-HTML/admin-signin.php');
+        header('Location: ../LANDING-PAGE/SignIn/LP-SignIn.php');
         exit;
     }
 }
@@ -126,9 +226,8 @@ function cv_require_member($con)
     $ok = false;
     if (!empty($_SESSION['is_logged_in']) && !empty($_SESSION['user_id'])) {
         $stmt = $con->prepare(
-            "SELECT s.signup_id FROM tbl_signup_acc s
-             JOIN tbl_payment p ON p.signup_id = s.signup_id AND p.status = 'approved'
-             WHERE s.signup_id = ? AND s.is_archived = 0 LIMIT 1"
+            // Membership is free: any account that is not archived may watch.
+            "SELECT signup_id FROM tbl_signup_acc WHERE signup_id = ? AND is_archived = 0 LIMIT 1"
         );
         $id = (int) $_SESSION['user_id'];
         $stmt->bind_param('i', $id);
@@ -145,7 +244,7 @@ function cv_require_member($con)
 
 function cv_wants_json()
 {
-    return basename($_SERVER['SCRIPT_NAME'] ?? '') === 'search.php'
+    return in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['admin-notifications.php', 'tmdb-api.php', 'archive-api.php', 'watch-progress.php'], true)
         || stripos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false;
 }
 
@@ -217,6 +316,9 @@ function cv_record_failure($con, $scope, $identifier)
 {
     $identifier = strtolower(trim((string) $identifier));
     $ip = cv_client_ip();
+    // Old records are only useful for the 15-minute lockout window; drop anything older than a day.
+    $con->query('DELETE FROM tbl_login_attempts WHERE attempted_at < (NOW() - INTERVAL 1 DAY)');
+
     $stmt = $con->prepare('INSERT INTO tbl_login_attempts (scope, identifier, ip_address) VALUES (?, ?, ?)');
     $stmt->bind_param('sss', $scope, $identifier, $ip);
     $stmt->execute();
@@ -314,13 +416,165 @@ function cv_send_mail($to, $subject, $htmlBody)
 }
 
 // Shows a browser alert, then goes to $url. Safe for any message text.
-function cv_alert_redirect($message, $url)
+/* ---------- Flash messages (Bootstrap alerts) ----------
+ * cv_flash() stores a one-time message; the next HTML page shows it as a
+ * Bootstrap alert at the top of the screen (added by the output filter above).
+ * Types: success, info, warning, danger. */
+function cv_flash($message, $type = 'success')
 {
-    echo '<script>alert(' . json_encode($message) . '); window.location.href = ' . json_encode($url) . ';</script>';
+    $_SESSION['cv_flash'] = ['message' => (string) $message, 'type' => $type];
+}
+
+// Shows $message on the page at $url as a Bootstrap alert (was a browser alert()).
+function cv_alert_redirect($message, $url, $type = 'success')
+{
+    while (ob_get_level() > 0) {
+        ob_end_clean(); // drop anything already printed; this response is only a redirect
+    }
+    // Set the message only after clearing: clearing runs the output filter, which
+    // would otherwise "show" (use up) the message on the half-printed page.
+    cv_flash($message, $type);
+    header('Location: ' . $url);
     exit;
 }
 
+function cv_flash_html(array $flash)
+{
+    $type  = in_array($flash['type'], ['success', 'info', 'warning', 'danger'], true) ? $flash['type'] : 'info';
+    $icons = ['success' => 'fa-circle-check', 'info' => 'fa-circle-info', 'warning' => 'fa-triangle-exclamation', 'danger' => 'fa-circle-exclamation'];
+    return '
+<div class="cv-flash-wrap" style="position:fixed;top:76px;left:50%;transform:translateX(-50%);z-index:2000;width:min(520px,calc(100vw - 24px));">
+  <div class="alert alert-' . $type . ' alert-dismissible fade show shadow d-flex align-items-center gap-2 mb-0" role="alert" style="border-radius:12px;">
+    <i class="fa-solid ' . $icons[$type] . '"></i>
+    <span>' . e($flash['message']) . '</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+</div>
+<script>
+  setTimeout(function () {
+    var a = document.querySelector(".cv-flash-wrap .alert");
+    if (!a) return;
+    if (window.bootstrap && bootstrap.Alert) { bootstrap.Alert.getOrCreateInstance(a).close(); }
+    else { a.parentNode.remove(); }
+  }, 4500);
+</script>';
+}
+
+/* ---------- Remember me (members only) ----------
+ * The cookie holds "selector:validator". The selector finds the row; the
+ * validator is checked against a SHA-256 hash, so the database alone can't
+ * be used to sign in. Each use swaps in a new validator, and the login
+ * still ends 30 days after the member ticked "Remember me".
+ */
+const CV_REMEMBER_COOKIE = 'cv_remember';
+const CV_REMEMBER_DAYS = 30;
+
+function cv_set_remember_cookie($value, $expires)
+{
+    setcookie(CV_REMEMBER_COOKIE, $value, [
+        'expires'  => $expires,
+        'path'     => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+        'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+    ]);
+}
+
+function cv_issue_remember_token($con, $signupId, $expiresAt = null)
+{
+    $selector  = bin2hex(random_bytes(12));
+    $validator = bin2hex(random_bytes(32));
+    $hash      = hash('sha256', $validator);
+    $expiresAt = $expiresAt ?: date('Y-m-d H:i:s', time() + CV_REMEMBER_DAYS * 86400);
+
+    $stmt = $con->prepare('INSERT INTO tbl_remember_tokens (signup_id, selector, validator_hash, expires_at) VALUES (?, ?, ?, ?)');
+    $stmt->bind_param('isss', $signupId, $selector, $hash, $expiresAt);
+    $stmt->execute();
+    $stmt->close();
+
+    cv_set_remember_cookie($selector . ':' . $validator, strtotime($expiresAt));
+    $_COOKIE[CV_REMEMBER_COOKIE] = $selector . ':' . $validator; // so a sign out on this same request finds it
+}
+
+// Removes this browser's saved login (used on sign out).
+function cv_forget_me($con)
+{
+    $cookie = $_COOKIE[CV_REMEMBER_COOKIE] ?? '';
+    if (is_string($cookie) && strpos($cookie, ':') !== false) {
+        $selector = explode(':', $cookie, 2)[0];
+        $stmt = $con->prepare('DELETE FROM tbl_remember_tokens WHERE selector = ?');
+        $stmt->bind_param('s', $selector);
+        $stmt->execute();
+        $stmt->close();
+    }
+    cv_set_remember_cookie('', time() - 3600);
+    unset($_COOKIE[CV_REMEMBER_COOKIE]);
+}
+
+// Removes every saved login for a member (used after a password reset).
+function cv_forget_all_devices($con, $signupId)
+{
+    $stmt = $con->prepare('DELETE FROM tbl_remember_tokens WHERE signup_id = ?');
+    $stmt->bind_param('i', $signupId);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Signs a member back in from a valid Remember me cookie.
+function cv_try_remember_login($con)
+{
+    if (!empty($_SESSION['is_logged_in'])) {
+        return;
+    }
+    $cookie = $_COOKIE[CV_REMEMBER_COOKIE] ?? '';
+    if (!is_string($cookie) || !preg_match('/^([a-f0-9]{24}):([a-f0-9]{64})$/', $cookie, $m)) {
+        if ($cookie !== '') {
+            cv_set_remember_cookie('', time() - 3600);
+        }
+        return;
+    }
+    [, $selector, $validator] = $m;
+
+    $stmt = $con->prepare(
+        'SELECT t.token_id, t.signup_id, t.validator_hash, t.expires_at, s.signup_email, s.is_archived
+         FROM tbl_remember_tokens t
+         JOIN tbl_signup_acc s ON s.signup_id = t.signup_id
+         WHERE t.selector = ? LIMIT 1'
+    );
+    $stmt->bind_param('s', $selector);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    $valid = $row
+        && hash_equals($row['validator_hash'], hash('sha256', $validator))
+        && strtotime($row['expires_at']) > time()
+        && (int) $row['is_archived'] === 0;
+
+    // Old or used tokens are removed either way.
+    $con->query('DELETE FROM tbl_remember_tokens WHERE expires_at < NOW()');
+    if ($row) {
+        $stmt = $con->prepare('DELETE FROM tbl_remember_tokens WHERE token_id = ?');
+        $stmt->bind_param('i', $row['token_id']);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    if (!$valid) {
+        cv_set_remember_cookie('', time() - 3600);
+        return;
+    }
+
+    cv_login_session([
+        'user_id' => (int) $row['signup_id'],
+        'user_email' => $row['signup_email'],
+        'is_logged_in' => true,
+    ]);
+    cv_issue_remember_token($con, (int) $row['signup_id'], $row['expires_at']);
+}
+
 /* ---------- Apply the guards for this page ---------- */
+cv_try_remember_login($con);
 $cvPage = cv_relative_script();
 if (
     (strpos($cvPage, 'DASHBOARD-HTML/') === 0 || strpos($cvPage, 'libs/') === 0)

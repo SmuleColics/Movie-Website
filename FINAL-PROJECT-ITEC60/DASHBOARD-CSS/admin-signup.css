@@ -1,5 +1,5 @@
 :root {
-  --bg-color: #212529;
+  --bg-color: #1F1A14;
   --box-text: #e9e0e0;
 }
 
@@ -70,7 +70,7 @@ body {
 .footer-signin {
   margin-top: -20px;
   padding: 140px 30px 0 30px;
-  background: linear-gradient(to top, #0A0F1A, #1A2536, #1F2A37);
+  background: linear-gradient(to top, #0D0B08, #17130F, #1C1813);
   
   /* Adjust the gradient stops to reduce blur height */
   -webkit-mask-image: linear-gradient(to bottom, 

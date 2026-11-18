@@ -58,6 +58,8 @@ if (isset($_POST['reset-pass-button'])) {
         $stmt->bind_param("si", $hashed, $row['signup_id']);
         $stmt->execute();
         $stmt->close();
+        // A new password signs out every device that used "Remember me".
+        cv_forget_all_devices($con, (int) $row['signup_id']);
         unset($_SESSION['reset_email']);
         cv_alert_redirect('Password reset successful!', 'LP-SignIn.php');
     }
@@ -73,8 +75,8 @@ if (isset($_POST['reset-pass-button'])) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="SignIn.css">
-  <link rel="stylesheet" href="../../DASHBOARD-CSS/for-all.css">
+  <link rel="stylesheet" href="SignIn.css?v=<?php echo CV_ASSET_VERSION; ?>">
+  <link rel="stylesheet" href="../../DASHBOARD-CSS/for-all.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="icon" href="../../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
   <style>
@@ -203,7 +205,7 @@ if (isset($_POST['reset-pass-button'])) {
 
   <main>
     <section class="position-relative">
-      <img class="landing-page-img" src="../ImagesLP/LandingPageWallpaper.jpg" alt="">
+      <img class="landing-page-img" src="../ImagesLP/LandingPageClassics.jpg" alt="">
       <div class="signin-container">
         <h1 class="signin-text db-text-sec mb-4 text-start">Reset Password</h1>
         <form class="signin-form db-text-sec p-0 mb-3" action="" method="post" autocomplete="off">
@@ -267,5 +269,6 @@ if (isset($_POST['reset-pass-button'])) {
       </div>
     </section>
   </main>
+  <script src="password-toggle.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>
 </body>
 </html>

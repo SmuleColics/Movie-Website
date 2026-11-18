@@ -36,8 +36,8 @@ $nationality_disp = !empty($nationality) ? e($nationality) : "Not Assigned";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Company Profile</title>
     <!-- ========== CSS LINK ========== -->
-    <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css">
-    <!-- <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css"> -->
+    <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css?v=<?php echo CV_ASSET_VERSION; ?>">
+    <!-- <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css?v=<?php echo CV_ASSET_VERSION; ?>"> -->
   </head>
 
   <body>

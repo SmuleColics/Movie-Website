@@ -14,6 +14,8 @@ $valid_email = true;
 $valid_pass = true;
 
 $first_name = $last_name = $mobile_number = $email = "";
+$agreed = false;
+$terms_error = "";
 
 if (isset($_POST["signup-btn"])) {
   // Sanitize and assign
@@ -23,16 +25,20 @@ if (isset($_POST["signup-btn"])) {
   $email = strtolower(trim((string) ($_POST["email"] ?? '')));
   $pass = (string) ($_POST["password"] ?? '');
 
-  // First name validation
-  if (!preg_match('/^[A-Za-z]{2,}$/', $first_name)) {
+  // Names: letters, plus spaces, dots, dashes and apostrophes (e.g. "John Lenard", "Dela Cruz")
+  if (!preg_match("/^[A-Za-z][A-Za-z .'-]{1,99}$/", $first_name)) {
     $first_name_error = "First name must be at least 2 letters.";
     $valid_first_name = false;
   }
 
-  // Last name validation
-  if (!preg_match('/^[A-Za-z]{2,}$/', $last_name)) {
+  if (!preg_match("/^[A-Za-z][A-Za-z .'-]{1,99}$/", $last_name)) {
     $last_name_error = "Last name must be at least 2 letters.";
     $valid_last_name = false;
+  }
+
+  $agreed = isset($_POST['agree_terms']);
+  if (!$agreed) {
+    $terms_error = "Please agree to the Terms of Service and Privacy Policy.";
   }
 
   // Mobile number validation
@@ -42,8 +48,8 @@ if (isset($_POST["signup-btn"])) {
   }
 
   // Email validation
-  $stmt = $con->prepare("SELECT 1 FROM tbl_signup_acc WHERE signup_email = ? UNION SELECT 1 FROM tbl_signup_pending WHERE signup_email = ? LIMIT 1");
-  $stmt->bind_param("ss", $email, $email);
+  $stmt = $con->prepare("SELECT 1 FROM tbl_signup_acc WHERE signup_email = ? LIMIT 1");
+  $stmt->bind_param("s", $email);
   $stmt->execute();
   $email_taken = (bool) $stmt->get_result()->fetch_assoc();
   $stmt->close();
@@ -51,7 +57,7 @@ if (isset($_POST["signup-btn"])) {
     $email_error = "Invalid email format";
     $valid_email = false;
   } elseif ($email_taken) {
-    $email_error = "This email is already registered or pending approval. Please use a different one.";
+    $email_error = "This email is already registered. Sign in instead, or use a different email.";
     $valid_email = false;
   }
 
@@ -61,21 +67,22 @@ if (isset($_POST["signup-btn"])) {
     $valid_pass = false;
   }
 
-  if ($valid_first_name && $valid_last_name && $valid_mobile && $valid_email && $valid_pass) {
+  if ($valid_first_name && $valid_last_name && $valid_mobile && $valid_email && $valid_pass && $agreed) {
     $hash_pass = password_hash($pass, PASSWORD_DEFAULT);
 
-    // Insert into pending table, not the main accounts table
-    $stmt = $con->prepare("INSERT INTO tbl_signup_pending (first_name, last_name, mobile_number, signup_email, signup_password) VALUES (?, ?, ?, ?, ?)");
+    // CineVault is free: the account works right away, no payment or approval.
+    $stmt = $con->prepare("INSERT INTO tbl_signup_acc (first_name, last_name, mobile_number, signup_email, signup_password) VALUES (?, ?, ?, ?, ?)");
     $stmt->bind_param("sssss", $first_name, $last_name, $mobile_number, $email, $hash_pass);
     $stmt->execute();
-    $pending_id = $stmt->insert_id;
+    $signup_id = $stmt->insert_id;
     $stmt->close();
 
-    // Store pending_id in session for payment step
-    $_SESSION['pending_id'] = $pending_id;
-    $_SESSION['pending_email'] = $email;
-
-    cv_alert_redirect('Account created successfully! Please complete your payment to continue.', 'LP-Payment.php');
+    cv_login_session([
+      'user_id' => (int) $signup_id,
+      'user_email' => $email,
+      'is_logged_in' => true,
+    ]);
+    cv_alert_redirect('Welcome to CineVault! Your account is ready.', '../../MovieWebsite/FirstProject.php');
   }
 }
 ?>
@@ -92,8 +99,8 @@ if (isset($_POST["signup-btn"])) {
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="SignIn.css">
-  <link rel="stylesheet" href="../../DASHBOARD-CSS/for-all.css">
+  <link rel="stylesheet" href="SignIn.css?v=<?php echo CV_ASSET_VERSION; ?>">
+  <link rel="stylesheet" href="../../DASHBOARD-CSS/for-all.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="icon" href="../../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
 </head>
@@ -108,8 +115,9 @@ if (isset($_POST["signup-btn"])) {
 
   <main>
     <section class="position-relative">
-      <img class="landing-page-img" src="../ImagesLP/LandingPageWallpaper.jpg" alt="">
+      <img class="landing-page-img" src="../ImagesLP/LandingPageClassics.jpg" alt="">
       <div class="signin-container" style="width: 500px;">
+        <a href="../LandingPageMovie.php" class="cv-back-link"><i class="fa-solid fa-chevron-left"></i> Back to home</a>
         <h1 class="signin-text db-text-sec text-start mb-4">Sign Up</h1>
         <p class="text-start create-acc db-text-primary p-0">Create An Account</p>
         <form class="signin-form db-text-sec d-flex flex-column gap-3" method="post" action="" id="signup-form">
@@ -155,9 +163,22 @@ if (isset($_POST["signup-btn"])) {
               <p class="mb-2 mt-1 text-danger text-start" style="font-size: 14px;"><?php echo $pass_error ?></p>
             <?php endif; ?>
           </div>
+          <div class="text-start cv-terms-check">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="agree_terms" id="agree_terms" required
+                <?php if ($agreed) echo 'checked'; ?>>
+              <label class="form-check-label" for="agree_terms">
+                I agree to the <a href="../terms.php" target="_blank" class="db-text-primary">Terms of Service</a>
+                and <a href="../privacy.php" target="_blank" class="db-text-primary">Privacy Policy</a>.
+              </label>
+            </div>
+            <?php if ($terms_error): ?>
+              <p class="mb-0 mt-1 text-danger" style="font-size: 14px;"><?php echo e($terms_error); ?></p>
+            <?php endif; ?>
+          </div>
           <div class="d-grid">
             <button type="submit" class="btn db-text-sec db-bg-primary fs-20" id="signup-btn"
-              name="signup-btn">Next</button>
+              name="signup-btn">Create Account</button>
           </div>
         </form>
         <p class="text-start ms-30 mt-3">
@@ -167,35 +188,10 @@ if (isset($_POST["signup-btn"])) {
         <div />
     </section>
     <footer class="footer-signin pb-5">
-      <div class="row text-white">
-        <p class="pt-5 color-light-white">Questions? <a href="#" class="color-light-white text-decoration-none">Contact
-            us.</a></p>
-        <div class="col-sm-6 col-md-3">
-          <div class="pb-2">
-            <a class="color-light-white" href="#">FAQ</a>
-          </div>
-          <div class="pb-2">
-            <a class="color-light-white" href="#">Cookie Preferences</a>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3">
-          <div class="pb-2">
-            <a class="color-light-white" href="#">Help Center</a>
-          </div>
-          <div class="pb-2">
-            <a class="color-light-white" href="#">Corporate Information</a>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3">
-          <div class="pb-2">
-            <a class="color-light-white" href="#">Terms of Use</a>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3">
-          <div class="pb-2">
-            <a class="color-light-white" href="#">Privacy</a>
-          </div>
-        </div>
-      </div>
+      <?php require_once __DIR__ . '/../../includes/site-footer.php'; echo cv_site_footer_links('../'); ?>
     </footer>
   </main>
+  <script src="password-toggle.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>
+</body>
+
+</html>

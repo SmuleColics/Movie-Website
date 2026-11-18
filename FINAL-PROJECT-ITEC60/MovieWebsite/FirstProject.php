@@ -1,5 +1,73 @@
 <?php
 include 'CineVault-header.php';
+
+/* ---------- Favorite genres (asked once per account) ---------- */
+$member_id = (int) ($_SESSION['user_id'] ?? 0);
+
+// Genres that actually have titles, with how many, for the picker.
+$picker_genres = [];
+$pg = mysqli_query($con, "
+  SELECT g.genre_id, g.genre_name, COUNT(m.movie_series_id) AS total
+  FROM tbl_movie_series_genre g
+  JOIN tbl_movie_series m ON g.genre_id IN (m.genre_id1, m.genre_id2, m.genre_id3)
+  GROUP BY g.genre_id, g.genre_name
+  ORDER BY total DESC, g.genre_name
+");
+while ($r = mysqli_fetch_assoc($pg)) {
+  $picker_genres[(int) $r['genre_id']] = $r;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['skip_genres'])) {
+  $_SESSION['genre_picker_skipped'] = true; // ask again next time they sign in
+  header('Location: FirstProject.php');
+  exit;
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_genres'])) {
+  $chosen = array_values(array_unique(array_map('intval', (array) ($_POST['genre_ids'] ?? []))));
+  $chosen = array_values(array_filter($chosen, fn($id) => isset($picker_genres[$id])));
+  if (count($chosen) === 3) {
+    $csv = implode(',', $chosen);
+    $stmt = $con->prepare("UPDATE tbl_signup_acc SET favorite_genres = ? WHERE signup_id = ?");
+    $stmt->bind_param("si", $csv, $member_id);
+    $stmt->execute();
+    $stmt->close();
+    unset($_SESSION['genre_picker_skipped']);
+  }
+  header('Location: FirstProject.php#recommended');
+  exit;
+}
+
+$stmt = $con->prepare("SELECT first_name, favorite_genres FROM tbl_signup_acc WHERE signup_id = ?");
+$stmt->bind_param("i", $member_id);
+$stmt->execute();
+$member = $stmt->get_result()->fetch_assoc() ?: [];
+$stmt->close();
+
+$favorite_ids = array_values(array_filter(array_map('intval', explode(',', (string) ($member['favorite_genres'] ?? '')))));
+$favorite_names = [];
+foreach ($favorite_ids as $fid) {
+  if (isset($picker_genres[$fid])) {
+    $favorite_names[] = $picker_genres[$fid]['genre_name'];
+  }
+}
+$show_genre_picker = !$favorite_ids && empty($_SESSION['genre_picker_skipped']) && $picker_genres;
+
+// Icon for each genre in the picker.
+function cv_genre_icon($name)
+{
+  $map = [
+    'action' => 'fa-explosion', 'adventure' => 'fa-compass', 'animation' => 'fa-wand-magic-sparkles',
+    'comedy' => 'fa-face-laugh-squint', 'crime' => 'fa-user-secret', 'documentary' => 'fa-video',
+    'drama' => 'fa-masks-theater', 'family' => 'fa-people-roof', 'fantasy' => 'fa-dragon',
+    'history' => 'fa-landmark', 'terror' => 'fa-ghost', 'horror' => 'fa-ghost', 'music' => 'fa-music',
+    'mystery' => 'fa-magnifying-glass', 'science fiction' => 'fa-rocket', 'cinema tv' => 'fa-tv',
+    'thriller' => 'fa-skull', 'war' => 'fa-person-rifle', 'western' => 'fa-hat-cowboy',
+    'news' => 'fa-newspaper', 'reality' => 'fa-camera', 'romance' => 'fa-heart',
+    'sci-fi & fantasy' => 'fa-user-astronaut', 'soap' => 'fa-tv', 'talk' => 'fa-microphone',
+    'war & politics' => 'fa-flag', 'kids' => 'fa-child-reaching',
+  ];
+  return $map[strtolower(trim($name))] ?? 'fa-film';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +83,7 @@ include 'CineVault-header.php';
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
   <link rel="stylesheet" href="feature-js.css">
-  <link rel="stylesheet" href="FirstProject.css">
+  <link rel="stylesheet" href="FirstProject.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -69,10 +137,8 @@ include 'CineVault-header.php';
         LEFT JOIN tbl_movie_series_genre g1 ON ms.genre_id1 = g1.genre_id
         LEFT JOIN tbl_movie_series_genre g2 ON ms.genre_id2 = g2.genre_id
         LEFT JOIN tbl_movie_series_genre g3 ON ms.genre_id3 = g3.genre_id
-        WHERE ms.poster LIKE '%HomeCarousel%'
-          AND ms.video LIKE '%HomeCarousel%'
-          AND ms.modal_poster_title LIKE '%HomeCarousel%'
-        ORDER BY ms.date_posted DESC
+        WHERE ms.feature_slot LIKE 'home-%'
+        ORDER BY ms.feature_slot
         LIMIT 3
       ");
           $active = true;
@@ -99,7 +165,7 @@ include 'CineVault-header.php';
               echo ' active';
               $active = false;
             } ?> position-relative">
-              <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($row['poster']); ?>"
+              <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($row['backdrop'] ?: $row['poster']); ?>"
                 class="d-block w-100 wallpaper" alt="<?php echo htmlspecialchars($row['title']); ?> Wallpaper">
               <div class="wallpaper-description text-primary">
                 <div class="wallpaper-left text-white d-flex flex-column">
@@ -122,7 +188,7 @@ include 'CineVault-header.php';
                     </div>
                     <div class="wallpaper-line bg-secondary mx-3"></div>
                   </div>
-                  <div class="rating-text">
+                  <div class="rating-text cv-full-desc" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="cv-desc-tooltip" data-bs-title="<?php echo htmlspecialchars($row['description'], ENT_QUOTES); ?>">
                     <?php echo $desc; ?>
                   </div>
                 </div>
@@ -170,11 +236,11 @@ include 'CineVault-header.php';
                 <div class='modal-pic-container m-0 position-relative'>
                   <video
                     class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-                    autoplay
+                    data-cv-autoplay preload=none
                     muted
                     loop
                   >
-                    <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($row['video']) . "\" type=\"video/mp4\">
+                    <source src=\"" . htmlspecialchars(cv_video_src($row['video'])) . "\" type=\"video/mp4\">
                     Your browser does not support the video tag.
                   </video>";
             if (!empty($row['modal_poster_title'])) {
@@ -238,6 +304,84 @@ include 'CineVault-header.php';
     </section>
     <!-- END OF SECTION WALLPAPER -->
 
+    <!-- START OF SECTION CONTINUE WATCHING -->
+    <?php
+    // Titles this member started but didn't finish, newest first. For a
+    // series whose last episode was finished, offer the next episode.
+    $cw_items = [];
+    $stmt = $con->prepare("
+      SELECT wp.movie_series_id, wp.episode_id, wp.position_sec, wp.duration_sec,
+             m.title, m.poster, m.category, e.episode_title, s.season_number, s.season_id
+      FROM tbl_watch_progress wp
+      JOIN tbl_movie_series m ON m.movie_series_id = wp.movie_series_id
+      LEFT JOIN tbl_movie_series_episodes e ON e.episode_id = wp.episode_id
+      LEFT JOIN tbl_movie_series_seasons s ON s.season_id = e.season_id
+      WHERE wp.signup_id = ?
+      ORDER BY wp.updated_at DESC
+      LIMIT 20");
+    $stmt->bind_param('i', $member_id);
+    $stmt->execute();
+    $cw_rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    foreach ($cw_rows as $r) {
+      $finished = $r['position_sec'] >= $r['duration_sec'] - 90;
+      if ($r['position_sec'] < 30 && !$finished) {
+        continue; // barely started
+      }
+      if ($finished && $r['episode_id']) {
+        // Next episode of the series, if there is one.
+        $nx = $con->prepare("SELECT e.episode_id, e.episode_title, s.season_number
+          FROM tbl_movie_series_episodes e JOIN tbl_movie_series_seasons s ON s.season_id = e.season_id
+          WHERE s.movie_series_id = ? AND (s.season_number > ? OR (s.season_number = ? AND e.episode_id > ?))
+          ORDER BY s.season_number, e.episode_id LIMIT 1");
+        $nx->bind_param('iiii', $r['movie_series_id'], $r['season_number'], $r['season_number'], $r['episode_id']);
+        $nx->execute();
+        $next = $nx->get_result()->fetch_assoc();
+        $nx->close();
+        if (!$next) {
+          continue; // finished the whole series
+        }
+        $cw_items[] = [
+          'title' => $r['title'], 'poster' => $r['poster'],
+          'sub' => 'Up next: S' . $next['season_number'] . ' · ' . $next['episode_title'],
+          'pct' => 0, 'url' => 'play-vid.php?type=episode&id=' . (int) $next['episode_id'],
+        ];
+        continue;
+      }
+      if ($finished) {
+        continue; // finished the movie
+      }
+      $left = max(1, (int) round(($r['duration_sec'] - $r['position_sec']) / 60));
+      $cw_items[] = [
+        'title' => $r['title'], 'poster' => $r['poster'],
+        'sub' => ($r['episode_id'] ? 'S' . $r['season_number'] . ' · ' . $r['episode_title'] . ' · ' : '') . $left . ' min left',
+        'pct' => min(100, round($r['position_sec'] / max(1, $r['duration_sec']) * 100)),
+        'url' => $r['episode_id'] ? 'play-vid.php?type=episode&id=' . (int) $r['episode_id'] : 'play-vid.php?type=movie_series&id=' . (int) $r['movie_series_id'],
+      ];
+      if (count($cw_items) >= 12) {
+        break;
+      }
+    }
+    ?>
+    <?php if ($cw_items): ?>
+    <section class="cv-continue ms-md-5 ms-3" id="section-continue-watching">
+      <p class="trending-text text-white fs-24 fw-bold mb-3">Continue Watching</p>
+      <div class="cv-continue-row">
+        <?php foreach ($cw_items as $it): ?>
+          <a class="cv-continue-card" href="<?php echo e($it['url']); ?>">
+            <span class="cv-continue-poster">
+              <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($it['poster']); ?>" alt="<?php echo e($it['title']); ?>" loading="lazy">
+              <i class="fa-solid fa-play cv-continue-play"></i>
+              <span class="cv-continue-bar"><span style="width: <?php echo (int) $it['pct']; ?>%"></span></span>
+            </span>
+            <span class="cv-continue-title"><?php echo e($it['title']); ?></span>
+            <span class="cv-continue-sub"><?php echo e($it['sub']); ?></span>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    </section>
+    <?php endif; ?>
+    <!-- END OF SECTION CONTINUE WATCHING -->
 
     <!-- START OF SECTION TOP 10 -->
     <?php
@@ -267,7 +411,7 @@ include 'CineVault-header.php';
           <p class="top-10-top-text">TOP 10</p>
           <div class="ms-3 fs-2 movies-today-text" style="color: #f4fff8">
             <p class="movies-text">MOVIES/SERIES</p>
-            <p class="today-text">TODAY</p>
+            <p class="today-text">ALL TIME</p>
           </div>
         </div>
 
@@ -296,7 +440,7 @@ include 'CineVault-header.php';
               $top10_description = $row['description'];
               ?>
               <div class="top-10-images position-relative">
-                <p class="top-10-text"><?php echo $top10_rank; ?></p>
+                <p class="top-10-text<?php echo $top10_rank >= 10 ? ' is-double' : ''; ?>"><?php echo $top10_rank; ?></p>
                 <a href='#' data-bs-toggle='modal' data-bs-target='#modal-top10-<?php echo $movie_series_id ?>'>
                   <div class="top-10-hover position-relative">
                     <img class="top-10-img rounded-3"
@@ -322,11 +466,11 @@ include 'CineVault-header.php';
             <div class='modal-pic-container m-0 position-relative'>
               <video
                 class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-                autoplay
+                data-cv-autoplay preload=none
                 muted
                 loop
               >
-                <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($top10_video) . "\" type=\"video/mp4\">
+                <source src=\"" . htmlspecialchars(cv_video_src($top10_video)) . "\" type=\"video/mp4\">
                 Your browser does not support the video tag.
               </video>";
               if (!empty($top10_modal_poster_title)) {
@@ -408,10 +552,10 @@ include 'CineVault-header.php';
                       $modals .= '
                           <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=episode&id=' . $ep['episode_id'] . '">
                               <video
-                                  class="position-relative rounded-3 m-0 p-0 video-player video-episode"
+                                  class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                   muted
                                   style="width: 120px; height: 70px; object-fit: cover;">
-                                  <source src="../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
+                                  <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                   Your browser does not support the video tag.
                               </video>
                           </a>';
@@ -517,7 +661,7 @@ include 'CineVault-header.php';
       AND ms.poster NOT LIKE '%SeriesCarousel%'
       AND ms.poster NOT LIKE '%HomeWallpaper%'
     ORDER BY ms.date_released DESC
-    LIMIT 7"
+    LIMIT 20"
           );
           $trend_modals = "";
           $trend_rank = 1;
@@ -563,11 +707,11 @@ include 'CineVault-header.php';
                 <div class='modal-pic-container m-0 position-relative'>
                   <video
                     class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-                    autoplay
+                    data-cv-autoplay preload=none
                     muted
                     loop
                   >
-                    <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($trend_video) . "\" type=\"video/mp4\">
+                    <source src=\"" . htmlspecialchars(cv_video_src($trend_video)) . "\" type=\"video/mp4\">
                     Your browser does not support the video tag.
                   </video>";
             if (!empty($trend_modal_poster_title)) {
@@ -648,10 +792,10 @@ include 'CineVault-header.php';
                     $trend_modals .= '
                                 <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=episode&id=' . $ep['episode_id'] . '">
                                     <video
-                                        class="position-relative rounded-3 m-0 p-0 video-player video-episode"
+                                        class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                         muted
                                         style="width: 120px; height: 70px; object-fit: cover;">
-                                        <source src="../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
+                                        <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                         Your browser does not support the video tag.
                                     </video>
                                 </a>';
@@ -756,7 +900,7 @@ include 'CineVault-header.php';
       AND ms.poster NOT LIKE '%SeriesCarousel%'
       AND ms.poster NOT LIKE '%HomeWallpaper%'
     ORDER BY ms.date_released DESC
-    LIMIT 7"
+    LIMIT 20"
           );
           $comedy_modals = "";
           while ($row = mysqli_fetch_assoc($comedy_query)):
@@ -801,11 +945,11 @@ include 'CineVault-header.php';
             <div class='modal-pic-container m-0 position-relative'>
               <video
                 class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-                autoplay
+                data-cv-autoplay preload=none
                 muted
                 loop
               >
-                <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($comedy_video) . "\" type=\"video/mp4\">
+                <source src=\"" . htmlspecialchars(cv_video_src($comedy_video)) . "\" type=\"video/mp4\">
                 Your browser does not support the video tag.
               </video>";
             if (!empty($comedy_modal_poster_title)) {
@@ -886,10 +1030,10 @@ include 'CineVault-header.php';
                     $comedy_modals .= '
                             <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=episode&id=' . $ep['episode_id'] . '">
                                 <video
-                                    class="position-relative rounded-3 m-0 p-0 video-player video-episode"
+                                    class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                     muted
                                     style="width: 120px; height: 70px; object-fit: cover;">
-                                    <source src="../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
+                                    <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
                             </a>';
@@ -992,7 +1136,7 @@ include 'CineVault-header.php';
         AND ms.poster NOT LIKE '%SeriesCarousel%'
         AND ms.poster NOT LIKE '%HomeWallpaper%'
       ORDER BY ms.date_released DESC
-      LIMIT 8"
+      LIMIT 20"
               );
               $action_modals = "";
               while ($row = mysqli_fetch_assoc($action_query)):
@@ -1037,11 +1181,11 @@ include 'CineVault-header.php';
               <div class='modal-pic-container m-0 position-relative'>
                 <video
                   class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-                  autoplay
+                  data-cv-autoplay preload=none
                   muted
                   loop
                 >
-                  <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($action_video) . "\" type=\"video/mp4\">
+                  <source src=\"" . htmlspecialchars(cv_video_src($action_video)) . "\" type=\"video/mp4\">
                   Your browser does not support the video tag.
                 </video>";
                 if (!empty($action_modal_poster_title)) {
@@ -1122,10 +1266,10 @@ include 'CineVault-header.php';
                         $action_modals .= '
                               <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=episode&id=' . $ep['episode_id'] . '">
                                   <video
-                                      class="position-relative rounded-3 m-0 p-0 video-player video-episode"
+                                      class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                       muted
                                       style="width: 120px; height: 70px; object-fit: cover;">
-                                      <source src="../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
+                                      <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                       Your browser does not support the video tag.
                                   </video>
                               </a>';
@@ -1197,13 +1341,13 @@ include 'CineVault-header.php';
         // Fetch the movie/series for HomeWallpaper1
         $wallpaper1_query = mysqli_query($con, "
       SELECT * FROM tbl_movie_series
-      WHERE poster LIKE '%HomeWallpaper1%'
+      WHERE feature_slot = 'banner1'
       LIMIT 1
     ");
         $wallpaper1 = mysqli_fetch_assoc($wallpaper1_query);
         if ($wallpaper1):
           ?>
-          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper1['poster']); ?>"
+          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper1['backdrop'] ?: $wallpaper1['poster']); ?>"
             class="d-block w-100 wallpaper-lotr bg-danger"
             alt="<?php echo htmlspecialchars($wallpaper1['title']); ?> Wallpaper">
 
@@ -1240,8 +1384,14 @@ include 'CineVault-header.php';
     $show_based_on_genre = false;
     $genres_for_recommend = [];
 
+    // Favorite genres saved on the account, plus genres of titles recently played on this device.
+    $genres_for_recommend = $favorite_names;
     if (isset($_COOKIE['preferred_genres']) && $_COOKIE['preferred_genres'] !== '') {
-      $genres_for_recommend = array_map('trim', explode(',', $_COOKIE['preferred_genres']));
+      $genres_for_recommend = array_merge($genres_for_recommend, array_map('trim', explode(',', $_COOKIE['preferred_genres'])));
+    }
+    $genres_for_recommend = array_values(array_unique(array_filter($genres_for_recommend)));
+
+    if ($genres_for_recommend) {
       $show_based_on_genre = true;
 
       // Build WHERE clause for multiple genres
@@ -1264,7 +1414,7 @@ include 'CineVault-header.php';
           AND ms.poster NOT LIKE '%MovieCarousel%'
           AND ms.poster NOT LIKE '%SeriesCarousel%'
           AND ms.poster NOT LIKE '%HomeWallpaper%'
-        ORDER BY RAND() LIMIT 8"
+        ORDER BY RAND() LIMIT 20"
       );
     } else {
       // Fallback: random picks
@@ -1279,7 +1429,7 @@ include 'CineVault-header.php';
           AND ms.poster NOT LIKE '%MovieCarousel%'
           AND ms.poster NOT LIKE '%SeriesCarousel%'
           AND ms.poster NOT LIKE '%HomeWallpaper%'
-        ORDER BY RAND() LIMIT 8"
+        ORDER BY RAND() LIMIT 20"
       );
     }
     while ($row = mysqli_fetch_assoc($recommend_query)) {
@@ -1287,14 +1437,19 @@ include 'CineVault-header.php';
     }
     $recommended_modals = "";
     ?>
-    <section class="section-popular text-white ms-md-5 ms-3">
+    <section class="section-popular text-white ms-md-5 ms-3" id="recommended">
       <div class="popular-container mt-4">
-        <div class="popular-top mb-4">
-          <p class="action-movies-text text-white fs-24 fw-bold">
+        <div class="popular-top mb-4 d-flex flex-wrap align-items-center gap-2">
+          <p class="action-movies-text text-white fs-24 fw-bold mb-0">
             Recommended for You
             <?php if ($show_based_on_genre)
               echo "<span class='fs-6 ms-1 text-primary'>(Based on " . htmlspecialchars(implode(', ', $genres_for_recommend)) . ")</span>"; ?>
           </p>
+          <?php if ($picker_genres): ?>
+            <button type="button" class="btn btn-sm cv-edit-genres" data-bs-toggle="modal" data-bs-target="#genreModal">
+              <i class="fa-solid fa-sliders me-1"></i><?php echo $favorite_ids ? 'Change my genres' : 'Pick my genres'; ?>
+            </button>
+          <?php endif; ?>
         </div>
         <div class="position-relative" style="width: 100%;">
           <div class="popular-images-container d-flex gap-3 position-relative">
@@ -1327,11 +1482,11 @@ include 'CineVault-header.php';
               <div class='modal-pic-container m-0 position-relative'>
                 <video
                   class=\"w-100 position-relative rounded-3 m-0 p-0 video-player\"
-                  autoplay
+                  data-cv-autoplay preload=none
                   muted
                   loop
                 >
-                  <source src=\"../DASHBOARD-HTML/MOVIE_SERIES_VIDEO/" . htmlspecialchars($item['video']) . "\" type=\"video/mp4\">
+                  <source src=\"" . htmlspecialchars(cv_video_src($item['video'])) . "\" type=\"video/mp4\">
                   Your browser does not support the video tag.
                 </video>";
               if (!empty($item['modal_poster_title'])) {
@@ -1412,10 +1567,10 @@ include 'CineVault-header.php';
                       $recommended_modals .= '
                                 <a href="play-vid.php?video=' . urlencode($ep['episode_video']) . '&type=episode&id=' . $ep['episode_id'] . '">
                                     <video
-                                        class="position-relative rounded-3 m-0 p-0 video-player video-episode"
+                                        class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                         muted
                                         style="width: 120px; height: 70px; object-fit: cover;">
-                                        <source src="../DASHBOARD-HTML/MOVIE_SERIES_EPISODE/' . htmlspecialchars($ep['episode_video']) . '" type="video/mp4">
+                                        <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                         Your browser does not support the video tag.
                                     </video>
                                 </a>';
@@ -1491,13 +1646,13 @@ include 'CineVault-header.php';
         // Fetch the movie/series for HomeWallpaper2
         $wallpaper2_query = mysqli_query($con, "
       SELECT * FROM tbl_movie_series
-      WHERE poster LIKE '%HomeWallpaper2%'
+      WHERE feature_slot = 'banner2'
       LIMIT 1
     ");
         $wallpaper2 = mysqli_fetch_assoc($wallpaper2_query);
         if ($wallpaper2):
           ?>
-          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper2['poster']); ?>"
+          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper2['backdrop'] ?: $wallpaper2['poster']); ?>"
             class="d-block w-100 wallpaper-lotr" alt="<?php echo htmlspecialchars($wallpaper2['title']); ?> Wallpaper">
 
           <div
@@ -1529,50 +1684,60 @@ include 'CineVault-header.php';
   </main>
   <!-- END OF THE MAIN CONTENT -->
 
-  <?php
-
-  // Fetch genres
-  $genres = [];
-  $result = mysqli_query($con, "SELECT genre_id, genre_name FROM tbl_movie_series_genre ORDER BY genre_name ASC");
-  while ($row = mysqli_fetch_assoc($result)) {
-    $genres[] = $row;
-  }
-  ?>
-
-  <!-- Genre Selection Modal -->
+  <!-- ========== FAVORITE GENRES PICKER ========== -->
   <div class="modal fade" id="genreModal" tabindex="-1" aria-labelledby="genreModalLabel" aria-hidden="true"
     data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content bg-dark text-white">
-        <div class="modal-header">
-          <h5 class="modal-title" id="genreModalLabel">Choose 3 genres you like</h5>
-        </div>
-        <form id="genre-form" method="post">
-          <div class="modal-body my-3">
-            <div class="d-flex flex-wrap justify-content-center gap-2 gap-md-3">
-              <?php
-              $btn_styles = ['btn-outline-primary', 'btn-outline-light'];
-              $i = 0;
-              foreach ($genres as $genre):
-                $style = $btn_styles[$i % 2];
-                $genre_name = htmlspecialchars($genre['genre_name']);
-                $genre_id = (int) $genre['genre_id'];
-                ?>
-                <button type="button" class="btn <?php echo $style; ?> rounded-5 category-btn genre-btn-modal"
-                  data-genre-id="<?php echo $genre_id; ?>" data-genre-name="<?php echo $genre_name; ?>">
-                  <?php echo $genre_name; ?>
-                </button>
-                <?php
-                $i++;
-              endforeach;
-              ?>
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg cv-genre-dialog">
+      <div class="modal-content cv-genre-modal text-white">
+        <form id="genre-form" method="post" class="d-flex flex-column h-100">
+          <input type="hidden" name="save_genres" value="1">
+
+          <div class="cv-genre-head text-center">
+            <?php if ($favorite_ids): ?>
+              <button type="button" class="btn-close btn-close-white cv-genre-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <?php endif; ?>
+            <div class="cv-genre-badge"><i class="fa-solid fa-clapperboard"></i></div>
+            <h2 class="fs-3 fw-bold mb-1" id="genreModalLabel">
+              <?php if ($favorite_ids): ?>
+                Change your favorite genres
+              <?php else: ?>
+                Welcome<?php echo !empty($member['first_name']) ? ', ' . e($member['first_name']) : ''; ?>!
+              <?php endif; ?>
+            </h2>
+            <p class="cv-genre-sub mb-3">Pick <strong>3 genres</strong> you love and we'll recommend movies and series for you.</p>
+            <div class="cv-genre-progress" aria-live="polite">
+              <div class="cv-genre-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <span id="genre-count-text">0 of 3 selected</span>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary" id="submit-btn" disabled>Continue</button>
+
+          <div class="modal-body cv-genre-body">
+            <div class="cv-genre-grid">
+              <?php foreach ($picker_genres as $gid => $g):
+                $checked = in_array($gid, $favorite_ids, true); ?>
+                <label class="cv-genre-card<?php echo $checked ? ' is-selected' : ''; ?>">
+                  <input type="checkbox" name="genre_ids[]" value="<?php echo (int) $gid; ?>" <?php echo $checked ? 'checked' : ''; ?>>
+                  <span class="cv-genre-check"><i class="fa-solid fa-check"></i></span>
+                  <i class="fa-solid <?php echo cv_genre_icon($g['genre_name']); ?> cv-genre-icon"></i>
+                  <span class="cv-genre-name"><?php echo e($g['genre_name']); ?></span>
+                  <span class="cv-genre-total"><?php echo (int) $g['total']; ?> title<?php echo (int) $g['total'] === 1 ? '' : 's'; ?></span>
+                </label>
+              <?php endforeach; ?>
+            </div>
           </div>
-          <!-- Hidden checkboxes for form submission -->
-          <div id="selected-genres"></div>
+
+          <div class="cv-genre-foot d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <?php if ($favorite_ids): ?>
+              <button type="button" class="btn btn-link cv-genre-skip" data-bs-dismiss="modal">Cancel</button>
+            <?php else: ?>
+              <button type="submit" name="skip_genres" value="1" class="btn btn-link cv-genre-skip" formnovalidate>Skip for now</button>
+            <?php endif; ?>
+            <button type="submit" class="btn cv-genre-continue" id="submit-btn" disabled>
+              Pick 3 to continue
+            </button>
+          </div>
         </form>
       </div>
     </div>
@@ -1580,8 +1745,7 @@ include 'CineVault-header.php';
 
   <footer>
     <div class="footer text-white d-flex justify-content-between mx-5 align-items-center">
-      <p class="footer-long-text">This site does not store any files on it's server, It only links to the media which is
-        hosted on 3rd party services like YouTube, Dailymotion, Ok.ru, Vidsrc and more.</p>
+      <p class="footer-long-text">Movie and series details and images come from <a class="text-white" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB. Free classic films stream from the <a class="text-white" href="https://archive.org/" target="_blank" rel="noopener">Internet Archive</a>.</p>
       <p>© 2025 CineVault. All rights reserved.</p>
     </div>
   </footer>
@@ -1590,61 +1754,49 @@ include 'CineVault-header.php';
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    function getCookie(name) {
-      let match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-      return match ? match[2] : null;
+    const modalEl = document.getElementById('genreModal');
+    const cards = modalEl.querySelectorAll('.cv-genre-card');
+    const boxes = modalEl.querySelectorAll('.cv-genre-card input');
+    const dots = modalEl.querySelectorAll('.cv-genre-dots span');
+    const countText = document.getElementById('genre-count-text');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function refresh() {
+      const picked = [...boxes].filter(b => b.checked).length;
+      cards.forEach(function (card) {
+        const box = card.querySelector('input');
+        card.classList.toggle('is-selected', box.checked);
+        // After 3 picks, the rest are dimmed until one is removed.
+        card.classList.toggle('is-locked', !box.checked && picked >= 3);
+      });
+      dots.forEach((d, i) => d.classList.toggle('on', i < picked));
+      countText.textContent = picked + ' of 3 selected';
+      submitBtn.disabled = picked !== 3;
+      submitBtn.innerHTML = picked === 3
+        ? 'Show my recommendations <i class="fa-solid fa-arrow-right ms-1"></i>'
+        : 'Pick ' + (3 - picked) + ' more';
     }
 
-    if (!getCookie('preferred_genres')) {
-      var genreModal = new bootstrap.Modal(document.getElementById('genreModal'));
-      genreModal.show();
-    }
-
-    const genreBtns = document.querySelectorAll('.genre-btn-modal');
-    const selectedGenresDiv = document.getElementById('selected-genres');
-    let selectedGenres = [];
-
-    genreBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        const genreName = btn.getAttribute('data-genre-name');
-        if (btn.classList.contains('selected')) {
-          btn.classList.remove('selected');
-          selectedGenres = selectedGenres.filter(g => g !== genreName);
-        } else {
-          if (selectedGenres.length >= 3) {
-            // Optionally show a message or shake effect
-            btn.classList.add('shake');
-            setTimeout(() => btn.classList.remove('shake'), 300);
-            return;
-          }
-          btn.classList.add('selected');
-          selectedGenres.push(genreName);
+    boxes.forEach(function (box) {
+      box.addEventListener('change', function () {
+        const picked = [...boxes].filter(b => b.checked).length;
+        if (picked > 3) {
+          box.checked = false;
+          const card = box.closest('.cv-genre-card');
+          card.classList.add('shake');
+          setTimeout(() => card.classList.remove('shake'), 350);
         }
-        // Update hidden checkboxes for form submission
-        selectedGenresDiv.innerHTML = '';
-        selectedGenres.forEach(function (genre) {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = 'genres[]';
-          input.value = genre;
-          selectedGenresDiv.appendChild(input);
-        });
-        document.getElementById('submit-btn').disabled = selectedGenres.length !== 3;
+        refresh();
       });
     });
+    refresh();
 
-    document.getElementById('genre-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (selectedGenres.length !== 3) {
-        alert('Please select exactly 3 genres.');
-        return;
-      }
-      document.cookie = "preferred_genres=" + selectedGenres.join(',') + "; path=/; max-age=" + (60 * 60 * 24 * 30);
-      location.reload();
-    });
+    <?php if ($show_genre_picker): ?>
+    new bootstrap.Modal(modalEl).show();
+    <?php endif; ?>
   });
 </script>
-<script src="video-player.js"></script>
-<script src="poster-slide.js"></script>
+<script src="video-player.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>
+<script src="poster-slide.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>
 
 </html>

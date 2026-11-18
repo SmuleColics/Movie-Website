@@ -1,0 +1,267 @@
+/*
+ * CineVault vintage theme: old movie palace instead of modern tech.
+ * Warm black, aged cream text, brass/gold accents, a marquee red for
+ * badges, a serif display face and a faint film grain.
+ * Loaded last on every public and member page (see includes/bootstrap.php).
+ */
+html:root {
+  --cv-ink: #14110D;          /* page background */
+  --cv-surface: #1F1A14;      /* cards, modals */
+  --cv-surface-2: #2A231A;    /* raised / hover */
+  --cv-line: #3D3326;         /* borders */
+  --cv-cream: #F1E8D4;        /* main text */
+  --cv-muted: #B3A68C;        /* secondary text */
+  --cv-brass: #C9A24B;        /* primary accent */
+  --cv-brass-hi: #DDB963;
+  --cv-brass-lo: #A9853A;
+  --cv-red: #9E2B25;          /* marquee red */
+  --cv-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+  /* existing variables used across the site */
+  --movie-bg: var(--cv-ink);
+  --bg-primary: var(--cv-brass);
+  --text-color: var(--cv-brass-hi);
+  --text-sec: var(--cv-cream);
+  --db-text-sec: var(--cv-cream);
+  --dashboard-primary: var(--cv-brass);
+  --bootstrap-dark: var(--cv-surface);
+  --box-text: var(--cv-cream);
+  --bg-color: var(--cv-surface);
+  --bs-body-bg: var(--cv-ink);
+  --bs-body-color: var(--cv-cream);
+  --bs-link-color: var(--cv-brass-hi);
+  --bs-link-color-rgb: 221, 185, 99;
+  --bs-link-hover-color: #F0D58F;
+  --bs-primary: var(--cv-brass);
+  --bs-primary-rgb: 201, 162, 75;
+  --bs-dark-rgb: 31, 26, 20;
+  --bs-tooltip-bg: var(--cv-surface-2);
+
+  /* shared notifications panel */
+  --nt-primary: var(--cv-brass);
+}
+
+/* ---------- Page ---------- */
+html, body {
+  background-color: var(--cv-ink) !important;
+  color: var(--cv-cream);
+}
+body.bg-dark {
+  background-color: var(--cv-ink) !important;
+}
+
+/* Faint film grain and vignette over everything (clicks pass through). */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2147483000;
+  opacity: .07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 .92  0 0 0 0 .8  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2147482999;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, .35) 100%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  body::after { animation: cv-grain 1.2s steps(4) infinite; }
+}
+@keyframes cv-grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, 1%); }
+  50% { transform: translate(1%, -2%); }
+  75% { transform: translate(2%, 2%); }
+  100% { transform: translate(0, 0); }
+}
+
+::selection { background: rgba(201, 162, 75, .35); color: #fff; }
+
+/* ---------- Type ---------- */
+h1, h2, h3,
+.trending-text, .action-movies-text, .featured-text,
+.endless-movies, .signin-text, .modal-title,
+.lp-cta h2, .legal-content h1, .legal-content h2 {
+  font-family: var(--cv-serif) !important;
+  letter-spacing: .01em;
+}
+.trending-text, .action-movies-text {
+  font-weight: 700 !important;
+}
+.featured-text {
+  letter-spacing: .18em !important;
+  color: var(--cv-brass-hi) !important;
+}
+.endless-movies {
+  font-weight: 700 !important;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, .6);
+}
+
+/* Brand: "Cine" in cream, "Vault" in brass, set in the serif face. */
+.navbar-brand, .cv-brand, a.navbar-brand {
+  font-family: var(--cv-serif) !important;
+  font-weight: 700 !important;
+  letter-spacing: .02em;
+}
+.db-text-primary, .navbar-brand .db-text-primary, .cv-brand span {
+  color: var(--cv-brass) !important;
+}
+.db-text-sec { color: var(--cv-cream) !important; }
+.text-white-50 { color: rgba(241, 232, 212, .55) !important; }
+
+/* ---------- Accents ---------- */
+.db-bg-primary, .btn-primary, .btn.db-bg-primary {
+  background-color: var(--cv-brass) !important;
+  border-color: var(--cv-brass) !important;
+  color: #1A140C !important;
+}
+.db-bg-primary:hover, .btn-primary:hover, .btn.db-bg-primary:hover,
+.btn-primary:focus-visible, .btn.db-bg-primary:focus-visible {
+  background-color: var(--cv-brass-hi) !important;
+  border-color: var(--cv-brass-hi) !important;
+  color: #1A140C !important;
+}
+body .btn-outline-light {
+  --bs-btn-color: var(--cv-cream);
+  --bs-btn-border-color: rgba(241, 232, 212, .6);
+  --bs-btn-hover-bg: var(--cv-cream);
+  --bs-btn-hover-color: #1A140C;
+}
+.btn-light, .play-btn {
+  background-color: var(--cv-cream) !important;
+  border-color: var(--cv-cream) !important;
+  color: #1A140C !important;
+}
+.btn-light:hover, .play-btn:hover {
+  background-color: #fff !important;
+}
+a { color: var(--cv-brass-hi); }
+.form-check-input:checked {
+  background-color: var(--cv-brass) !important;
+  border-color: var(--cv-brass) !important;
+}
+.form-control:focus, .form-select:focus, .signin-inputs:focus {
+  border-color: var(--cv-brass) !important;
+  box-shadow: 0 0 0 .2rem rgba(201, 162, 75, .25) !important;
+}
+.badge.bg-danger, .cv-notif-badge, .notif-badge {
+  background-color: var(--cv-red) !important;
+}
+
+/* ---------- Surfaces ---------- */
+.bg-dark, .modal-content, .modals, .dropdown-menu, .offcanvas, .accordion-item, .accordion-button {
+  background-color: var(--cv-surface) !important;
+  color: var(--cv-cream);
+  border-color: var(--cv-line) !important;
+}
+.accordion-button:not(.collapsed) {
+  background-color: var(--cv-surface-2) !important;
+  color: var(--cv-brass-hi) !important;
+  box-shadow: none;
+}
+.modal-content {
+  border: 1px solid var(--cv-line) !important;
+}
+.dropdown-item { color: var(--cv-cream); }
+.dropdown-item:hover, .dropdown-item:focus {
+  background-color: var(--cv-surface-2);
+  color: var(--cv-brass-hi);
+}
+.tooltip-inner {
+  background-color: var(--cv-surface-2) !important;
+  color: var(--cv-cream) !important;
+  border: 1px solid var(--cv-line);
+}
+
+/* Nav bar: warm and translucent once scrolled. */
+#navbar.is-scrolled, #navbar.scrolled, .navbar.is-scrolled {
+  background-color: rgba(20, 17, 13, .94) !important;
+  border-bottom: 1px solid var(--cv-line);
+}
+
+/* Posters: a thin brass frame, like a lobby card. */
+.trending-img, .top-10-img, .trending-images img {
+  box-shadow: 0 0 0 1px rgba(201, 162, 75, .18), 0 10px 24px rgba(0, 0, 0, .45);
+}
+.trending-hover:hover .trending-img, .top-10-hover:hover img {
+  box-shadow: 0 0 0 2px var(--cv-brass), 0 14px 30px rgba(0, 0, 0, .55);
+}
+
+/* Top 10 numbers: brass outline, like marquee letters. */
+.top-10-number, .top-10-numbers, .number-top10 {
+  -webkit-text-stroke-color: var(--cv-brass-hi) !important;
+}
+
+/* Scrollbars */
+* { scrollbar-color: rgba(201, 162, 75, .45) transparent; }
+::-webkit-scrollbar-thumb { background: rgba(201, 162, 75, .4) !important; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201, 162, 75, .65) !important; }
+
+/* Footer */
+footer, .footer, .footer-signin {
+  color: var(--cv-muted);
+}
+footer a, .footer a { color: var(--cv-cream) !important; }
+
+/* Bootstrap's blue "primary" outline and text, used on the carousel play buttons. */
+body .btn-outline-primary {
+  --bs-btn-color: var(--cv-brass-hi);
+  --bs-btn-border-color: var(--cv-brass);
+  --bs-btn-hover-bg: var(--cv-brass);
+  --bs-btn-hover-border-color: var(--cv-brass);
+  --bs-btn-hover-color: #1A140C;
+  --bs-btn-active-bg: var(--cv-brass-lo);
+  --bs-btn-active-border-color: var(--cv-brass-lo);
+  --bs-btn-active-color: #1A140C;
+}
+.text-primary { color: var(--cv-brass-hi) !important; }
+.border-primary { border-color: var(--cv-brass) !important; }
+.bg-primary { background-color: var(--cv-brass) !important; color: #1A140C !important; }
+
+/* ---------- Admin side ---------- */
+html:root { --db-bg-primary: #3A2E1C; }
+.table-task-top, .emp-stats-top {
+  background: linear-gradient(135deg, #3A2E1C 0%, #2A2219 100%) !important;
+  border-bottom: 2px solid var(--cv-brass);
+}
+.table-task-top .btn-outline-light, .table-task-top .btn-light, .table-task-top .btn-group .btn {
+  border-color: rgba(201, 162, 75, .55) !important;
+}
+.table-task-top .btn-group .btn.active, .table-task-top .btn-group .btn:hover {
+  background-color: var(--cv-brass) !important;
+  color: #1A140C !important;
+}
+.alert-success {
+  --bs-alert-bg: #2A2219;
+  --bs-alert-border-color: var(--cv-brass);
+  --bs-alert-color: var(--cv-cream);
+}
+.alert-success .bi, .alert-success .fa-solid { color: var(--cv-brass-hi); }
+.alert-success .btn-close { filter: invert(1) sepia(.4); }
+table.dataTable thead th, .table thead th { color: var(--cv-brass-hi) !important; }
+.table { --bs-table-bg: transparent; --bs-table-color: var(--cv-cream); --bs-table-border-color: var(--cv-line); --bs-table-hover-bg: rgba(201, 162, 75, .06); }
+.page-item.active .page-link, .dt-paging .dt-paging-button.current {
+  background-color: var(--cv-brass) !important;
+  border-color: var(--cv-brass) !important;
+  color: #1A140C !important;
+}
+.page-link { color: var(--cv-brass-hi); background-color: var(--cv-surface); border-color: var(--cv-line); }
+
+/* Text boxes and dropdowns: typed text always readable on the dark fields. */
+body .form-control, body .form-select, body textarea.form-control {
+  background-color: #1E1913;
+  color: var(--cv-cream);
+  border-color: var(--cv-line);
+  caret-color: var(--cv-brass-hi);
+}
+body .form-control:focus, body .form-select:focus {
+  background-color: #1E1913;
+  color: var(--cv-cream);
+}
+body .form-control::placeholder { color: var(--cv-muted); opacity: 1; }
+body .form-select option { background-color: var(--cv-surface); color: var(--cv-cream); }
+body .form-control:disabled, body .form-control[readonly] { background-color: #18140F; color: var(--cv-muted); }

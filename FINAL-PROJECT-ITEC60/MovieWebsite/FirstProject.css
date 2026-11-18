@@ -1,18 +1,18 @@
 :root {
-  --movie-bg: #1F2A37;
-  --bg-primary: #0275d8;
-  --text-color: #4d97ff ;
+  --movie-bg: #1C1813;
+  --bg-primary: #C9A24B;
+  --text-color: #E0B95C ;
   --ivory: #FFFFF0;
-  --placeholder-color: #F8F8FF;
-  --text-sec: #f4fff8;
-  --bootstrap-dark: #212529;
+  --placeholder-color: #F5EFE0;
+  --text-sec: #F3EAD6;
+  --bootstrap-dark: #1F1A14;
   --secondary-color: #6c757d;
-  --db-text-sec: #f4fff8;
+  --db-text-sec: #F3EAD6;
 
 }
 
 body {
-  height: 4350px;
+  height: auto; /* was a fixed 4350px, which left a big empty gap under the footer */
   background-color: var(--movie-bg);
   font-family: 'Poppins', sans-serif;
   overflow-x: hidden;
@@ -42,7 +42,7 @@ input:focus {
 }
 
 .search::placeholder {
-  color: #F8F8FF;
+  color: #F5EFE0;
 }
 
 .search-container {
@@ -51,7 +51,7 @@ input:focus {
   align-items: center;
 }
 
-.fa-magnifying-glass {
+.search-container .fa-magnifying-glass { /* only the search bar icon; was every magnifying glass on the page */
   position: absolute;
   left: 10px;
   color: var(--ivory);
@@ -292,7 +292,7 @@ input:focus {
 footer {
   margin-top: -100px;
   padding-top: 90px;
-  background: linear-gradient(to top, #0A0F1A, #1A2536, #1F2A37);
+  background: linear-gradient(to top, #0D0B08, #17130F, #1C1813);
   -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 1));
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 1));
 }
@@ -507,11 +507,11 @@ img, .top-10-text, .trending-img, .action-movies-img, .featured-img, .popular-im
 }
 
 .nav-link:hover, .navigation-links:hover {
-  color: #607EBC !important;
+  color: #C9A24B !important;
 }
 
 .middle-header a:hover {
-  color: #607EBC !important;
+  color: #C9A24B !important;
 }
 
 .movies-2 {
@@ -639,4 +639,884 @@ select {
 
 .video-episode:hover {
   transform: scale(1.1) !important;
+}
+/* ========== FAVORITE GENRES PICKER ========== */
+.cv-genre-modal {
+  background: linear-gradient(180deg, #231C14 0%, #15120E 40%);
+  border: 1px solid #3D3326;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.cv-genre-head {
+  position: relative;
+  padding: 28px 24px 16px;
+}
+
+.cv-genre-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.cv-genre-badge {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: #fff;
+  background: #C9A24B;
+  box-shadow: 0 0 0 8px rgba(201, 162, 75, .18);
+}
+
+.cv-genre-sub {
+  color: #D8CCB0;
+}
+
+.cv-genre-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .06);
+  font-size: 14px;
+  color: #D8CCB0;
+}
+
+.cv-genre-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.cv-genre-dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .2);
+  transition: background .2s, transform .2s;
+}
+
+.cv-genre-dots span.on {
+  background: #E0B95C;
+  transform: scale(1.15);
+}
+
+.cv-genre-body {
+  padding: 8px 24px 16px;
+}
+
+.cv-genre-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.cv-genre-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 118px;
+  padding: 16px 10px;
+  border-radius: 14px;
+  border: 2px solid #3D3326;
+  background: #221C15;
+  cursor: pointer;
+  text-align: center;
+  user-select: none;
+  transition: border-color .2s, background .2s, transform .15s, opacity .2s;
+}
+
+.cv-genre-card:hover {
+  border-color: #4d6aa3;
+  transform: translateY(-2px);
+}
+
+.cv-genre-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cv-genre-card:focus-within {
+  outline: 2px solid #E0B95C;
+  outline-offset: 2px;
+}
+
+.cv-genre-icon {
+  font-size: 28px;
+  color: #8fa8d8;
+  transition: color .2s;
+}
+
+.cv-genre-name {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.cv-genre-total {
+  font-size: 12px;
+  color: #9198A1;
+}
+
+.cv-genre-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  background: #C9A24B;
+  opacity: 0;
+  transform: scale(.6);
+  transition: opacity .2s, transform .2s;
+}
+
+.cv-genre-card.is-selected {
+  border-color: #C9A24B;
+  background: rgba(201, 162, 75, .18);
+}
+
+.cv-genre-card.is-selected .cv-genre-icon {
+  color: #fff;
+}
+
+.cv-genre-card.is-selected .cv-genre-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.cv-genre-card.is-locked {
+  opacity: .45;
+}
+
+.cv-genre-card.shake {
+  animation: cv-shake .35s;
+}
+
+@keyframes cv-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.cv-genre-foot {
+  padding: 14px 24px 22px;
+  border-top: 1px solid #3D3326;
+}
+
+.cv-genre-skip {
+  color: #D8CCB0;
+  text-decoration: none;
+}
+
+.cv-genre-skip:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.cv-genre-continue {
+  min-width: 220px;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  color: #fff;
+  background: #C9A24B;
+  border: 0;
+}
+
+.cv-genre-continue:hover {
+  color: #fff;
+  background: #A9853A;
+}
+
+.cv-genre-continue:disabled {
+  color: #D8CCB0;
+  background: #4A3F2E;
+  opacity: 1;
+}
+
+.cv-edit-genres {
+  color: #D8CCB0;
+  border: 1px solid #3D3326;
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+.cv-edit-genres:hover {
+  color: #fff;
+  border-color: #C9A24B;
+}
+
+@media (max-width: 576px) {
+  .cv-genre-dialog {
+    margin: 12px;
+  }
+  .cv-genre-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .cv-genre-card {
+    min-height: 100px;
+  }
+  .cv-genre-foot {
+    flex-direction: column-reverse;
+  }
+  .cv-genre-continue {
+    width: 100%;
+  }
+}
+
+/* The site's search-bar style positions .fa-magnifying-glass absolutely; undo it inside the picker. */
+.cv-genre-card .cv-genre-icon {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+}
+
+/* Keep the header and buttons visible; only the genre grid scrolls. */
+.cv-genre-modal #genre-form {
+  min-height: 0;
+  max-height: 100%;
+  height: auto !important;
+}
+
+.cv-genre-modal .cv-genre-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Keep sliders from making the page wider than the screen. On phones the
+   extra width pushed popups off screen and zoomed the whole page out. */
+html, body {
+  overflow-x: clip;
+}
+
+main {
+  overflow-x: clip;
+}
+
+/* ========== Taller home carousel (desktop and tablet) ==========
+   Fills the screen below the 60px top bar, and only the bottom third fades
+   out (before, it faded from halfway, so it looked short). */
+@media (min-width: 769px) {
+  .section-wallpaper .wallpaper {
+    height: calc(100vh - 60px);
+    min-height: 520px;
+    max-height: 980px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 62%, rgba(0, 0, 0, 0.55) 82%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 62%, rgba(0, 0, 0, 0.55) 82%, transparent 100%);
+  }
+  .section-wallpaper .wallpaper-description {
+    bottom: 12%;
+  }
+}
+
+/* Full description tooltip on the carousels */
+.cv-full-desc {
+  cursor: help;
+}
+
+.cv-desc-tooltip {
+  --bs-tooltip-max-width: 420px;
+  --bs-tooltip-bg: #221C15;
+  --bs-tooltip-padding-x: 14px;
+  --bs-tooltip-padding-y: 10px;
+  --bs-tooltip-font-size: 14px;
+}
+
+.cv-desc-tooltip .tooltip-inner {
+  text-align: left;
+  line-height: 1.5;
+  border: 1px solid #3D3326;
+}
+
+/* ========== Empty banner sections ==========
+   The big banners (movies-1, movies-2, ...) only show when their title is in
+   the database. When one is missing, hide the empty section and undo the
+   negative margin the next row uses to tuck under the banner (otherwise that
+   row slides up over the row above it). */
+section[class^="movies-"]:not(:has(img)) {
+  display: none;
+}
+
+section[class^="movies-"]:not(:has(img)) + section {
+  margin-top: 80px !important;
+}
+
+/* ========== Top bar: transparent over the carousel, solid after scrolling ==========
+   Only on pages whose carousel has slides; other pages keep the solid bar. */
+#navbar {
+  transition: background-color .3s ease, box-shadow .3s ease, backdrop-filter .3s ease;
+}
+
+body:has(.section-wallpaper .carousel-item) {
+  margin-top: 0 !important;            /* let the carousel start behind the bar */
+}
+
+body:has(.section-wallpaper .carousel-item) #navbar:not(.is-scrolled) {
+  background-color: transparent !important;
+  /* soft shade at the very top keeps the menu readable over bright posters */
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, .65), rgba(0, 0, 0, 0)) !important;
+  box-shadow: none;
+}
+
+#navbar.is-scrolled {
+  background-color: rgba(26, 21, 15, .96) !important;
+  background-image: none !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .35);
+  backdrop-filter: blur(6px);
+}
+
+/* ========== Top 10: two-digit rank ("10") ==========
+   One digit fits in the 50px left of a poster; "10" needs about twice that,
+   so its "0" used to hide behind the poster. Give it more room. */
+.top-10-images:has(.top-10-text.is-double) {
+  margin-left: 80px;
+}
+
+.top-10-text.is-double {
+  left: -126px;
+  letter-spacing: -10px;
+}
+
+@media (max-width: 768px) {
+  .top-10-images:has(.top-10-text.is-double) {
+    margin-left: 44px;
+  }
+  .top-10-text.is-double {
+    left: -92px;
+  }
+}
+
+
+/* ========== Member top bar: logo, search, bell, account chip ========== */
+.cv-brand {
+  font-size: 26px !important;
+  font-weight: 700;
+  letter-spacing: -.3px;
+  color: #fff !important;
+}
+
+.cv-brand span {
+  color: #C9A24B;
+}
+
+.cv-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cv-search-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 14px;
+  color: #B3A68C;
+  pointer-events: none;
+  transition: color .2s;
+}
+
+.cv-search input {
+  width: 230px;
+  height: 40px;
+  padding: 0 14px 0 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: width .25s ease, background .2s, border-color .2s, box-shadow .2s;
+}
+
+.cv-search input::placeholder {
+  color: #B3A68C;
+}
+
+.cv-search input:focus {
+  width: 300px;
+  background: rgba(255, 255, 255, .14);
+  border-color: #C9A24B;
+  box-shadow: 0 0 0 3px rgba(201, 162, 75, .25);
+}
+
+.cv-search:focus-within .cv-search-icon {
+  color: #fff;
+}
+
+/* hide the browser's own clear (x) button so it matches the dark style */
+.cv-search input::-webkit-search-cancel-button {
+  filter: invert(1);
+  opacity: .6;
+}
+
+.cv-icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s;
+}
+
+.cv-icon-btn:hover,
+.cv-icon-btn[aria-expanded="true"] {
+  background: rgba(201, 162, 75, .35);
+}
+
+.cv-icon-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #dc3545;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  border: 2px solid #1A1510;
+}
+
+.cv-member-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .06);
+  color: #fff;
+  transition: background .2s, border-color .2s;
+}
+
+@media (min-width: 1200px) {
+  .cv-member-chip {
+    padding: 3px 12px 3px 3px;
+  }
+}
+
+.cv-member-chip:hover,
+.cv-member-chip[aria-expanded="true"] {
+  background: rgba(201, 162, 75, .25);
+  border-color: #C9A24B;
+}
+
+.cv-member-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #C9A24B, #E0B95C);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .5px;
+}
+
+.cv-member-avatar-lg {
+  width: 46px;
+  height: 46px;
+  font-size: 16px;
+}
+
+.cv-member-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.cv-member-chevron {
+  font-size: 11px;
+  color: #B3A68C;
+}
+
+/* Shared dropdown look for the bell and account menus */
+.cv-menu {
+  margin-top: 10px !important;
+  padding: 8px;
+  background: #221C15 !important;
+  border: 1px solid #3D3326;
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .5);
+  color: #F1E8D4;
+}
+
+.cv-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: #F1E8D4;
+}
+
+.cv-menu .dropdown-item:hover {
+  background: #2C241A;
+  color: #fff;
+}
+
+.cv-menu .dropdown-item.text-danger {
+  color: #ff6b6b !important;
+}
+
+.cv-menu .dropdown-divider {
+  border-color: #3D3326;
+}
+
+.cv-menu-header {
+  padding: 6px 10px 10px;
+  font-weight: 600;
+  color: #fff;
+  border-bottom: 1px solid #3D3326;
+  margin-bottom: 6px;
+}
+
+.cv-menu-empty {
+  padding: 16px 10px;
+  text-align: center;
+  font-size: 14px;
+  color: #B3A68C;
+}
+
+.cv-arrivals-menu {
+  width: 320px;
+  max-width: calc(100vw - 24px);
+}
+
+.cv-arrival {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: #F1E8D4;
+  text-decoration: none;
+}
+
+.cv-arrival:hover {
+  background: #2C241A;
+  color: #fff;
+}
+
+.cv-arrival-icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201, 162, 75, .22);
+  color: #E6CF96;
+}
+
+.cv-arrival-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cv-arrival-title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cv-arrival-date {
+  font-size: 12px;
+  color: #B3A68C;
+}
+
+.cv-member-menu {
+  min-width: 260px;
+}
+
+.cv-member-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px 4px;
+}
+
+.cv-member-head-text p {
+  margin: 0;
+}
+
+.cv-member-head-name {
+  font-weight: 600;
+  color: #fff;
+}
+
+.cv-member-head-email {
+  font-size: 13px;
+  color: #B3A68C;
+  word-break: break-all;
+}
+
+/* Phones: a smaller search box so the bell and avatar still fit */
+@media (max-width: 575px) {
+  .cv-brand {
+    font-size: 22px !important;
+  }
+  .cv-search input,
+  .cv-search input:focus {
+    width: 140px;
+  }
+}
+
+/* ========== Thin scrollbars that blend into the dark background ========== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .22) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .22);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, .4);
+}
+
+/* Dark frosted look so the search, bell and chip stay readable over bright posters */
+.cv-search input,
+.cv-icon-btn,
+.cv-member-chip {
+  background: rgba(18, 14, 10, .55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, .18);
+}
+
+.cv-search input:focus {
+  background: rgba(18, 14, 10, .8);
+}
+
+/* The frosted input paints above earlier siblings, so lift the icon over it. */
+.cv-search-icon {
+  z-index: 2;
+}
+
+.cv-member-menu {
+  min-width: 300px;
+}
+
+.cv-member-head-email {
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Search: full box from tablets up, icon button on phones */
+.cv-search-mobile {
+  display: none !important;
+  text-decoration: none;
+}
+
+@media (max-width: 575px) {
+  .cv-search {
+    display: none !important;
+  }
+  .cv-search-mobile {
+    display: inline-flex !important;
+  }
+  #navbar .navbar-toggler {
+    padding: 4px 6px;
+    margin-left: 6px !important;
+  }
+  #navbar header {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}
+
+/* Phones: keep "TOP 10" on one line (same fix as the landing page) */
+@media (max-width: 576px) {
+  main .top-10-top {
+    align-items: flex-start !important;
+  }
+  main .top-10-top-text {
+    font-size: 80px;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: -4px;
+    margin-bottom: 4px;
+  }
+  main .movies-today-text {
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    font-size: 22px !important;
+  }
+  main .movies-today-text p {
+    margin-bottom: 0;
+  }
+}
+
+/* Member bell: same bell as the admin side (shared/notifications.css),
+   with the frosted look used by the other top bar buttons. */
+.cv-bell.cv-bell-member {
+  width: 40px;
+  height: 40px;
+  background: rgba(18, 14, 10, .55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, .18);
+  font-size: 16px;
+}
+
+.cv-bell.cv-bell-member:hover,
+.cv-bell.cv-bell-member[aria-expanded="true"] {
+  background: rgba(201, 162, 75, .35);
+}
+
+.cv-bell-member .cv-bell-badge {
+  top: -4px;
+  right: -4px;
+  border-color: #1A1510;
+}
+
+/* ========== Footer spacing ==========
+   The footer is pulled up 100px to fade into the big banner that normally ends
+   the page. Only do that when the last section really is a banner with a
+   picture; otherwise the footer would cover the last row of posters. */
+footer {
+  margin-top: 60px;
+}
+
+body:has(main > section:last-of-type[class^="movies-"] img) footer {
+  margin-top: -100px;
+}
+
+/* ========== Rows with no titles ==========
+   On the browse pages (Home, Movies, Series), a genre row with no posters only
+   showed its heading above empty space. Hide any row that has no pictures. */
+main:has(.section-wallpaper) > section:not(:has(img)) {
+  display: none;
+}
+
+/* ========== Gap between the carousel and Top 10 (Home, Movies, Series) ==========
+   The carousel already fades into the page, so the old 180px gap left a big
+   empty band. Desktop and tablet only; phones keep their own layout. */
+@media (min-width: 769px) {
+  main:has(.section-wallpaper .carousel-item) .section-top-10,
+  main:has(.section-wallpaper .carousel-item) #section-top-10 { /* id: Override.css sets it on Movies */
+    margin-top: 24px !important;
+  }
+}
+
+/* ---------- Continue Watching (home) ---------- */
+.cv-continue { margin-top: 28px; }
+.cv-continue-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 4px 24px 14px 2px;
+  scroll-snap-type: x proximity;
+}
+.cv-continue-card {
+  flex: 0 0 170px;
+  scroll-snap-align: start;
+  color: inherit;
+  text-decoration: none;
+}
+.cv-continue-poster {
+  position: relative;
+  display: block;
+  aspect-ratio: 2 / 3;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #1F1A14;
+  box-shadow: 0 0 0 1px rgba(201, 162, 75, .2), 0 10px 24px rgba(0, 0, 0, .45);
+  transition: transform .2s, box-shadow .2s;
+}
+.cv-continue-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cv-continue-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(.9);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(20, 17, 13, .75);
+  color: #F1E8D4;
+  border: 1px solid rgba(241, 232, 212, .5);
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+}
+.cv-continue-card:hover .cv-continue-poster,
+.cv-continue-card:focus-visible .cv-continue-poster {
+  transform: translateY(-3px);
+  box-shadow: 0 0 0 2px #C9A24B, 0 14px 30px rgba(0, 0, 0, .55);
+}
+.cv-continue-card:hover .cv-continue-play,
+.cv-continue-card:focus-visible .cv-continue-play { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.cv-continue-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  background: rgba(0, 0, 0, .55);
+}
+.cv-continue-bar > span { display: block; height: 100%; background: #C9A24B; }
+.cv-continue-title {
+  display: block;
+  margin-top: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cv-continue-sub {
+  display: block;
+  font-size: 12px;
+  color: #B3A68C;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 576px) {
+  .cv-continue-card { flex-basis: 130px; }
 }

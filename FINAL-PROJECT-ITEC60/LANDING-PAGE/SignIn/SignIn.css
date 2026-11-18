@@ -1,5 +1,5 @@
 :root {
-  --bg-color: #212529;
+  --bg-color: #1F1A14;
   --box-text: #e9e0e0;
 }
 
@@ -70,7 +70,7 @@ body {
 .footer-signin {
   margin-top: -20px;
   padding: 140px 30px 0 30px;
-  background: linear-gradient(to top, #0A0F1A, #1A2536, #1F2A37);
+  background: linear-gradient(to top, #0D0B08, #17130F, #1C1813);
   
   /* Adjust the gradient stops to reduce blur height */
   -webkit-mask-image: linear-gradient(to bottom, 
@@ -194,4 +194,185 @@ margin-top: -40px;
 }
 .forgot-pass:hover {
   text-decoration: underline !important; 
+}
+/* Back to home link above the sign in / sign up forms */
+.cv-back-link {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--db-text-sec, #F3EAD6);
+  text-decoration: none;
+  font-size: 15px;
+  opacity: .85;
+}
+
+.cv-back-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+  color: #fff;
+}
+
+/* Terms checkbox on sign up */
+.cv-terms-check {
+  font-size: 14px;
+}
+
+.cv-terms-check .form-check-input {
+  background-color: transparent;
+  border-color: #9198A1;
+}
+
+.cv-terms-check .form-check-input:checked {
+  background-color: #C9A24B;
+  border-color: #C9A24B;
+}
+
+/* Footer headings */
+.cv-footer-title {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+/* The checkbox label must not use the floating-label style above,
+   and its links must stay clickable. */
+.cv-terms-check .form-check-label {
+  position: static;
+  font-size: 14px;
+  pointer-events: auto;
+  color: var(--db-text-sec, #F3EAD6);
+}
+
+.cv-terms-check .form-check-input {
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+/* Show/hide password eye (added by password-toggle.js) */
+.cv-eye-btn {
+  position: absolute;
+  right: 12px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
+  padding: 4px 6px;
+  color: #D8CCB0;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.cv-eye-btn:hover,
+.cv-eye-btn:focus-visible {
+  color: #fff;
+}
+
+/* Remember me row on sign in */
+.cv-remember {
+  font-size: 14px;
+}
+
+.cv-remember .form-check-label {
+  position: static;
+  font-size: 14px;
+  pointer-events: auto;
+  color: var(--db-text-sec, #F3EAD6);
+  cursor: pointer;
+}
+
+.cv-remember .form-check-input {
+  background-color: transparent;
+  border-color: #9198A1;
+  cursor: pointer;
+}
+
+.cv-remember .form-check-input:checked {
+  background-color: #C9A24B;
+  border-color: #C9A24B;
+}
+
+/* Phones: the form sits under the logo bar and the page can scroll,
+   instead of floating over the picture and getting cut off at the top.
+   (body prefix + !important so it also beats the inline styles on
+   forgot-pass.php and reset-password.php.) */
+@media (max-width: 576px) {
+  body.bg-dark {
+    overflow-y: auto !important;
+    background-color: var(--bg-color) !important;
+  }
+  body .signin-header {
+    margin: 0 !important;
+    padding: 0 20px;
+    justify-content: flex-start !important;
+    background-color: var(--bg-color);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    z-index: 300;
+  }
+  body .signin-header .navbar-brand {
+    margin-left: 0 !important;
+  }
+  body .landing-page-img {
+    display: none;
+  }
+  body .signin-container {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    min-width: 0;
+    margin: 55px 0 0 !important;
+    padding: 24px 20px 32px !important;
+    border-radius: 0;
+  }
+  body .signin-form {
+    padding: 0 !important;
+  }
+  body .signin-text {
+    font-size: 28px;
+  }
+  body .footer-signin {
+    margin-top: 0;
+    padding-top: 40px;
+  }
+}
+
+/* Tablets, laptops and tall (vertical) monitors: the picture fills the
+   whole screen and the form is centred below the logo bar, instead of
+   sitting at a fixed spot over a 735px picture. */
+@media (min-width: 577px) {
+  body.bg-dark {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+  main > section.position-relative {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 90px 16px 48px;
+    overflow: hidden;
+  }
+  body .landing-page-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+  }
+  body .signin-container {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    max-width: 100%;
+  }
+  body .footer-signin {
+    margin-top: 0;
+    padding-top: 60px;
+  }
 }

@@ -1,6 +1,6 @@
 :root {
-  --text-color: #4d97ff ;
-  --box-text: #f4fff8;
+  --text-color: #E0B95C ;
+  --box-text: #F3EAD6;
 }
 
 body {
@@ -170,7 +170,7 @@ body {
 }
 
 .more-reasons-box {
-  background: linear-gradient(to bottom, #121212 20%, #1b0f30 60%, #110a1f 100%);
+  background: linear-gradient(to bottom, #121212 20%, #1A1209 60%, #0F0B07 100%);
   border: none;
   color: white;
   border-radius: 10px; 
@@ -189,7 +189,7 @@ body {
   height: fit-content;
   padding: 140px 30px 0 30px;
   margin-bottom: 0;
-  background: linear-gradient(to top, #0A0F1A, #1A2536, #1F2A37);
+  background: linear-gradient(to top, #0D0B08, #17130F, #1C1813);
   
   /* Adjust the gradient stops to reduce blur height */
   -webkit-mask-image: linear-gradient(to bottom, 
@@ -269,6 +269,152 @@ body {
   color: var(--box-text);
 }
 
+/* Keep the Top 10 slider from making the page wider than the screen
+   (on phones it pushed the Sign In button off screen). */
+main {
+  overflow-x: clip;
+}
+
+/* HERO BUTTONS */
+.lp-hero-btn {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 10px 28px;
+  border-radius: 8px;
+}
+
+/* Top 10 sits closer to the hero. The hero image already fades out at
+   the bottom, so the old 180px margin left a big empty band. */
+main .section-top-10 {
+  margin-top: -60px;
+}
+
+/* SHARED SPACING FOR LANDING SECTIONS */
+main .lp-section {
+  margin-top: 100px;
+}
+
+.lp-section-sub {
+  color: var(--placeholder-color);
+}
+
+/* STATS */
+.lp-stat {
+  padding: 22px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: rgba(201, 162, 75, 0.08);
+}
+
+.lp-stat-number {
+  font-family: 'Orbitron', 'Poppins', sans-serif;
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 6px;
+  color: var(--text-color);
+}
+
+.lp-stat-label {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--box-text);
+}
+
+/* HOW IT WORKS */
+.lp-step {
+  position: relative;
+  padding: 28px 24px;
+  border-radius: 10px;
+  background: linear-gradient(to bottom, #121212 20%, #1A150F 100%);
+  border: 1px solid var(--border-color);
+}
+
+.lp-step-number {
+  position: absolute;
+  top: 10px;
+  right: 18px;
+  font-family: 'Orbitron', 'Poppins', sans-serif;
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(77, 151, 255, 0.45);
+}
+
+.lp-step-icon {
+  font-size: 32px;
+  color: var(--dashboard-primary);
+}
+
+/* GENRES */
+.lp-genre-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: #221C15;
+  color: var(--box-text);
+  text-decoration: none;
+  transition: border-color .2s, background .2s;
+}
+
+.lp-genre-chip:hover {
+  border-color: var(--dashboard-primary);
+  background: #2A2219;
+  color: #fff;
+}
+
+.lp-genre-count {
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(201, 162, 75, 0.25);
+}
+
+/* FAQ */
+.lp-faq .accordion-item {
+  background: #15120E;
+  border: 1px solid var(--border-color);
+  margin-bottom: 8px;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.lp-faq .accordion-button {
+  background: #15120E;
+  color: var(--box-text);
+  font-size: 18px;
+  font-weight: 500;
+  box-shadow: none;
+}
+
+.lp-faq .accordion-button:not(.collapsed) {
+  background: #221C15;
+  color: #fff;
+}
+
+.lp-faq .accordion-button::after {
+  filter: invert(1);
+}
+
+.lp-faq .accordion-body {
+  color: var(--box-text);
+  background: #221C15;
+}
+
+/* FINAL CALL TO ACTION */
+.lp-cta {
+  padding: 56px 24px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(135deg, #2B2013 0%, #15120E 60%, #1A1209 100%);
+}
+
 /* SECTION MEDIA QUERY */
 
 @media (min-width: 768px) and (max-width: 991px) {
@@ -285,5 +431,92 @@ body {
   }
   .endless-movies {
     font-size: 42px;
+  }
+  .movie-poster-text {
+    top: 52%;
+  }
+  main .section-top-10 {
+    margin-top: -40px;
+  }
+  main .lp-section {
+    margin-top: 64px;
+  }
+  .lp-stat-number {
+    font-size: 34px;
+  }
+}
+
+@media (max-width: 576px) {
+  .endless-movies {
+    font-size: 32px;
+  }
+  .lp-hero-btn {
+    font-size: 16px;
+    padding: 8px 20px;
+  }
+  main .top-10-top {
+    align-items: flex-start !important;
+  }
+  main .top-10-top-text {
+    font-size: 80px;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: -4px;
+    margin-bottom: 4px;
+  }
+  main .movies-today-text {
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    font-size: 22px !important;
+  }
+  main .movies-today-text p {
+    margin-bottom: 0;
+  }
+}
+/* Footer headings */
+.cv-footer-title {
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+/* ========== Scroll animations (added by the script at the end of LandingPageMovie.php) ==========
+   Items start slightly hidden and slide/fade in when they scroll into view.
+   Without JavaScript, or with "reduce motion" on, nothing is hidden. */
+.cv-reveal {
+  opacity: 0;
+  transition: none; /* hide at once; only the reveal below animates */
+  will-change: opacity, transform;
+}
+
+.cv-reveal-up    { transform: translateY(36px); }
+.cv-reveal-right { transform: translateX(60px); }
+.cv-reveal-pop   { transform: scale(.85); }
+.cv-reveal-zoom  { transform: scale(.94); }
+
+.cv-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  transition: opacity .7s ease, transform .7s cubic-bezier(.2, .7, .2, 1);
+}
+
+/* Step and reason cards: same reveal, plus a lift on hover. */
+.lp-step.is-visible,
+.more-reasons-box.is-visible {
+  transition: opacity .7s ease, transform .5s cubic-bezier(.2, .7, .2, 1), box-shadow .25s ease, border-color .25s ease;
+}
+
+.lp-step:hover,
+.more-reasons-box:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .45);
+  border-color: #C9A24B;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }

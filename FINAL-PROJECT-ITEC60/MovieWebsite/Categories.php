@@ -13,7 +13,7 @@ include 'CineVault-header.php';
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="FirstProject.css" />
+  <link rel="stylesheet" href="FirstProject.css?v=<?php echo CV_ASSET_VERSION; ?>" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
@@ -32,11 +32,9 @@ include 'CineVault-header.php';
           Explore a selection of Movies and TV Series organized by category.
         </p>
         <p id="categories-long-text" class="text-center w-75 mx-auto text-white-50">
-          Explore a wide range of genres, from timeless classics to the latest
-          updates. Dive into thrilling adventures, heartfelt romances,
-          hilarious comedies, gripping dramas, chilling horrors, insightful
-          documentaries, and more. Discover our categories and uncover your
-          next captivating story.
+          Every movie and episode here is a full-length classic that is free
+          to watch: silent comedies, film noir, horror, westerns, sci-fi
+          B-movies, old sitcoms and cartoons. Pick a genre to start.
         </p>
       </div>
 
@@ -66,11 +64,7 @@ include 'CineVault-header.php';
   <!-- START OF FOOTER -->
   <footer>
     <div id="footer-categories" class="footer text-white d-flex justify-content-between mx-5 align-items-center">
-      <p class="footer-long-text">
-        This site does not store any files on it's server, It only links to
-        the media which is hosted on 3rd party services like YouTube,
-        Dailymotion, Ok.ru, Vidsrc and more.
-      </p>
+      <p class="footer-long-text">Movie and series details and images come from <a class="text-white" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB. Free classic films stream from the <a class="text-white" href="https://archive.org/" target="_blank" rel="noopener">Internet Archive</a>.</p>
       <p>© 2025 CineVault. All rights reserved.</p>
     </div>
   </footer>

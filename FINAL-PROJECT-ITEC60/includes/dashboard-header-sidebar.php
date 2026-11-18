@@ -1,18 +1,70 @@
 <?php
 include 'db-connection.php';
 
-if (isset($_GET['logout'])) {
-  session_unset();
-  session_destroy();
-  header("Location: admin-signin.php");
-  exit;
+// Signing out happens in DASHBOARD-HTML/admin-logout.php, after the "Sign out?" popup.
+
+$cv_admin_id = (int) ($_SESSION['admin_id'] ?? 0);
+
+// Which sidebar item to highlight. Movies and Series are separate items;
+// the add/edit form counts as Series when the record (or ?category=) is one.
+$cv_page = basename($_SERVER['SCRIPT_NAME'] ?? '');
+$cv_cat = $_GET['category'] ?? '';
+if ($cv_page === 'web-movie-series.php' && $cv_cat === '' && !empty($_GET['id'])) {
+    $st = $con->prepare('SELECT category FROM tbl_movie_series WHERE movie_series_id = ?');
+    $cv_rec = (int) $_GET['id'];
+    $st->bind_param('i', $cv_rec);
+    $st->execute();
+    $cv_cat = (string) ($st->get_result()->fetch_column() ?: '');
+    $st->close();
+}
+$cv_nav = [
+    'dashboard.php' => 'dashboard',
+    'web-movies.php' => $cv_cat === 'Series' ? 'series' : 'movies',
+    'web-movie-series.php' => $cv_cat === 'Series' ? 'series' : 'movies',
+    'web-genre.php' => 'genres',
+    'signup-accounts.php' => 'accounts',
+    'archive-accounts.php' => 'accounts',
+][$cv_page] ?? '';
+function cv_nav_active($key)
+{
+    global $cv_nav;
+    return $cv_nav === $key ? ' is-active' : '';
 }
 
+// Signed-in admin, for the account chip.
+$stmt = $con->prepare("SELECT first_name, last_name, email FROM tbl_admin_acc WHERE admin_id = ?");
+$stmt->bind_param('i', $cv_admin_id);
+$stmt->execute();
+$cv_admin = $stmt->get_result()->fetch_assoc() ?: ['first_name' => 'Admin', 'last_name' => '', 'email' => ''];
+$stmt->close();
+$cv_admin_first = trim(explode(' ', trim($cv_admin['first_name']))[0] ?? 'Admin');
+$cv_admin_full  = trim($cv_admin['first_name'] . ' ' . $cv_admin['last_name']);
+$cv_admin_initials = strtoupper(substr($cv_admin['first_name'], 0, 1) . substr($cv_admin['last_name'], 0, 1));
 
-$notif_sql = "SELECT s.signup_id, s.signup_email, p.date_created FROM tbl_signup_acc AS s JOIN tbl_payment AS p ON s.signup_id = p.signup_id ORDER BY signup_id DESC LIMIT 5";
-$notif_result = $con->query($notif_sql);
-$notif_count_sql = "SELECT COUNT(*) as cnt FROM tbl_signup_acc WHERE is_archived=0"; // Only count non-archived signups
-$notif_count = $con->query($notif_count_sql)->fetch_assoc()['cnt'];
+// Notifications: newest member sign ups, with read/unread per admin.
+$stmt = $con->prepare(
+  "SELECT s.signup_id, s.first_name, s.last_name, s.signup_email, s.date_created,
+          (r.signup_id IS NOT NULL) AS is_read
+   FROM tbl_signup_acc s
+   LEFT JOIN tbl_admin_notif_reads r ON r.signup_id = s.signup_id AND r.admin_id = ?
+   WHERE s.is_archived = 0
+   ORDER BY s.date_created DESC
+   LIMIT 8"
+);
+$stmt->bind_param('i', $cv_admin_id);
+$stmt->execute();
+$cv_notifs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+$stmt = $con->prepare(
+  "SELECT COUNT(*) AS n FROM tbl_signup_acc s
+   LEFT JOIN tbl_admin_notif_reads r ON r.signup_id = s.signup_id AND r.admin_id = ?
+   WHERE s.is_archived = 0 AND r.signup_id IS NULL"
+);
+$stmt->bind_param('i', $cv_admin_id);
+$stmt->execute();
+$notif_count = (int) $stmt->get_result()->fetch_assoc()['n'];
+$stmt->close();
 
 ?>
 
@@ -24,39 +76,20 @@ $notif_count = $con->query($notif_count_sql)->fetch_assoc()['cnt'];
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CineVault Admin</title>
   <!-- ========== CSS LINK ========== -->
-  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard-header-sidebar.css" />
-  <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css">
+  <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard-header-sidebar.css?v=<?php echo CV_ASSET_VERSION; ?>" />
+  <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css?v=<?php echo CV_ASSET_VERSION; ?>">
+  <link rel="stylesheet" href="../DASHBOARD-CSS/admin-theme.css?v=<?php echo CV_ASSET_VERSION; ?>">
+  <link rel="stylesheet" href="../shared/notifications.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
-  <style>
-    #search-results {
-      position: absolute;
-      left: 0;
-      right: 0;
-      background: #222;
-      color: #fff;
-      z-index: 9999;
-      border-radius: 0 0 4px 4px;
-      max-height: 220px;
-      overflow-y: auto;
-      min-width: 220px;
-    }
-    #search-results div {
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-    #search-results div:hover {
-      background: #607ebc;
-    }
-  </style>
 </head>
 
-<body>
-  <nav class="navbar navbar-dark fixed-top" style="background-color: #181818; z-index: 1050;">
+<body class="cv-admin">
+  <nav class="navbar navbar-dark fixed-top" style="background-color: #17130F; z-index: 1050;">
     <div class="container-fluid">
       <header class="d-flex align-items-center justify-content-between px-3 w-100">
 
@@ -78,98 +111,87 @@ $notif_count = $con->query($notif_count_sql)->fetch_assoc()['cnt'];
         </div>
 
         <div class="right-header text-light d-flex align-items-center gap-1 gap-md-2">
-          <!-- ========== SEARCH ========== -->
-          <div class="search-container position-relative" style="min-width:220px;">
-            <label id="search-icon" for="dashboard-search">
-              <i class="fas fa-search"></i>
-            </label>
-            <input id="dashboard-search" type="text" class="form-control bg-transparent border-color text-light"
-              placeholder="Search...">
-            <div id="search-results" style="display:none;"></div>
-          </div>
-
-          <!-- ========== NOTIFICATIONS ========== -->
-          <div class="d-flex dropdown-center">
-            <div id="bell-container">
-              <button class="btn border-0 p-0 flexbox-align" role="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                <div id="button-bell" class="position-relative flexbox-align" data-bs-toggle="tooltip"
-                  data-bs-placement="bottom" data-bs-title="Notifications"
-                  onmouseover="this.style.backgroundColor='#607EBC'; this.style.color='white';"
-                  onmouseout="this.style.backgroundColor='transparent'; this.style.color='black';">
-                  <i class="fa-solid fa-bell fs-5 text-light"></i>
-                  <span class="badge bg-danger rounded-pill badge-bell position-absolute">
-                    <?php echo $notif_count; ?>
-                  </span>
-                </div>
-              </button>
-
-              <ul class="dropdown-menu dropdown-menu-dark mt-1 notif-dropdown" style="transform: translateX(-154px);">
-                <p class="fs-5 ps-3 mb-2 notif-text">New Signups</p>
-                <?php if ($notif_result->num_rows > 0): ?>
-                  <?php while($row = $notif_result->fetch_assoc()): ?>
-                    <li>
-                      <a class="dropdown-item" href="signup-accounts.php">
-                        <?php echo htmlspecialchars($row['signup_email']); ?>
-                        <span class="text-secondary small">(ID: <?php echo $row['signup_id']; ?>)</span>
-                      </a>
-                    </li>
-                  <?php endwhile; ?>
-                <?php else: ?>
-                  <li><a class="dropdown-item" href="#">No new signups</a></li>
-                <?php endif; ?>
-              </ul>
-            </div>
-          </div>
-
-          <!-- ========== PROFILE MENU ========== -->
-          <div class="dropdown-center">
-            <button class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <div class="header-user bg-secondary rounded-circle flexbox-align ms-1" style="padding: 11px">
-                <i class="fa-solid fa-user db-text-sec fs-18"></i>
-              </div>
+          <!-- ========== SIGNED-IN ACCOUNT (left of the bell) ========== -->
+          <div class="dropdown cv-account-dropdown">
+            <button type="button" class="cv-account" data-bs-toggle="dropdown" data-bs-display="static"
+              aria-expanded="false" title="Signed in as <?php echo e($cv_admin_first); ?> (Administrator)">
+              <span class="cv-account-avatar"><?php echo e($cv_admin_initials ?: 'A'); ?></span>
+              <span class="cv-account-text">
+                <span class="cv-account-name"><?php echo e($cv_admin_first); ?></span>
+                <span class="cv-account-role">Administrator</span>
+              </span>
+              <i class="fa-solid fa-chevron-down cv-account-chevron"></i>
             </button>
-            <ul class="dropdown-menu dropdown-menu-dark mt-1 profile-dropdown" style="transform: translateX(-130px);">
-              <li class="dropdown-profile-top d-flex mb-1">
-                <a class="dropdown-item d-flex align-items-center" href="../DASHBOARD-HTML/my-profile.php">
-                  <div class="bg-secondary rounded-circle flexbox-align ms-1"
-                    style="padding: 9px; transform: translateX(-9px);">
-                    <i class="fa-solid fa-user db-text-sec fs-18"></i>
-                  </div>
-                  <div class="dropdown-profile-text" style="margin-left: -4px;">
-                    <p class="fs-18 view-profile-text">View Profile</p>
-                    <p class="m-0 fs-14 db-text-secondary">Administrator</p>
-                  </div>
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end cv-account-menu">
+              <li class="cv-account-head">
+                <span class="cv-account-avatar cv-account-avatar-lg"><?php echo e($cv_admin_initials ?: 'A'); ?></span>
+                <div class="cv-account-head-text">
+                  <p class="cv-account-head-name"><?php echo e($cv_admin_full); ?></p>
+                  <p class="cv-account-head-email"><?php echo e($cv_admin['email']); ?></p>
+                  <span class="cv-account-head-role">Administrator</span>
+                </div>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="../DASHBOARD-HTML/my-profile.php">
+                  <i class="fa-solid fa-user-gear"></i> View Profile
                 </a>
               </li>
-              <li class="mb-1">
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                  <i class="fa-solid fa-question ms-1 me-2 fs-22"></i>
-                  <span class="fs-18 d-inline-block ms-1">Help & Support</span>
-                </a>
-              </li>
-              <li class="mb-1">
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                  <i class="fa-solid fa-gear me-2 fs-22 "></i>
-                  <span class="fs-18 d-inline-block">Settings</span>
-                </a>
-              </li>
-              <li class="mb-1">
-                <a class="dropdown-item d-flex align-items-center" href="admin-signin.php?logout=true">
-                  <i class="fa-solid fa-right-from-bracket me-2 fs-22"></i>
-                  <span class="fs-18 d-inline-block">Log out</span>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" data-bs-toggle="modal"
+                  data-bs-target="#cvLogoutModal">
+                  <i class="fa-solid fa-right-from-bracket"></i> Log out
                 </a>
               </li>
             </ul>
           </div>
 
+          <!-- ========== NOTIFICATIONS (last item on the bar) ========== -->
+          <div class="dropdown">
+            <button type="button" class="cv-bell" data-bs-toggle="dropdown" data-bs-display="static"
+              aria-expanded="false" title="Notifications">
+              <i class="fa-solid fa-bell"></i>
+              <span class="cv-bell-badge" id="cv-bell-badge" <?php echo $notif_count ? '' : 'hidden'; ?>>
+                <?php echo $notif_count > 99 ? '99+' : $notif_count; ?>
+              </span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end cv-notif-menu" data-notif-endpoint="../DASHBOARD-HTML/admin-notifications.php">
+              <div class="cv-notif-header">
+                <span>Notifications</span>
+                <a href="#" id="cv-notif-read-all" class="cv-notif-read-all" <?php echo $notif_count ? '' : 'hidden'; ?>>Mark all as read</a>
+              </div>
+              <div class="cv-notif-list">
+                <?php if ($cv_notifs): ?>
+                  <?php foreach ($cv_notifs as $n):
+                    $who = trim($n['first_name'] . ' ' . $n['last_name']) ?: $n['signup_email']; ?>
+                    <a href="../DASHBOARD-HTML/signup-accounts.php?search=<?php echo urlencode($n['signup_email']); ?>"
+                      class="cv-notif-item js-notif-item<?php echo $n['is_read'] ? '' : ' unread'; ?>"
+                      data-notif-id="<?php echo (int) $n['signup_id']; ?>">
+                      <span class="cv-notif-icon"><i class="fa-solid fa-user-plus"></i></span>
+                      <span class="cv-notif-body">
+                        <span class="cv-notif-title">New member: <?php echo e($who); ?></span>
+                        <span class="cv-notif-detail"><?php echo e($n['signup_email']); ?></span>
+                        <span class="cv-notif-time"><?php echo e(cv_time_ago($n['date_created'])); ?></span>
+                      </span>
+                      <span class="cv-notif-dot" aria-label="Unread"></span>
+                    </a>
+                  <?php endforeach; ?>
+                <?php else: ?>
+                  <div class="text-center small py-4 cv-notif-empty">No notifications yet.</div>
+                <?php endif; ?>
+              </div>
+              <a href="../DASHBOARD-HTML/signup-accounts.php" class="cv-notif-view-all">View all members</a>
+            </div>
+          </div>
         </div>
 
       </header>
+      <?php $cvLogoutAction = 'admin-logout.php'; $cvLogoutMessage = 'You will need to sign in again to manage CineVault.'; include __DIR__ . '/logout-modal.php'; ?>
 
       <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="dashboard-offcanvas"
-        aria-labelledby="offcanvasDarkNavbarLabel" style="background-color: #181818">
-        <div class="offcanvas-header" style="background-color: #181818">
+        aria-labelledby="offcanvasDarkNavbarLabel" style="background-color: #17130F">
+        <div class="offcanvas-header" style="background-color: #17130F">
           <button class="navbar-toggler d-lg-none me-2" type="button" data-bs-dismiss="offcanvas">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -184,9 +206,9 @@ $notif_count = $con->query($notif_count_sql)->fetch_assoc()['cnt'];
             Admin
           </a>
         </div>
-        <div class="offcanvas-body" style="background-color: #181818">
+        <div class="offcanvas-body" style="background-color: #17130F">
           <ul class="offcanvas-content list-unstyled fs-20">
-            <li class="sidebar-content-item d-flex align-items-center mb-1">
+            <li class="sidebar-content-item d-flex align-items-center mb-1<?php echo cv_nav_active('dashboard'); ?>">
               <a href="../DASHBOARD-HTML/dashboard.php" class="sidebar-anchor">
                 <span class="aside-icon material-symbols-outlined text-center">
                   dashboard
@@ -194,26 +216,34 @@ $notif_count = $con->query($notif_count_sql)->fetch_assoc()['cnt'];
                 <span class="sidebar-text ms-2">Dashboard</span>
               </a>
             </li>
-            <li class="sidebar-content-item d-flex align-items-center mb-1">
-              <a href="../DASHBOARD-HTML/web-movies.php" class="sidebar-anchor">
+            <li class="sidebar-content-item d-flex align-items-center mb-1<?php echo cv_nav_active('movies'); ?>">
+              <a href="../DASHBOARD-HTML/web-movies.php?category=Movie" class="sidebar-anchor">
                 <span class="material-symbols-outlined">
                   movie
                 </span>
                 <span class="sidebar-text" style="margin-left: 12px">Movies</span>
               </a>
             </li>
-            <li class="sidebar-content-item sidebar-collapse d-flex align-items-center justify-content-between mb-1 movies-db"
+            <li class="sidebar-content-item d-flex align-items-center mb-1<?php echo cv_nav_active('series'); ?>">
+              <a href="../DASHBOARD-HTML/web-movies.php?category=Series" class="sidebar-anchor">
+                <span class="material-symbols-outlined">
+                  live_tv
+                </span>
+                <span class="sidebar-text" style="margin-left: 12px">Series</span>
+              </a>
+            </li>
+            <li class="sidebar-content-item sidebar-collapse d-flex align-items-center justify-content-between mb-1 movies-db<?php echo cv_nav_active('genres'); ?>"
               aria-expanded="true">
               <a href="../DASHBOARD-HTML/web-genre.php" class="sidebar-anchor">
                 <div class="d-flex align-items-center">
                   <span class="aside-icon material-symbols-outlined">
                     category
                   </span>
-                  <span class="sidebar-text ms-2">Genre</span>
+                  <span class="sidebar-text ms-2">Genres</span>
                 </div>
               </a>
             </li>
-            <li class="sidebar-content-item sidebar-collapse d-flex align-items-cente justify-content-between mb-1"
+            <li class="sidebar-content-item sidebar-collapse d-flex align-items-cente justify-content-between mb-1<?php echo cv_nav_active('accounts'); ?>"
               aria-expanded="true">
               <a href="../DASHBOARD-HTML/signup-accounts.php" class="sidebar-anchor">
                 <div class="d-flex align-items-center">
@@ -232,10 +262,10 @@ $notif_count = $con->query($notif_count_sql)->fetch_assoc()['cnt'];
   <!-- ========== END OF HEADER ========== -->
 
   <!-- ========== START OF SIDEBAR ========== -->
-  <aside class="sidebar" style="background-color: #181818;">
+  <aside class="sidebar" style="background-color: #17130F;">
     <div class="sidebar-container text-light">
       <ul class="sidebar-content list-unstyled fs-20">
-        <li class="sidebar-content-item d-flex align-items-center mb-1">
+        <li class="sidebar-content-item d-flex align-items-center mb-1<?php echo cv_nav_active('dashboard'); ?>">
           <a href="../DASHBOARD-HTML/dashboard.php" class="sidebar-anchor">
             <span class="aside-icon material-symbols-outlined text-center">
               dashboard
@@ -243,26 +273,34 @@ $notif_count = $con->query($notif_count_sql)->fetch_assoc()['cnt'];
             <span class="sidebar-text ms-2">Dashboard</span>
           </a>
         </li>
-        <li class="sidebar-content-item d-flex align-items-center mb-1">
-          <a href="../DASHBOARD-HTML/web-movies.php" class="sidebar-anchor">
+        <li class="sidebar-content-item d-flex align-items-center mb-1<?php echo cv_nav_active('movies'); ?>">
+          <a href="../DASHBOARD-HTML/web-movies.php?category=Movie" class="sidebar-anchor">
             <span class="material-symbols-outlined">
               movie
             </span>
             <span class="sidebar-text" style="margin-left: 12px">Movies</span>
           </a>
         </li>
-        <li class="sidebar-content-item sidebar-collapse d-flex align-items-cente justify-content-between mb-1 movies-db"
+        <li class="sidebar-content-item d-flex align-items-center mb-1<?php echo cv_nav_active('series'); ?>">
+          <a href="../DASHBOARD-HTML/web-movies.php?category=Series" class="sidebar-anchor">
+            <span class="material-symbols-outlined">
+              live_tv
+            </span>
+            <span class="sidebar-text" style="margin-left: 12px">Series</span>
+          </a>
+        </li>
+        <li class="sidebar-content-item sidebar-collapse d-flex align-items-cente justify-content-between mb-1 movies-db<?php echo cv_nav_active('genres'); ?>"
           aria-expanded="true">
           <a href="../DASHBOARD-HTML/web-genre.php" class="sidebar-anchor">
             <div class="d-flex align-items-center">
               <span class="aside-icon material-symbols-outlined">
                 category
               </span>
-              <span class="sidebar-text ms-2">Genre</span>
+              <span class="sidebar-text ms-2">Genres</span>
             </div>
           </a>
         </li>
-        <li class="sidebar-content-item sidebar-collapse d-flex align-items-cente justify-content-between mb-1">
+        <li class="sidebar-content-item sidebar-collapse d-flex align-items-cente justify-content-between mb-1<?php echo cv_nav_active('accounts'); ?>">
           <a href="../DASHBOARD-HTML/signup-accounts.php" class="sidebar-anchor">
             <div class="d-flex align-items-center">
               <span class="aside-icon material-symbols-outlined">
@@ -306,32 +344,7 @@ $notif_count = $con->query($notif_count_sql)->fetch_assoc()['cnt'];
     });
   });
 
-document.getElementById('dashboard-search').addEventListener('input', function() {
-  const q = this.value.trim();
-  const resultsBox = document.getElementById('search-results');
-  if (q.length < 2) {
-    resultsBox.style.display = 'none';
-    resultsBox.innerHTML = '';
-    return;
-  }
-  fetch('search.php?q=' + encodeURIComponent(q))
-    .then(res => res.json())
-    .then(results => {
-      if (results.length === 0) {
-        resultsBox.innerHTML = '<div>No results</div>';
-      } else {
-        resultsBox.innerHTML = results.map(r =>
-          `<div><a href="${r.url}" style="color:inherit; text-decoration:none;">${r.value}</a></div>`
-        ).join('');
-      }
-      resultsBox.style.display = 'block';
-    });
-});
-
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.search-container')) {
-      document.getElementById('search-results').style.display = 'none';
-    }
-  });
 </script>
+<script src="../shared/notifications.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>
+<script src="../shared/ellipsis-tooltips.js?v=<?php echo CV_ASSET_VERSION; ?>" defer></script>
 </html>

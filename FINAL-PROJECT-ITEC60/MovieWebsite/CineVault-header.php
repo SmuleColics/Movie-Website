@@ -3,20 +3,24 @@ include '../includes/db-connection.php';
 
 $user_id = $_SESSION['user_id'];
 
-// Notification logic for "New Arrivals" (most recent 5 movies/series)
-$notif_sql = "SELECT movie_series_id, title, date_posted 
-              FROM tbl_movie_series 
-              ORDER BY date_posted DESC
-              LIMIT 5";
-$notif_result = $con->query($notif_sql);
-$notif_count = $notif_result ? $notif_result->num_rows : 0;
-
-if (isset($_GET['logout'])) {
-  session_unset();
-  session_destroy();
-  header('Location: ../LANDING-PAGE/LandingPageMovie.php');
-  exit();
+// "New arrivals" bell: newest titles, read/unread per member (same bell as the admin side).
+$cv_arrivals = cv_member_arrivals($con, (int) $user_id);
+$notif_count = 0;
+foreach ($cv_arrivals as $cv_a) {
+  $notif_count += $cv_a['is_read'] ? 0 : 1;
 }
+// Signing out happens in LANDING-PAGE/SignIn/logout.php, after the "Sign out?" popup.
+
+// Signed-in member, for the account chip.
+$cv_stmt = $con->prepare("SELECT first_name, last_name, signup_email FROM tbl_signup_acc WHERE signup_id = ?");
+$cv_uid = (int) $user_id;
+$cv_stmt->bind_param('i', $cv_uid);
+$cv_stmt->execute();
+$cv_member = $cv_stmt->get_result()->fetch_assoc() ?: [];
+$cv_stmt->close();
+$cv_member_first = trim(explode(' ', trim($cv_member['first_name'] ?? ''))[0]) ?: 'Member';
+$cv_member_full = trim(($cv_member['first_name'] ?? '') . ' ' . ($cv_member['last_name'] ?? '')) ?: ($cv_member['signup_email'] ?? 'Member');
+$cv_member_initials = strtoupper(substr($cv_member['first_name'] ?? 'M', 0, 1) . substr($cv_member['last_name'] ?? '', 0, 1)) ?: 'M';
 ?>
 
 <!DOCTYPE html>
@@ -29,12 +33,13 @@ if (isset($_GET['logout'])) {
   <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
   <!-- Font Awesome CDN (for icons) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../shared/notifications.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <style>
     .middle-header a.active {
-      color: #607EBC !important;
+      color: #C9A24B !important;
     }
     .offcanvas-body .nav-link.active {
-      color: #607EBC !important;
+      color: #C9A24B !important;
     }
     .notif-badge {
       font-size: 12px;
@@ -48,11 +53,11 @@ if (isset($_GET['logout'])) {
 
 <body style="margin-top: 61px;">
   <!-- START OF HEADER -->
-  <nav id="navbar" class="navbar navbar-dark fixed-top" style="background-color: #212529;">
+  <nav id="navbar" class="navbar navbar-dark fixed-top" style="background-color: #1F1A14;">
     <div class="container-fluid">
       <header class="d-flex justify-content-between align-items-center w-100 px-md-5 bg-transparent">
         <div class="left-header">
-          <a class="navbar-brand fw-semibold" href="website-search.php">Cine<span style="color: #607EBC">Vault</span></a>
+          <a class="navbar-brand cv-brand" href="FirstProject.php">Cine<span>Vault</span></a>
         </div>
 
         <div class="middle-header position-relative d-none d-lg-block">
@@ -73,87 +78,78 @@ if (isset($_GET['logout'])) {
         </div>
 
         <div class="right-header d-flex">
-          <div class="d-flex align-items-center">
-            <div class="search-container">
-              <form method="get" action="Website-Search.php" class="d-flex align-items-center mb-0 position-relative">
-                <input class="search rounded-5 bg-transparent text-white" type="text" name="search"
-                  placeholder="Search..." style="max-width: 200px;"
-                  value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>" />
-                <button type="submit" class="btn btn-link p-0 ms-2" style="color:inherit; position: absolute; top: 6px; left: -10px;">
-                  <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
-              </form>
-            </div>
+          <div class="d-flex align-items-center gap-2 gap-md-3">
+            <!-- ========== SEARCH ========== -->
+            <!-- Phones: a search icon that opens the search page (the box would not fit) -->
+            <a href="Website-Search.php" class="cv-icon-btn cv-search-mobile" title="Search" aria-label="Search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </a>
+            <form method="get" action="Website-Search.php" class="cv-search mb-0" role="search">
+              <i class="fa-solid fa-magnifying-glass cv-search-icon" aria-hidden="true"></i>
+              <input type="search" name="search" placeholder="Search titles or cast" aria-label="Search"
+                value="<?php echo isset($_GET['search']) ? e($_GET['search']) : ''; ?>">
+            </form>
 
-            <!-- ========== NOTIFICATIONS ========== -->
-            <div class="d-flex dropdown-center ms-3">
-              <div id="bell-container">
-                <button class="btn border-0 p-0 flexbox-align position-relative" role="button" data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <div id="button-bell" class="position-relative flexbox-align" data-bs-toggle="tooltip"
-                    data-bs-placement="bottom" data-bs-title="Notifications"
-                   >
-                    <i class="fa-solid fa-bell fs-5 text-light"></i>
-                    <?php if ($notif_count > 0): ?>
-                      <span class="badge bg-danger rounded-pill notif-badge" style="position: absolute; top: -10px; right: -12px;"><?php echo $notif_count; ?></span>
-                    <?php endif; ?>
-                  </div>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-dark mt-1 notif-dropdown" style="transform: translate(-310px, 10px); min-width: 260px;">
-                  <p class="fs-5 ps-3 mb-2 notif-text">New Arrivals</p>
-                  <?php if ($notif_count > 0): ?>
-                    <?php while($row = $notif_result->fetch_assoc()): ?>
-                      <li>
-                        <a class="dropdown-item" href="Website-Search.php?search=<?php echo urlencode($row['title']); ?>">
-                          <span class="fw-bold"><?php echo htmlspecialchars($row['title']); ?></span>
-                          <span class="text-secondary small">(<?php echo date('M d, Y', strtotime($row['date_posted'])); ?>)</span>
-                        </a>
-                      </li>
-                    <?php endwhile; ?>
+            <!-- ========== NOTIFICATIONS (new arrivals; same bell as the admin side) ========== -->
+            <div class="dropdown">
+              <button type="button" class="cv-bell cv-bell-member" data-bs-toggle="dropdown" data-bs-display="static"
+                aria-expanded="false" title="New arrivals">
+                <i class="fa-solid fa-bell"></i>
+                <span class="cv-bell-badge" id="cv-bell-badge" <?php echo $notif_count ? '' : 'hidden'; ?>><?php echo $notif_count > 99 ? '99+' : $notif_count; ?></span>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end cv-notif-menu" data-notif-endpoint="member-notifications.php">
+                <div class="cv-notif-header">
+                  <span>New Arrivals</span>
+                  <a href="#" id="cv-notif-read-all" class="cv-notif-read-all" <?php echo $notif_count ? '' : 'hidden'; ?>>Mark all as read</a>
+                </div>
+                <div class="cv-notif-list">
+                  <?php if ($cv_arrivals): ?>
+                    <?php foreach ($cv_arrivals as $a):
+                      $kind = $a['category'] === 'Series' ? 'Series' : 'Movie'; ?>
+                      <a href="Website-Search.php?search=<?php echo urlencode($a['title']); ?>"
+                        class="cv-notif-item js-notif-item<?php echo $a['is_read'] ? '' : ' unread'; ?>"
+                        data-notif-id="<?php echo (int) $a['movie_series_id']; ?>">
+                        <span class="cv-notif-icon"><i class="fa-solid <?php echo $kind === 'Series' ? 'fa-tv' : 'fa-film'; ?>"></i></span>
+                        <span class="cv-notif-body">
+                          <span class="cv-notif-title">New <?php echo strtolower($kind); ?>: <?php echo e($a['title']); ?></span>
+                          <span class="cv-notif-detail"><?php echo e($kind . ($a['date_released'] ? ' · ' . $a['date_released'] : '')); ?></span>
+                          <span class="cv-notif-time">Added <?php echo e(strtolower(cv_time_ago($a['date_posted']))); ?></span>
+                        </span>
+                        <span class="cv-notif-dot" aria-label="Unread"></span>
+                      </a>
+                    <?php endforeach; ?>
                   <?php else: ?>
-                    <li><a class="dropdown-item" href="#">No new arrivals</a></li>
+                    <div class="text-center small py-4 cv-notif-empty">No new arrivals yet.</div>
                   <?php endif; ?>
-                </ul>
+                </div>
+                <a href="Website-Search.php" class="cv-notif-view-all">Browse all titles</a>
               </div>
             </div>
-            <!-- ========== END NOTIFICATIONS ========== -->
 
-            <!-- ========== PROFILE MENU ========== -->
-            <div class="dropdown-center">
-              <button class="btn p-0 border-0 ms-2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="header-user rounded-circle flexbox-align ms-1" style="padding: 11px; color: #f4fff8;">
-                  <i class="fa-solid fa-user db-text-sec fs-18"></i>
-                </div>
+            <!-- ========== ACCOUNT ========== -->
+            <div class="dropdown">
+              <button type="button" class="cv-member-chip" data-bs-toggle="dropdown" data-bs-display="static"
+                aria-expanded="false" title="Signed in as <?php echo e($cv_member_first); ?>">
+                <span class="cv-member-avatar"><?php echo e($cv_member_initials); ?></span>
+                <span class="cv-member-name d-none d-xl-inline"><?php echo e($cv_member_first); ?></span>
+                <i class="fa-solid fa-chevron-down cv-member-chevron d-none d-xl-inline"></i>
               </button>
-              <ul class="dropdown-menu dropdown-menu-dark mt-1 profile-dropdown" style="transform: translateX(-130px);">
-                <li class="dropdown-profile-top d-flex mb-1" style="height: 50px;">
-                  <a href="user-view-profile.php" class="dropdown-item d-flex align-items-center" href="">
-                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center ms-1"
-                      style="height: 32px; width: 32px; transform: translateX(-9px);">
-                      <i class="fa-solid fa-user db-text-sec fs-18"></i>
-                    </div>
-                    <div class="dropdown-profile-text" style="margin-left: -4px;">
-                      <p class="fs-18 view-profile-text" style="transform: translateY(10px)">Manage Profile</p>
-                      <p class="m-0 fs-14 db-text-secondary" style="transform: translateY(-10px)">User</p>
-                    </div>
-                  </a>
+              <ul class="dropdown-menu dropdown-menu-end cv-menu cv-member-menu">
+                <li class="cv-member-head">
+                  <span class="cv-member-avatar cv-member-avatar-lg"><?php echo e($cv_member_initials); ?></span>
+                  <div class="cv-member-head-text">
+                    <p class="cv-member-head-name"><?php echo e($cv_member_full); ?></p>
+                    <p class="cv-member-head-email"><?php echo e($cv_member['signup_email'] ?? ''); ?></p>
+                  </div>
                 </li>
-                <li class="mb-1">
-                  <a class="dropdown-item d-flex align-items-center" href="#">
-                    <i class="fa-solid fa-question ms-1 me-2 fs-22"></i>
-                    <span class="fs-18 d-inline-block ms-1">Help & Support</span>
-                  </a>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item" href="user-view-profile.php"><i class="fa-solid fa-user-pen"></i> My Profile</a>
                 </li>
-                <li class="mb-1" style="transform: translateX(-12px);">
-                  <a class="dropdown-item d-flex align-items-center" href="#">
-                    <i class="fa-solid fa-gear me-2 fs-22 "></i>
-                    <span class="fs-18 d-inline-block">Settings</span>
-                  </a>
-                </li>
-                <li class="mb-1">
-                  <a href="../LANDING-PAGE/LandingPageMovie.php" class="dropdown-item d-flex align-items-center">
-                    <i class="fa-solid fa-right-from-bracket me-2 fs-22"></i>
-                    <span class="fs-18 d-inline-block">Log out</span>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#cvLogoutModal">
+                    <i class="fa-solid fa-right-from-bracket"></i> Log out
                   </a>
                 </li>
               </ul>
@@ -166,6 +162,26 @@ if (isset($_GET['logout'])) {
           </button>
         </div>
       </header>
+      <?php $cvLogoutAction = "../LANDING-PAGE/SignIn/logout.php"; include __DIR__ . "/../includes/logout-modal.php"; ?>
+      <script>
+        // Turn on Bootstrap tooltips (e.g. the full description on the carousel).
+        document.addEventListener('DOMContentLoaded', function () {
+          if (!window.bootstrap) return;
+          document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+            bootstrap.Tooltip.getOrCreateInstance(el);
+          });
+        });
+
+        // Top bar: solid background once the page is scrolled (see #navbar.is-scrolled in FirstProject.css).
+        (function () {
+          var nav = document.getElementById('navbar');
+          function update() { nav.classList.toggle('is-scrolled', window.scrollY > 10); }
+          update();
+          window.addEventListener('scroll', update, { passive: true });
+        })();
+      </script>
+      <script src="../shared/notifications.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>
+      <script src="../shared/ellipsis-tooltips.js?v=<?php echo CV_ASSET_VERSION; ?>" defer></script>
 
       <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar"
         aria-labelledby="offcanvasDarkNavbarLabel">
