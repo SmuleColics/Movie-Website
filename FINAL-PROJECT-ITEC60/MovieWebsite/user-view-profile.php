@@ -126,8 +126,6 @@ include 'CineVault-header.php';
     .cv-facts li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px solid #3D3326; font-size: 14px; overflow-wrap: anywhere; }
     .cv-facts i { color: #C9A24B; width: 16px; margin-top: 3px; text-align: center; flex-shrink: 0; }
     .cv-facts span { color: #B3A68C; display: block; font-size: 12px; }
-    .cv-profile .btn i { font-size: 14px; }
-
     .cv-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .cv-stat { background: #2A231A; border: 1px solid #3D3326; border-radius: 10px; padding: 12px 14px; }
     .cv-stat b { display: block; font-size: 24px; color: #DDB963; line-height: 1.2; }

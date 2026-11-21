@@ -71,12 +71,6 @@ input:focus {
   margin-bottom: 2px;
 }
 
-.fa-gear {
-  margin-left: 12px;
-  color: #fff;
-  font-size: 24px;
-}
-
 .wallpaper {
   height: 70vh;
   max-height: 735px;
@@ -1175,6 +1169,15 @@ body:has(.section-wallpaper .carousel-item) #navbar:not(.is-scrolled) {
   padding: 9px 10px;
   border-radius: 8px;
   color: #F1E8D4;
+}
+
+/* Same size and width for every menu icon, so the labels line up. */
+.cv-menu .dropdown-item i {
+  width: 18px;
+  margin: 0;
+  font-size: 15px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .cv-menu .dropdown-item:hover {
