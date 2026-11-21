@@ -25,7 +25,9 @@ document.addEventListener("DOMContentLoaded", function () {
       // Previews load only when a title is opened, so a page full of titles
       // doesn't start streaming every movie at once.
       const preview = modal.querySelector("video[data-cv-autoplay]");
-      if (preview) {
+      // Settings > Playback can turn previews off.
+      const previewsOn = !(window.CV_PREFS && window.CV_PREFS.autoplay_previews === 0);
+      if (preview && previewsOn) {
         if (!preview.dataset.cvStarted) {
           preview.dataset.cvStarted = "1";
           preview.preload = "auto";

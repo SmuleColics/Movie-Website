@@ -32,7 +32,7 @@ include 'CineVault-header.php';
           $genre_name = $genre ? $genre['genre_name'] : "Category";
         }
         ?>
-        <p class="action-movies-text text-white fs-24 fw-bold mb-0"><?php echo htmlspecialchars($genre_name); ?></p>
+        <p class="action-movies-text text-white fs-24 fw-bold mb-0"><?php echo e($genre_name); ?></p>
         <!-- Search input removed as requested -->
       </div>
       <div class="top10-featured-wrapper position-relative d-flex ">
@@ -67,7 +67,7 @@ include 'CineVault-header.php';
           $result = mysqli_query($con, $query);
 
           if (mysqli_num_rows($result) == 0): ?>
-            <div class="text-white-50 fs-4 py-5 px-3">No results found<?php echo $search ? ' for "' . htmlspecialchars($search) . '"' : ''; ?>.</div>
+            <div class="text-white-50 fs-4 py-5 px-3">No results found<?php echo $search ? ' for "' . e($search) . '"' : ''; ?>.</div>
           <?php else:
             $comedy_modals = "";
             while ($row = mysqli_fetch_assoc($result)):
@@ -86,18 +86,18 @@ include 'CineVault-header.php';
               $cast = $row['cast'];
               $description = $row['description'];
 
-              $genres = htmlspecialchars($genre_1);
+              $genres = e($genre_1);
               if (!empty($genre_2))
-                $genres .= ', ' . htmlspecialchars($genre_2);
+                $genres .= ', ' . e($genre_2);
               if (!empty($genre_3))
-                $genres .= ', ' . htmlspecialchars($genre_3);
+                $genres .= ', ' . e($genre_3);
           ?>
             <div class="comedy-images position-relative pe-2 mt-2" style="overflow: visible;">
               <a href="#" data-bs-toggle="modal" data-bs-target="#modal-comedy-<?php echo $movie_series_id ?>">
                 <div class="trending-hover position-relative">
                   <img class="action-movies-img rounded-3"
-                    src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($poster); ?>"
-                    alt="<?php echo htmlspecialchars($title); ?>">
+                    src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($poster); ?>"
+                    alt="<?php echo e($title); ?>">
                   <i class="fa-solid fa-play play-button-comedy"></i>
                 </div>
               </a>
@@ -117,13 +117,13 @@ include 'CineVault-header.php';
                 muted
                 loop
               >
-                <source src=\"" . htmlspecialchars(cv_video_src($video)) . "\" type=\"video/mp4\">
+                <source src=\"" . e(cv_video_src($video)) . "\" type=\"video/mp4\">
                 Your browser does not support the video tag.
               </video>";
             if (!empty($modal_poster_title)) {
-              $comedy_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
+              $comedy_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . e($modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
             } else {
-              $comedy_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($title) . "</p>";
+              $comedy_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . e($title) . "</p>";
             }
             $comedy_modals .= "
               <a href=\"play-vid.php?video=" . urlencode($video) . "&type=movie_series&id=" . $movie_series_id . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
@@ -137,19 +137,19 @@ include 'CineVault-header.php';
             <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
               <div class=\"col-8 text-wrap\">
                 <div class=\"d-flex gap-2\">
-                  <p class='modal-text-rating mb-0'>" . htmlspecialchars($date_released) . "</p>
-                  <p class='modal-text-rating mb-0'>" . htmlspecialchars($duration) . "</p>
+                  <p class='modal-text-rating mb-0'>" . e($date_released) . "</p>
+                  <p class='modal-text-rating mb-0'>" . e($duration) . "</p>
                 </div>
                 <div class=\"d-flex gap-2 align-items-center\">
-                  <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($age_rating) . "+</p>
-                  <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($category) . "</p>
+                  <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . e($age_rating) . "+</p>
+                  <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . e($category) . "</p>
                 </div>
-                <p class='modal-text-rating'>" . htmlspecialchars($description) . "</p>
+                <p class='modal-text-rating'>" . e($description) . "</p>
               </div>
               <div class=\"col-4 ps-0 pe-4 text-wrap\">
                 <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
                   <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span>
-                  " . htmlspecialchars($cast) . ", more...
+                  " . e($cast) . ", more...
                 </p>
                 <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
                   <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span>
@@ -179,7 +179,7 @@ include 'CineVault-header.php';
             <div class="position-relative" style="min-width:180px; ">
                 <select style="transform: translateX(-48px);" id="modal-season-select-comedy-' . $movie_series_id . '" class="form-control me-5">';
               foreach ($seasons as $s) {
-                $comedy_modals .= '<option value="season-' . $s['season_id'] . '">' . htmlspecialchars($s['season_title']) . '</option>';
+                $comedy_modals .= '<option value="season-' . $s['season_id'] . '">' . e($s['season_title']) . '</option>';
               }
               $comedy_modals .= '</select>
                 <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
@@ -201,7 +201,7 @@ include 'CineVault-header.php';
                                     class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                     muted
                                     style="width: 120px; height: 70px; object-fit: cover;">
-                                    <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
+                                    <source src="' . e(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
                             </a>';
@@ -210,11 +210,11 @@ include 'CineVault-header.php';
                         </div>
                         <div class="db-text-sec me-4">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
-                                <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
+                                <p class="mb-0">' . e($ep['episode_title']) . '</p>
+                                <p class="mb-0">' . e($ep['episode_duration']) . '</p>
                             </div>
                             <div>
-                                <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
+                                <p class="mb-0 " style="font-size: 14px;">' . e($ep['episode_description']) . '</p>
                             </div>
                         </div>
                     </div>';
@@ -260,7 +260,7 @@ include 'CineVault-header.php';
   <footer style="margin-top: 270px;">
     <div class="footer text-white d-flex justify-content-between mx-5 align-items-center">
       <p class="footer-long-text">Movie and series details and images come from <a class="text-white" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB. Free classic films stream from the <a class="text-white" href="https://archive.org/" target="_blank" rel="noopener">Internet Archive</a>.</p>
-      <p>© 2025 CineVault. All rights reserved.</p>
+      <p>© <?php echo date('Y'); ?> <?php echo e(cv_setting('site_name', 'CineVault')); ?>. All rights reserved.</p>
     </div>
   </footer>
   <script src="video-player.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>

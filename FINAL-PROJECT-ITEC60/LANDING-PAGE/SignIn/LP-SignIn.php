@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   <link rel="stylesheet" href="SignIn.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="stylesheet" href="../../DASHBOARD-CSS/for-all.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="icon" href="../../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
+  <link rel="icon" href="../../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg?v=<?php echo CV_ASSET_VERSION; ?>">
 </head>
 
 <body class="bg-dark overflow-hidden">
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
           $remember = isset($_POST['remember_me']);
 
           // The same form signs in admins and members: the email is checked against both.
-          $stmt = $con->prepare("SELECT * FROM tbl_admin_acc WHERE email = ? LIMIT 1");
+          $stmt = $con->prepare("SELECT * FROM tbl_admin_acc WHERE email = ? AND is_archived = 0 LIMIT 1"); // archived admins can't sign in
           $stmt->bind_param("s", $email);
           $stmt->execute();
           $admin = $stmt->get_result()->fetch_assoc();

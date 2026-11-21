@@ -1,15 +1,7 @@
 <?php
 include '../includes/db-connection.php';
 
-if (isset($_GET['alert'])) {
-  $msg = "";
-  if ($_GET['alert'] == 'added')   $msg = "Genre added successfully!";
-  if ($_GET['alert'] == 'edited')  $msg = "Genre edited successfully!";
-  if ($_GET['alert'] == 'deleted') $msg = "Genre deleted successfully!";
-  if ($msg) {
-    echo "<script>alert('{$msg}');</script>";
-  }
-}
+
 
 // Handle Add
 if (isset($_POST['add-genre'])) {
@@ -19,7 +11,7 @@ if (isset($_POST['add-genre'])) {
     $stmt->bind_param("s", $genre_name);
     $stmt->execute();
     $stmt->close();
-    header("Location: web-genre.php?alert=added");  
+    cv_alert_redirect('Genre added.', 'web-genre.php');
     exit;
   }
 }
@@ -33,21 +25,28 @@ if (isset($_POST['edit-genre-modal'])) {
     $stmt->bind_param("si", $genre_name, $genre_id);
     $stmt->execute();
     $stmt->close();
-    header("Location: web-genre.php?alert=edited");  
+    cv_alert_redirect('Genre updated.', 'web-genre.php');
     exit;
   }
 }
 
-// Handle Delete
+// Archive a genre (it can be restored from the Archive page). A genre that
+// active titles still use stays, so those titles don't lose it.
 if (isset($_POST['delete-genre-btn-modal'])) {
   $genre_id = intval($_POST['delete-genre-id']);
   if ($genre_id > 0) {
-    $stmt = $con->prepare("DELETE FROM tbl_movie_series_genre WHERE genre_id = ?");
+    $stmt = $con->prepare("SELECT COUNT(*) FROM tbl_movie_series WHERE ? IN (genre_id1, genre_id2, genre_id3)");
     $stmt->bind_param("i", $genre_id);
     $stmt->execute();
+    $in_use = (int) $stmt->get_result()->fetch_column();
     $stmt->close();
-    header("Location: web-genre.php?alert=deleted");
-    exit;
+    if ($in_use > 0) {
+      cv_alert_redirect('This genre is used by ' . $in_use . ' title' . ($in_use === 1 ? '' : 's') . '. Change or archive those titles first, then archive the genre.', 'web-genre.php', 'warning');
+    }
+    if (!cv_archive_row($con, 'genre', $genre_id)) {
+      cv_alert_redirect('That genre could not be archived. Try again.', 'web-genre.php', 'danger');
+    }
+    cv_alert_redirect('Genre moved to the Archive. You can restore it from the Archive page.', 'web-genre.php');
   }
 }
 
@@ -87,9 +86,12 @@ include '../includes/dashboard-header-sidebar.php';
       <div class="card bg-dark">
         <div class="card-body">
           <div class="table-task-top db-text-sec">
-            <div class="py-2 ps-3">
-              <p class="m-0 fs-20">Genres</p>
-              <p class="m-0 fs-14" style="transform: translateY(-2px)">List of All Genres</p>
+            <div class="py-2 ps-3 pe-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+              <div>
+                <p class="m-0 fs-20">Genres</p>
+                <p class="m-0 fs-14" style="transform: translateY(-2px)">List of All Genres</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-light" data-print-table="#table-genre" data-print-title="Genres"><i class="fa-solid fa-print me-1"></i> Print</button>
             </div>
           </div>
           <div class="table-responsive mt-2">
@@ -99,7 +101,7 @@ include '../includes/dashboard-header-sidebar.php';
                   <th class="db-text-primary text-center ps-4" scope="col">#</th>
                   <th class="db-text-primary text-center ps-2" scope="col">Genre Name</th>
                   <th class="db-text-primary text-center pe-2" scope="col">Edit</th>
-                  <th class="db-text-primary text-center ps-4" scope="col">Delete</th>
+                  <th class="db-text-primary text-center ps-4" scope="col">Archive</th>
                 </tr>
               </thead>
               <tbody>
@@ -122,9 +124,9 @@ include '../includes/dashboard-header-sidebar.php';
                       </a>
                     </td>
                     <td class="text-center">
-                      <a href="javascript:void(0);" class="text-danger delete-btn" data-bs-toggle="modal" data-bs-target="#modalDeleteGenre"
-                        data-id="<?php echo $row['genre_id']; ?>">
-                        <i class="fa-solid fa-delete-left"></i>
+                      <a href="javascript:void(0);" class="text-warning delete-btn" data-bs-toggle="modal" data-bs-target="#modalDeleteGenre"
+                        data-id="<?php echo $row['genre_id']; ?>" title="Archive">
+                        <i class="fa-solid fa-box-archive"></i>
                       </a>
                     </td>
                   </tr>
@@ -171,18 +173,18 @@ include '../includes/dashboard-header-sidebar.php';
         <div class="modal-content">
           <form action="" method="post">
             <div class="modal-header">
-              <h1 class="modal-title fs-5 db-text-sec">Delete Genre</h1>
+              <h1 class="modal-title fs-5 db-text-sec">Archive Genre</h1>
               <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal"
                 style="filter: invert(1) grayscale(100%) brightness(200%); opacity: 1;"></button>
             </div>
             <div class="modal-body px-4">
               <input type="hidden" name="delete-genre-id" id="delete-genre-id">
-              <h4 class="my-4 db-text-sec text-center">Are you sure you want to delete this genre?</h4>
+              <h4 class="my-4 db-text-sec text-center">Move this genre to the Archive?</h4>
+              <p class="text-center db-text-secondary mb-0">You can restore it any time from the Archive page.</p>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-danger" data-bs-dismiss="modal">NO</button>
-              <button type="submit" class="btn db-bg-primary db-text-sec" name="delete-genre-btn-modal"
-                style="color: #F3EAD6">YES</button>
+              <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn db-bg-primary" name="delete-genre-btn-modal">Archive</button>
             </div>
           </form>
         </div>

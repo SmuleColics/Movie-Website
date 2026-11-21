@@ -3,6 +3,23 @@
 include '../includes/dashboard-header-sidebar.php';
 include '../includes/db-connection.php';
 
+// Archive this admin's own account (another admin can restore it from the
+// Archive page). The last active admin can't, so the site always has one.
+if (isset($_POST['modal-delete-button'])) {
+  $self_id = (int) ($_SESSION['admin_id'] ?? 0);
+  $others = (int) mysqli_fetch_row(mysqli_query($con, "SELECT COUNT(*) FROM tbl_admin_acc WHERE is_archived = 0 AND admin_id <> $self_id"))[0];
+  if ($others === 0) {
+    cv_alert_redirect('You are the only active admin, so your account can\'t be archived. Add another admin first.', 'edit-my-profile.php', 'warning');
+  }
+  $stmt = $con->prepare('UPDATE tbl_admin_acc SET is_archived = 1, archived_at = NOW() WHERE admin_id = ?');
+  $stmt->bind_param('i', $self_id);
+  $stmt->execute();
+  $stmt->close();
+  unset($_SESSION['admin_id'], $_SESSION['admin_email'], $_SESSION['admin_logged_in']);
+  session_regenerate_id(true);
+  cv_alert_redirect('Your admin account was archived and you have been signed out. Another admin can restore it from the Archive page.', '../LANDING-PAGE/SignIn/LP-SignIn.php', 'info');
+}
+
 // Validation variables (initialize as valid)
 $email_error = $mobile_error = $fname_error = $mname_error = $lname_error = $fb_error = "";
 $employee_id_error = $department_error = $gender_error = $marital_error = $nationality_error = "";
@@ -148,11 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save-changes'])) {
             nationality = '$nationality_esc'
           WHERE admin_id = '$admin_id'
         ");
-      echo "<script>
-            alert('Profile updated successfully!');
-            window.location.href = 'my-profile.php';
-        </script>";
-      exit;
+      cv_alert_redirect('Your profile was updated.', 'my-profile.php');
     } catch (mysqli_sql_exception $ex) {
       if ($ex->getCode() === 1062) {
         // Duplicate entry error
@@ -215,7 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save-changes'])) {
           <a href="my-profile.php" class="btn db-bg-primary text-white"><i class="fa-solid fa-chevron-left"></i>
             Go Back</a>
           <button class="btn btn-danger" type="button" data-bs-toggle="modal"
-            data-bs-target="#adminAccDeleteModal">Delete Account</button>
+            data-bs-target="#adminAccDeleteModal">Archive Account</button>
         </div>
 
         <div class="row g-3">
@@ -357,31 +370,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save-changes'])) {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header d-flex justify-content-between">
-          <h1 class="modal-title fs-5 db-text-sec" id="staticBackdropLabel">Delete Admin Account</h1>
+          <h1 class="modal-title fs-5 db-text-sec" id="staticBackdropLabel">Archive Your Admin Account</h1>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <?php
-        if (isset($_POST['modal-delete-button'])) {
-          $delete_id = $_SESSION['admin_id'];
 
-          $delete_query = mysqli_query($con, "DELETE FROM tbl_admin_acc WHERE admin_id = $delete_id");
-
-          if ($delete_query) {
-            echo "<script>
-                  alert('Your account has been deleted. You have been automatically logged out.');
-                  window.location.href = '../LANDING-PAGE/SignIn/LP-SignIn.php';
-                </script>";
-          }
-        }
-        ?>
         <form action="" method="post">
           <input type="hidden" name="delete-id" id="delete-id">
           <div class="modal-body">
-            <h3 class="db-text-sec text-center m-0 py-4">Are you sure you want to Delete?</h3>
+            <h3 class="db-text-sec text-center m-0 pt-4 pb-2 fs-4">Archive your admin account?</h3>
+            <p class="text-center db-text-secondary mb-3">You will be signed out and can't sign in until another admin restores your account from the Archive page.</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" name="modal-delete-button" class="btn btn-danger">Delete</button>
+            <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" name="modal-delete-button" class="btn db-bg-primary">Archive</button>
           </div>
         </form>
       </div>

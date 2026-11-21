@@ -34,8 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update-profile'])) {
         $stmt->execute();
         $stmt->close();
         // Alert with JS and redirect after
-        echo '<script>alert("Profile updated successfully!"); window.location.href="user-view-profile.php";</script>';
-        exit;
+        cv_alert_redirect('Your profile was updated.', 'user-view-profile.php');
     } else {
         $alert = "Please fill out all fields.";
     }
@@ -46,7 +45,7 @@ if ($user_id) {
     $query = mysqli_query($con, "SELECT * FROM tbl_signup_acc WHERE signup_id = $user_id LIMIT 1");
     $user = mysqli_fetch_assoc($query);
 }
-$fullname = $user ? htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) : 'N/A';
+$fullname = $user ? e($user['first_name'] . ' ' . $user['last_name']) : 'N/A';
 $first_name = $user['first_name'] ?? '';
 $last_name = $user['last_name'] ?? '';
 $mobile = $user['mobile_number'] ?? '';
@@ -66,7 +65,7 @@ $email = $user['signup_email'] ?? '';
   <link rel="stylesheet" href="Override.css" />
   <link rel="stylesheet" href="../DASHBOARD-CSS/dashboard.css">
   <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css?v=<?php echo CV_ASSET_VERSION; ?>">
-  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
+  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg?v=<?php echo CV_ASSET_VERSION; ?>">
   <style>
     body { height: fit-content !important; }
     main { height: 475px; }
@@ -97,11 +96,11 @@ $email = $user['signup_email'] ?? '';
                 <p class="db-text-secondary">User</p>
                 <div class="d-flex align-items-center gap-2">
                   <i class="fa-solid fa-envelope db-text-sec"></i>
-                  <p class="db-text-sec mb-0"><?php echo htmlspecialchars($email); ?></p>
+                  <p class="db-text-sec mb-0"><?php echo e($email); ?></p>
                 </div>
                 <div class="d-flex align-items-center gap-2 mt-2 mb-3">
                   <i class="fa-solid fa-phone db-text-sec"></i>
-                  <p class="db-text-sec mb-0"><?php echo htmlspecialchars($mobile); ?></p>
+                  <p class="db-text-sec mb-0"><?php echo e($mobile); ?></p>
                 </div>
                 <div class="d-grid db-bg-primary w-100 rounded-1">
                   <center class="py-1">
@@ -129,8 +128,8 @@ $email = $user['signup_email'] ?? '';
               </div>
               <div class="d-flex flex-column">
                 <p class="text-white"><?php echo $fullname; ?></p>
-                <p class="text-white"><?php echo htmlspecialchars($mobile); ?></p>
-                <p class="text-white mb-0"><?php echo htmlspecialchars($email); ?></p>
+                <p class="text-white"><?php echo e($mobile); ?></p>
+                <p class="text-white mb-0"><?php echo e($email); ?></p>
               </div>
             </div>
           </div>
@@ -147,22 +146,22 @@ $email = $user['signup_email'] ?? '';
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4">
-              <input type="hidden" name="signup_id" id="signup_id" value="<?php echo htmlspecialchars($user_id); ?>">
+              <input type="hidden" name="signup_id" id="signup_id" value="<?php echo e($user_id); ?>">
               <div class="mb-3">
                 <label for="firstName" class="form-label db-text-sec mb-0">First Name</label>
-                <input type="text" class="form-control" id="firstName" name="first_name" value="<?php echo htmlspecialchars($first_name); ?>" required>
+                <input type="text" class="form-control" id="firstName" name="first_name" value="<?php echo e($first_name); ?>" required>
               </div>
               <div class="mb-3">
                 <label for="lastName" class="form-label db-text-sec mb-0">Last Name</label>
-                <input type="text" class="form-control" id="lastName" name="last_name" value="<?php echo htmlspecialchars($last_name); ?>" required>
+                <input type="text" class="form-control" id="lastName" name="last_name" value="<?php echo e($last_name); ?>" required>
               </div>
               <div class="mb-3">
                 <label for="mobile" class="form-label db-text-sec mb-0">Mobile Number</label>
-                <input type="text" class="form-control" id="mobile" name="mobile_number" value="<?php echo htmlspecialchars($mobile); ?>" required>
+                <input type="text" class="form-control" id="mobile" name="mobile_number" value="<?php echo e($mobile); ?>" required>
               </div>
               <div class="mb-3">
                 <label for="email" class="form-label db-text-sec mb-0">Email address</label>
-                <input type="email" class="form-control" id="email" name="signup_email" value="<?php echo htmlspecialchars($email); ?>" required>
+                <input type="email" class="form-control" id="email" name="signup_email" value="<?php echo e($email); ?>" required>
               </div>
           </div>
           <div class="modal-footer">
@@ -176,7 +175,7 @@ $email = $user['signup_email'] ?? '';
   <footer>
     <div id="footer-categories" class="footer text-white d-flex justify-content-between mx-5 align-items-center">
       <p class="footer-long-text">Movie and series details and images come from <a class="text-white" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB. Free classic films stream from the <a class="text-white" href="https://archive.org/" target="_blank" rel="noopener">Internet Archive</a>.</p>
-      <p>© 2025 CineVault. All rights reserved.</p>
+      <p>© <?php echo date('Y'); ?> <?php echo e(cv_setting('site_name', 'CineVault')); ?>. All rights reserved.</p>
     </div>
   </footer>
   <script src="header-scroll.js"></script>

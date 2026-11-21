@@ -26,7 +26,7 @@ function cv_legal_page_start($title)
   <link rel="stylesheet" href="LandingPage.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="stylesheet" href="../DASHBOARD-CSS/for-all.css?v=<?php echo CV_ASSET_VERSION; ?>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
+  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg?v=<?php echo CV_ASSET_VERSION; ?>">
   <style>
     .legal-header { height: 64px; border-bottom: 1px solid var(--border-color); }
     .legal-wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; color: var(--box-text); line-height: 1.7; }

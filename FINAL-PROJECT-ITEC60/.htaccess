@@ -1,0 +1,6 @@
+# CineVault: no folder listings, and no downloading of database dumps,
+# notes or backup copies from the web.
+Options -Indexes
+<FilesMatch "\.(sql|md|bak|log|ini|sh|txt)$">
+  Require all denied
+</FilesMatch>

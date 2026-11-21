@@ -30,7 +30,7 @@ $cv_member_initials = strtoupper(substr($cv_member['first_name'] ?? 'M', 0, 1) .
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CineVault</title>
-  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
+  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg?v=<?php echo CV_ASSET_VERSION; ?>">
   <!-- Font Awesome CDN (for icons) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../shared/notifications.css?v=<?php echo CV_ASSET_VERSION; ?>">
@@ -146,6 +146,9 @@ $cv_member_initials = strtoupper(substr($cv_member['first_name'] ?? 'M', 0, 1) .
                 <li>
                   <a class="dropdown-item" href="user-view-profile.php"><i class="fa-solid fa-user-pen"></i> My Profile</a>
                 </li>
+                <li>
+                  <a class="dropdown-item" href="settings.php"><i class="fa-solid fa-gear"></i> Settings</a>
+                </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#cvLogoutModal">
@@ -180,6 +183,7 @@ $cv_member_initials = strtoupper(substr($cv_member['first_name'] ?? 'M', 0, 1) .
           window.addEventListener('scroll', update, { passive: true });
         })();
       </script>
+      <script>window.CV_PREFS = <?php echo json_encode(cv_member_prefs($cv_uid)); ?>;</script>
       <script src="../shared/notifications.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>
       <script src="../shared/ellipsis-tooltips.js?v=<?php echo CV_ASSET_VERSION; ?>" defer></script>
 

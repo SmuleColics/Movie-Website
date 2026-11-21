@@ -4,21 +4,23 @@ include '../includes/dashboard-header-sidebar.php';
 // ?category=Movie or ?category=Series shows just that kind (sidebar Movies / Series).
 $cv_category = in_array($_GET['category'] ?? '', ['Movie', 'Series'], true) ? $_GET['category'] : '';
 
-// Handle Movie/Series delete
+// Archive a movie/series (it can be restored from the Archive page).
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
-  $delete_id = intval($_POST["delete-id"]);
-  $delete_query = "DELETE FROM tbl_movie_series WHERE movie_series_id = $delete_id";
-  $result = mysqli_query($con, $delete_query);
+  $archive_id = intval($_POST["delete-id"]);
+  $stmt = $con->prepare("SELECT title FROM tbl_movie_series WHERE movie_series_id = ?");
+  $stmt->bind_param('i', $archive_id);
+  $stmt->execute();
+  $archived_title = (string) ($stmt->get_result()->fetch_column() ?: '');
+  $stmt->close();
 
-  if (!$result) {
-    die("Delete failed: " . mysqli_error($con));
-  } else {
-    echo "<script>
-      alert('Movie/Series Deleted Successfully');
-      window.location.href='web-movies.php';
-    </script>";
-    exit;
-  }
+  $ok = cv_archive_row($con, 'title', $archive_id);
+
+  $back = 'web-movies.php' . ($cv_category ? '?category=' . $cv_category : '');
+  cv_alert_redirect(
+    $ok ? '"' . $archived_title . '" was moved to the Archive. You can restore it from the Archive page.' : 'That title was not found.',
+    $back,
+    $ok ? 'success' : 'danger'
+  );
 }
 ?>
 <!DOCTYPE html>
@@ -64,6 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
               <a href="web-movies.php?category=Movie" class="btn <?php echo $cv_category === 'Movie' ? 'btn-light' : 'btn-outline-light'; ?>">Movies</a>
               <a href="web-movies.php?category=Series" class="btn <?php echo $cv_category === 'Series' ? 'btn-light' : 'btn-outline-light'; ?>">Series</a>
             </div>
+            <button type="button" class="btn btn-sm btn-outline-light" data-print-table="#table-all-movie" data-print-title="<?php echo $cv_category === 'Movie' ? 'Movies' : ($cv_category === 'Series' ? 'Series' : 'Movies and Series'); ?>"><i class="fa-solid fa-print me-1"></i> Print</button>
           </div>
         </div>
         <div class="table-responsive mt-2">
@@ -78,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
                 <th class="db-text-primary" scope="col">Description</th>
                 <th class="db-text-primary" scope="col">View</th>
                 <th class="db-text-primary" scope="col">Edit</th>
-                <th class="db-text-primary" scope="col">Delete</th>
+                <th class="db-text-primary" scope="col">Archive</th>
               </tr>
             </thead>
             <tbody>
@@ -141,7 +144,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
                   <td>
                     <button class='btn text-white p-0 border-0 delete-btn' data-bs-toggle='modal'
                       data-bs-target='#modalDelete' data-identification='<?php echo $row['movie_series_id'] ?>'>
-                      <i class='fa-solid fa-delete-left text-danger ps-2'></i>
+                      <i class="fa-solid fa-box-archive text-warning ps-2" title="Archive"></i>
                     </button>
                   </td>
                 </tr>
@@ -245,18 +248,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete-btn-modal"])) {
       <div class="modal-content">
         <form action="" method="post">
           <div class="modal-header">
-            <h1 class="modal-title fs-5 db-text-sec">Delete Movie/Series</h1>
+            <h1 class="modal-title fs-5 db-text-sec">Archive Movie/Series</h1>
             <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal"
               style="filter: invert(1) grayscale(100%) brightness(200%); opacity: 1;"></button>
           </div>
           <div class="modal-body px-4">
             <input type="hidden" name="delete-id" id="delete-id" required>
-            <h4 class="my-4 db-text-sec text-center">Are you sure you want to delete this movie/series?</h4>
+            <h4 class="my-4 db-text-sec text-center">Move this title to the Archive?</h4>
+            <p class="text-center db-text-secondary mb-0">Members will no longer see it. You can restore it any time from the Archive page.</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">NO</button>
+            <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
             <button type="submit" class="btn db-bg-primary db-text-sec" name="delete-btn-modal"
-              style="color: #F3EAD6">YES</button>
+              style="color: #1A140C">Archive</button>
           </div>
         </form>
       </div>

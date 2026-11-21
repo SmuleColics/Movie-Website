@@ -23,7 +23,9 @@ $cv_nav = [
     'web-movie-series.php' => $cv_cat === 'Series' ? 'series' : 'movies',
     'web-genre.php' => 'genres',
     'signup-accounts.php' => 'accounts',
-    'archive-accounts.php' => 'accounts',
+    'archive-accounts.php' => 'archive',
+    'archive.php' => 'archive',
+    'settings.php' => 'settings',
 ][$cv_page] ?? '';
 function cv_nav_active($key)
 {
@@ -85,7 +87,7 @@ $stmt->close();
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
+  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg?v=<?php echo CV_ASSET_VERSION; ?>">
 </head>
 
 <body class="cv-admin">
@@ -99,7 +101,7 @@ $stmt->close();
             <span class="navbar-toggler-icon"></span>
           </button>
           <a href="#">
-            <img class="me-2" src="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg" alt="CineVault Logo"
+            <img class="me-2" src="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg?v=<?php echo CV_ASSET_VERSION; ?>" alt="CineVault Logo"
               style="width: 36px;">
           </a>
           <a class="navbar-brand fw-semibold" href="#">
@@ -196,7 +198,7 @@ $stmt->close();
             <span class="navbar-toggler-icon"></span>
           </button>
           <a href="#">
-            <img class="me-2" src="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg" alt="CineVault Logo"
+            <img class="me-2" src="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg?v=<?php echo CV_ASSET_VERSION; ?>" alt="CineVault Logo"
               style="width: 36px;">
           </a>
           <a class="navbar-brand fw-semibold" href="#">
@@ -254,6 +256,19 @@ $stmt->close();
                 </div>
               </a>
             </li>
+          <li class="sidebar-content-item d-flex align-items-center mb-1<?php echo cv_nav_active('archive'); ?>">
+            <a href="../DASHBOARD-HTML/archive.php" class="sidebar-anchor">
+              <span class="aside-icon material-symbols-outlined text-center">inventory_2</span>
+              <span class="sidebar-text ms-2">Archive</span>
+            </a>
+          </li>
+          <li class="sidebar-content-item d-flex align-items-center mb-1<?php echo cv_nav_active('settings'); ?>">
+            <a href="../DASHBOARD-HTML/settings.php" class="sidebar-anchor">
+              <span class="aside-icon material-symbols-outlined text-center">settings</span>
+              <span class="sidebar-text ms-2">Settings</span>
+            </a>
+          </li>
+
           </ul>
         </div>
       </div>
@@ -310,6 +325,19 @@ $stmt->close();
             </div>
           </a>
         </li>
+      <li class="sidebar-content-item d-flex align-items-center mb-1<?php echo cv_nav_active('archive'); ?>">
+        <a href="../DASHBOARD-HTML/archive.php" class="sidebar-anchor">
+          <span class="aside-icon material-symbols-outlined text-center">inventory_2</span>
+          <span class="sidebar-text ms-2">Archive</span>
+        </a>
+      </li>
+      <li class="sidebar-content-item d-flex align-items-center mb-1<?php echo cv_nav_active('settings'); ?>">
+        <a href="../DASHBOARD-HTML/settings.php" class="sidebar-anchor">
+          <span class="aside-icon material-symbols-outlined text-center">settings</span>
+          <span class="sidebar-text ms-2">Settings</span>
+        </a>
+      </li>
+
       </ul>
     </div>
   </aside>
@@ -347,4 +375,13 @@ $stmt->close();
 </script>
 <script src="../shared/notifications.js?v=<?php echo CV_ASSET_VERSION; ?>"></script>
 <script src="../shared/ellipsis-tooltips.js?v=<?php echo CV_ASSET_VERSION; ?>" defer></script>
+<?php
+// For printing admin tables (shared/table-print.js): the letterhead and who is printing.
+require_once __DIR__ . '/print-letterhead.php';
+?>
+<template id="cv-print-letterhead"><?php echo cv_print_letterhead('../'); ?></template>
+<span id="cv-print-meta" hidden
+  data-admin="<?php echo e(trim($cv_admin['first_name'] . ' ' . $cv_admin['last_name'])); ?>"
+  data-site="<?php echo e(cv_setting('site_name', 'CineVault')); ?>"></span>
+<script src="../shared/table-print.js?v=<?php echo CV_ASSET_VERSION; ?>" defer></script>
 </html>

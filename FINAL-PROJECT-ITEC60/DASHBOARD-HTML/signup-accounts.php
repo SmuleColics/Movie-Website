@@ -5,10 +5,10 @@ include '../includes/db-connection.php';
 // Handle Archive (Delete) POST (for already approved accounts)
 if (isset($_POST['modal-delete-button'])) {
   $delete_id = (int) $_POST['delete-id'];
-  $stmt = $con->prepare("UPDATE tbl_signup_acc SET is_archived = 1 WHERE signup_id = ?");
+  $stmt = $con->prepare("UPDATE tbl_signup_acc SET is_archived = 1, archived_at = NOW() WHERE signup_id = ?");
   $stmt->bind_param("i", $delete_id);
   if ($stmt->execute()) {
-    cv_alert_redirect('Account archived successfully.', 'signup-accounts.php');
+    cv_alert_redirect('Account moved to the Archive. You can restore it from the Archive page.', 'signup-accounts.php');
   }
 }
 ?>
@@ -42,7 +42,7 @@ if (isset($_POST['modal-delete-button'])) {
 <body>
   <main class="container-lg p-0 overflow-hidden">
     <div class="me-3 mt-3 p-0 ms-md-2 ms-0 w-auto w-md-auto d-flex justify-content-end">
-      <a href="archive-accounts.php" class="btn db-bg-primary db-text-sec" id="add-movie-btn">Archive Accounts</a>
+      <a href="archive.php?tab=members" class="btn db-bg-primary db-text-sec" id="add-movie-btn">Archived Members</a>
     </div>
     <!-- ========== MEMBER ACCOUNTS SECTION ========== -->
     <section class="signup-accounts-section text-left p-3">
@@ -50,9 +50,12 @@ if (isset($_POST['modal-delete-button'])) {
         <div class="card-body">
 
           <div class="table-task-top db-text-sec">
-            <div class="py-2 ps-3">
-              <p class="m-0 fs-20">Member Accounts</p>
-              <p class="m-0 fs-14" style="transform: translateY(-2px)">Everyone who signed up. Membership is free, so accounts work right away.</p>
+            <div class="py-2 ps-3 pe-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+              <div>
+                <p class="m-0 fs-20">Member Accounts</p>
+                <p class="m-0 fs-14" style="transform: translateY(-2px)">Everyone who signed up. Membership is free, so accounts work right away.</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-light" data-print-table="#table-signup-acc" data-print-title="Member Accounts"><i class="fa-solid fa-print me-1"></i> Print</button>
             </div>
           </div>
 

@@ -36,6 +36,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 if (!headers_sent()) {
+    header_remove('X-Powered-By'); // don't advertise the PHP version
     header('X-Frame-Options: SAMEORIGIN');
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: strict-origin-when-cross-origin');
@@ -44,7 +45,7 @@ if (!headers_sent()) {
 /* ---------- Asset version ----------
  * Added to CSS/JS links as ?v=... so browsers fetch fresh copies.
  * Change this whenever a .css or .js file changes. */
-const CV_ASSET_VERSION = '20261118.23';
+const CV_ASSET_VERSION = '20261120.8';
 
 /* ---------- Small helpers ---------- */
 function e($value)
@@ -69,6 +70,50 @@ function cv_video_src($value, $folder = 'MOVIE_SERIES_VIDEO')
         return $value;
     }
     return '../DASHBOARD-HTML/' . $folder . '/' . basename((string) $value);
+}
+
+/* ---------- Site settings (admin Settings page, tbl_settings) ---------- */
+function cv_setting($key, $default = '')
+{
+    static $cache = null;
+    global $con;
+    if ($cache === null) {
+        $cache = [];
+        $res = @mysqli_query($con, 'SELECT setting_key, setting_value FROM tbl_settings');
+        while ($res && ($r = mysqli_fetch_assoc($res))) {
+            $cache[$r['setting_key']] = $r['setting_value'];
+        }
+    }
+    $v = $cache[$key] ?? null;
+    return ($v === null || $v === '') ? $default : $v;
+}
+
+function cv_setting_save($key, $value)
+{
+    global $con;
+    $stmt = $con->prepare('INSERT INTO tbl_settings (setting_key, setting_value) VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)');
+    $stmt->bind_param('ss', $key, $value);
+    $stmt->execute();
+    $stmt->close();
+}
+
+/* A member's own preferences (member Settings page), with defaults. */
+function cv_member_prefs($memberId)
+{
+    global $con;
+    $prefs = ['autoplay_previews' => 1, 'resume_playback' => 1];
+    if ($memberId) {
+        $stmt = $con->prepare('SELECT autoplay_previews, resume_playback FROM tbl_member_settings WHERE signup_id = ?');
+        $stmt->bind_param('i', $memberId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if ($row) {
+            $prefs = array_map('intval', $row);
+        }
+    }
+    return $prefs;
 }
 
 /* ---------- Member "new arrivals" bell ----------
@@ -170,7 +215,8 @@ ob_start(function ($html) {
     $rel = cv_relative_script();
     if (stripos($html, '</head>') !== false
         && !preg_match('#^libs/#i', $rel)
-        && $rel !== 'MovieWebsite/play-vid.php') {
+        && $rel !== 'MovieWebsite/play-vid.php'
+        && stripos($html, 'data-cv-plain') === false) { // printed sheets stay white
         $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
         $base = substr($script, 0, strlen($script) - strlen($rel));
         $theme = '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
@@ -201,7 +247,7 @@ function cv_require_admin($con)
 {
     $ok = false;
     if (!empty($_SESSION['admin_logged_in']) && !empty($_SESSION['admin_id'])) {
-        $stmt = $con->prepare('SELECT admin_id FROM tbl_admin_acc WHERE admin_id = ? LIMIT 1');
+        $stmt = $con->prepare('SELECT admin_id FROM tbl_admin_acc WHERE admin_id = ? AND is_archived = 0 LIMIT 1');
         $id = (int) $_SESSION['admin_id'];
         $stmt->bind_param('i', $id);
         $stmt->execute();
@@ -332,6 +378,63 @@ function cv_clear_failures($con, $scope, $identifier)
     $stmt->bind_param('ss', $scope, $identifier);
     $stmt->execute();
     $stmt->close();
+}
+
+/* ---------- Archive for titles and genres ----------
+ * Archived titles and genres live in their own *_archived tables, so every
+ * page that reads tbl_movie_series / tbl_movie_series_genre sees only active
+ * ones (free hosts don't allow database views). Members and admins keep an
+ * is_archived column instead.
+ */
+const CV_ARCHIVE_TABLES = [
+    'title' => ['tbl_movie_series', 'tbl_movie_series_archived', 'movie_series_id'],
+    'genre' => ['tbl_movie_series_genre', 'tbl_movie_series_genre_archived', 'genre_id'],
+];
+
+// Moves one row from $from to $to. Returns false if it isn't there or the move fails.
+function cv_move_row($con, $from, $to, $key, $id, $archived)
+{
+    $id = (int) $id;
+    $con->begin_transaction();
+    try {
+        mysqli_query($con, "INSERT INTO `$to` SELECT * FROM `$from` WHERE `$key` = $id");
+        if (mysqli_affected_rows($con) < 1) {
+            $con->rollback();
+            return false;
+        }
+        mysqli_query($con, $archived
+            ? "UPDATE `$to` SET is_archived = 1, archived_at = NOW()" . ($from === 'tbl_movie_series' ? ', feature_slot = NULL' : '') . " WHERE `$key` = $id"
+            : "UPDATE `$to` SET is_archived = 0, archived_at = NULL WHERE `$key` = $id");
+        mysqli_query($con, "DELETE FROM `$from` WHERE `$key` = $id");
+        $con->commit();
+        return true;
+    } catch (mysqli_sql_exception $ex) {
+        $con->rollback();
+        return false;
+    }
+}
+
+function cv_archive_row($con, $kind, $id)
+{
+    [$active, $archive, $key] = CV_ARCHIVE_TABLES[$kind];
+    return cv_move_row($con, $active, $archive, $key, $id, true);
+}
+
+function cv_restore_row($con, $kind, $id)
+{
+    [$active, $archive, $key] = CV_ARCHIVE_TABLES[$kind];
+    if ($kind === 'title') {
+        // Bring back any of its genres that were archived after it, so it keeps them.
+        $stmt = $con->prepare('SELECT genre_id1, genre_id2, genre_id3 FROM tbl_movie_series_archived WHERE movie_series_id = ?');
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $genres = array_filter((array) $stmt->get_result()->fetch_row());
+        $stmt->close();
+        foreach ($genres as $genreId) {
+            cv_move_row($con, 'tbl_movie_series_genre_archived', 'tbl_movie_series_genre', 'genre_id', $genreId, false);
+        }
+    }
+    return cv_move_row($con, $archive, $active, $key, $id, false);
 }
 
 /* ---------- Safe uploads ---------- */

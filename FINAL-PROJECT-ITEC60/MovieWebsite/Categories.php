@@ -18,7 +18,7 @@ include 'CineVault-header.php';
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="Override.css" />
-  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
+  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg?v=<?php echo CV_ASSET_VERSION; ?>">
 </head>
 
 <body class="bg-dark" id="categories-body">
@@ -46,7 +46,7 @@ include 'CineVault-header.php';
         while ($genre = mysqli_fetch_assoc($genre_query)):
           $style = $btn_styles[$i % 2];
           // Optional: make the genre name "safe" for HTML and URLs
-          $genre_name = htmlspecialchars($genre['genre_name']);
+          $genre_name = e($genre['genre_name']);
           $genre_id = (int) $genre['genre_id'];
           ?>
           <button class="btn <?php echo $style; ?> rounded-5 category-btn" data-genre-id="<?php echo $genre_id; ?>">
@@ -65,7 +65,7 @@ include 'CineVault-header.php';
   <footer>
     <div id="footer-categories" class="footer text-white d-flex justify-content-between mx-5 align-items-center">
       <p class="footer-long-text">Movie and series details and images come from <a class="text-white" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB. Free classic films stream from the <a class="text-white" href="https://archive.org/" target="_blank" rel="noopener">Internet Archive</a>.</p>
-      <p>© 2025 CineVault. All rights reserved.</p>
+      <p>© <?php echo date('Y'); ?> <?php echo e(cv_setting('site_name', 'CineVault')); ?>. All rights reserved.</p>
     </div>
   </footer>
   <!-- END OF FOOTER -->

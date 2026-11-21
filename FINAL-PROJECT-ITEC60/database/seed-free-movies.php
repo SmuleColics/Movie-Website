@@ -225,24 +225,6 @@ $series = [
     ['Max Fleischer\'s Superman', 1941, ['tmdb_movie' => 342605, 'items' => [
         'superman_1941', 'superman_the_mechanical_monsters', 'superman_the_mad_scientist',
         'superman_electric_earthquake', 'superman_eleventh_hour']]],
-    ['Popeye the Sailor', 1933],
-    ['Casper the Friendly Ghost', 1945, ['q' => 'Casper']],
-    ['Betty Boop', 1930],
-    ['Felix the Cat', 1919],
-    ['Little Lulu', 1943],
-    ['Herman and Katnip', 1950],
-    ['Color Classics', 1934, ['q' => 'Color Classic']],
-    ['Noveltoons', 1943],
-    ['Tom and Jerry', 1931, ['q' => 'Van Beuren Tom and Jerry']],
-    ['Merrie Melodies', 1931],
-    ['Looney Tunes', 1930],
-    ['Mighty Mouse', 1942, ['q' => 'Mighty Mouse']],
-    ['Woody Woodpecker', 1941, ['q' => 'Woody Woodpecker']],
-    ['Little Audrey', 1947],
-    ['Heckle and Jeckle', 1946],
-    ['Raggedy Ann', 1941, ['q' => 'Raggedy Ann']],
-    ['Scrappy', 1931, ['q' => 'Scrappy cartoon']],
-    ['Flip the Frog', 1930],
     // More westerns
     ['Death Valley Days', 1952],
     ['Tales of the Texas Rangers', 1955],
@@ -272,15 +254,11 @@ $series = [
 $cartoons = [
     ['Popeye the Sailor', 1933, 'popeye', ['Popeye the Sailor', 1933],
         'The spinach-powered sailor man takes on Bluto, rescues Olive Oyl and gets into trouble with Swee\'Pea and Wimpy in these classic theatrical shorts.'],
-    ['Betty Boop', 1930, 'betty boop', ['Snow-White', 1933],
+    ['Betty Boop', 1930, 'betty boop', ['Minnie the Moocher', 1932],
         'The Jazz Age flapper Betty Boop, with Bimbo and Koko the Clown, in surreal, music-filled Fleischer Studios cartoons.'],
     ['Felix the Cat', 1919, 'felix', ['Feline Follies', 1919],
         'The first great cartoon star: a clever black cat whose silent-era adventures twist reality any way he likes.'],
-    ['Bugs Bunny and Friends', 1941, 'bugs bunny', ['Falling Hare', 1943],
-        'Bugs Bunny, Daffy Duck and Elmer Fudd in public domain Warner Bros. cartoons from the 1940s.'],
-    ['Porky Pig', 1935, 'porky', ['Porky in Wackyland', 1938],
-        'The stuttering pig from Warner Bros. in early Looney Tunes adventures, from Wackyland to wartime spy chases.'],
-    ['Little Lulu', 1943, 'little lulu', ['Eggs Don\'t Bounce', 1943],
+    ['Little Lulu', 1943, 'little lulu', ['Cad and Caddy', 1947],
         'The mischievous girl from the comic strip gets into trouble at school, at the store and on the golf course.'],
     ['Little Audrey', 1947, 'little audrey', ['Santa\'s Surprise', 1947],
         'Famous Studios\' cheerful, dreamy little girl and her imaginative adventures.'],
@@ -290,8 +268,12 @@ $cartoons = [
         'Ub Iwerks\' cheerful frog in some of the first sound and color cartoons, full of music and gags.'],
     ['Tom and Jerry (Van Beuren)', 1931, 'tom and jerry', ['Wot a Night', 1931],
         'Not the cat and mouse: the original Tom and Jerry were a tall and short human duo in zany Van Beuren Studios cartoons.'],
-    ['Heckle and Jeckle', 1946, 'heckle', ['The Talking Magpies', 1946],
-        'Two wisecracking magpies from Terrytoons who outwit everyone they meet.'],
+    ['Screen Songs', 1929, 'screen song', ['Oh You Beautiful Doll', 1929],
+        'Fleischer Studios\' sing-along cartoons: a bouncing ball over the lyrics, with gags and live-action musical stars.'],
+    ['Krazy Kat', 1925, 'krazy kat', ['Bars and Stripes', 1931],
+        'George Herriman\'s comic-strip cat, in Charles Mintz\'s early sound cartoons.'],
+    ['Molly Moo-Cow', 1935, 'molly moo', ['Molly Moo-Cow and the Butterflies', 1935],
+        'A friendly cow\'s colorful adventures in Van Beuren Studios\' Rainbow Parade cartoons.'],
 ];
 
 function cartoon_shorts($words, $max)
@@ -314,7 +296,9 @@ function cartoon_shorts($words, $max)
         if (preg_match('/theat(er|re)|cartoons\b|collection|compil|vhs|dvd|colori[sz]ed|trailer|commercial|dub\b|\bep\.? ?\d/i', $t)) {
             continue;
         }
-        $clean = trim(preg_replace(['/\(.*?\)|\[.*?\]/', '/^.*?(:| - |\bin\b)\s*/i', '/\s+/'], ['', '', ' '], $t), " \t\"'-");
+        // A quoted name is the short's title ('1936 Fleischer Screen Song "No Other One"').
+        $clean = preg_match('/"([^"]{3,})"/', $t, $qm) ? $qm[1]
+            : trim(preg_replace(['/\(.*?\)|\[.*?\]/', '/^.*?(:| - |\bin\b)\s*/i', '/\s+/'], ['', '', ' '], $t), " \t\"'-");
         $key = norm($clean);
         if ($clean === '' || isset($seen[$key])) {
             continue;
@@ -415,8 +399,9 @@ function norm($s)
 
 function already_added($con, $type, $id)
 {
-    $stmt = $con->prepare('SELECT movie_series_id FROM tbl_movie_series WHERE tmdb_type = ? AND tmdb_id = ?');
-    $stmt->bind_param('si', $type, $id);
+    $stmt = $con->prepare('SELECT movie_series_id FROM tbl_movie_series WHERE tmdb_type = ? AND tmdb_id = ?
+        UNION ALL SELECT movie_series_id FROM tbl_movie_series_archived WHERE tmdb_type = ? AND tmdb_id = ?');
+    $stmt->bind_param('sisi', $type, $id, $type, $id);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
@@ -500,6 +485,47 @@ function insert_title($con, array $d, $category, $duration, $video, $title = nul
     return $id;
 }
 
+/* Drops videos that are not real episodes: trailers, promos, documentaries,
+ * and anything far longer or shorter than the show's usual episode (a feature
+ * film or a clip that matched the search). Keeps at most $max. */
+function episode_filter(array $eps, $max)
+{
+    $eps = array_values(array_filter($eps, fn($e) => !preg_match('/trailer|promo|commercial|documentar|behind the|look beneath|watch and download|\bapp\b|bad movie|remembered|reunion/i', $e['label'])));
+    $mins = array_values(array_filter(array_column($eps, 'minutes')));
+    if ($mins) {
+        sort($mins);
+        $median = $mins[intdiv(count($mins), 2)];
+        $eps = array_values(array_filter($eps, fn($e) => $e['minutes'] && $e['minutes'] >= $median * 0.6 && $e['minutes'] <= $median * 1.6));
+    }
+    return array_slice($eps, 0, $max);
+}
+
+/* Turns an archive.org file or item name into a readable episode title. */
+function clean_episode_title($t, $show)
+{
+    $t = preg_replace('/(_512kb|\.ia|\.mp4|\.avi)+$/i', '', (string) $t);
+    $t = str_replace('_', ' ', $t);
+    $t = preg_replace([
+        '/\((TV )?Incomplete Series\)/i', '/\[[^\]]*\]/', '/\(\d{4}\)/', '/\b\d{1,2}[-. ]\d{1,2}[-. ]\d{2,4}\b/',
+        '/\bS\d+\s*E\d+\b/i', '/\bTV ?Special\b/i', '/\s*-\d+$/', '/\s+Is\s*$/i',
+    ], '', $t);
+    $t = preg_replace('/^\s*(ep(isode)?\.?\s*)?\d+\s*[-.:]?\s+/i', '', $t); // leading episode numbers
+    // Drop the show's name, with or without "The", quoted or not.
+    $names = array_unique([$show, preg_replace('/^The\s+/i', '', $show), preg_replace('/,.*$/', '', $show)]);
+    foreach ($names as $n) {
+        $q = preg_quote($n, '/');
+        $t = preg_replace(["/(''|\")$q(''|\")/i", "/^\s*$q(\s*[-:]\s*|\s+(?=\S{3,})|\s*$)/i"], '', $t);
+    }
+    // Generic names ("1949 episode of the TV series ...") are no title at all.
+    if (preg_match('/^\s*(\d{4}\s+)?(misc\.?\s+)?ep(isode)?\.?\s*(of|no\.?)?\b/i', $t)) {
+        return '';
+    }
+    $t = trim(preg_replace('/\s{2,}/', ' ', $t), " \t-:'\"()");
+    if ($t !== '' && $t === strtoupper($t)) {
+        $t = ucwords(strtolower($t)); // ALL CAPS -> Title Case
+    }
+    return $t;
+}
 /* All TMDB episodes of a show, keyed by "season-episode", plus a name index. */
 function tmdb_episodes($tvId, $seasonCount)
 {
@@ -598,6 +624,10 @@ foreach ($series as $s) {
             continue;
         }
         $d = tmdb_details($con, $type, $tmdbId);
+        if ($type === 'tv' && trim($d['description']) === '') {
+            say("skip  (weak TMDB match, no description) series $title");
+            continue;
+        }
         $max = $opt['max'] ?? 6;
 
         // Episode videos: either listed items or the most-watched matches.
@@ -605,7 +635,7 @@ foreach ($series as $s) {
         $eps = [];
         $seen = [];
         foreach ($itemIds as $item) {
-            if (count($eps) >= $max) {
+            if (count($eps) >= $max * 2) {
                 break;
             }
             try {
@@ -622,7 +652,7 @@ foreach ($series as $s) {
             $pack = count($names) >= 3;
             foreach ($pack ? $files : [$files[0]] as $f) {
                 $key = preg_replace('/(_512kb|\.ia)?\.mp4$/i', '', $f['name']);
-                if (isset($seen[$key]) || count($eps) >= $max) {
+                if (isset($seen[$key]) || count($eps) >= $max * 2) {
                     continue;
                 }
                 $seen[$key] = true;
@@ -630,6 +660,7 @@ foreach ($series as $s) {
                 $eps[] = ['label' => $label, 'url' => $f['url'], 'minutes' => $f['minutes']];
             }
         }
+        $eps = episode_filter($eps, $max);
         if (count($eps) < 2) {
             say("skip  (fewer than 2 episodes found) series $title");
             continue;
@@ -654,6 +685,7 @@ foreach ($series as $s) {
                     }
                 }
             }
+            $clean = clean_episode_title($clean, $title);
             $ep['title'] = $match['name'] ?? ($clean !== '' && norm($clean) !== norm($title) ? $clean : 'Episode ' . ($i + 1));
             $ep['season'] = $match['season'] ?? 1;
             $ep['episode'] = $match['episode'] ?? (100 + $i);

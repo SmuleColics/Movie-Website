@@ -144,7 +144,7 @@ function cv_genre_icon($name)
           $active = true;
           while ($row = mysqli_fetch_assoc($carousel_query)):
             $movie_series_id = $row['movie_series_id'];
-            $desc = htmlspecialchars($row['description']);
+            $desc = e($row['description']);
             $maxlen = 110;
             if (function_exists('mb_substr')) {
               if (mb_strlen($desc) > $maxlen) {
@@ -155,40 +155,40 @@ function cv_genre_icon($name)
                 $desc = substr($desc, 0, $maxlen) . '...';
               }
             }
-            $genres = htmlspecialchars($row['genre_1']);
+            $genres = e($row['genre_1']);
             if (!empty($row['genre_2']))
-              $genres .= ', ' . htmlspecialchars($row['genre_2']);
+              $genres .= ', ' . e($row['genre_2']);
             if (!empty($row['genre_3']))
-              $genres .= ', ' . htmlspecialchars($row['genre_3']);
+              $genres .= ', ' . e($row['genre_3']);
             ?>
             <div class="carousel-item<?php if ($active) {
               echo ' active';
               $active = false;
             } ?> position-relative">
-              <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($row['backdrop'] ?: $row['poster']); ?>"
-                class="d-block w-100 wallpaper" alt="<?php echo htmlspecialchars($row['title']); ?> Wallpaper">
+              <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($row['backdrop'] ?: $row['poster']); ?>"
+                class="d-block w-100 wallpaper" alt="<?php echo e($row['title']); ?> Wallpaper">
               <div class="wallpaper-description text-primary">
                 <div class="wallpaper-left text-white d-flex flex-column">
                   <div class="d-flex justify-content-center">
                     <img class="sonic-title-img"
-                      src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($row['modal_poster_title']); ?>"
-                      alt="<?php echo htmlspecialchars($row['title']); ?> Title">
+                      src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($row['modal_poster_title']); ?>"
+                      alt="<?php echo e($row['title']); ?> Title">
                   </div>
                   <div class="wallpaper-ratings d-flex align-items-center justify-content-center my-2 my-md-4">
                     <div class="rating-year">
-                      <?php echo htmlspecialchars($row['date_released']); ?>
+                      <?php echo e($row['date_released']); ?>
                     </div>
                     <span class="mx-2 text-white-50">|</span>
                     <div class="rating-points d-flex">
-                      <?php echo htmlspecialchars($row['age_rating']); ?>+
+                      <?php echo e($row['age_rating']); ?>+
                     </div>
                     <span class="mx-2 text-white-50">|</span>
                     <div class="rating-gender text-nowrap">
-                      <?php echo htmlspecialchars($row['category']); ?>
+                      <?php echo e($row['category']); ?>
                     </div>
                     <div class="wallpaper-line bg-secondary mx-3"></div>
                   </div>
-                  <div class="rating-text cv-full-desc" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="cv-desc-tooltip" data-bs-title="<?php echo htmlspecialchars($row['description'], ENT_QUOTES); ?>">
+                  <div class="rating-text cv-full-desc" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="cv-desc-tooltip" data-bs-title="<?php echo e($row['description'], ENT_QUOTES); ?>">
                     <?php echo $desc; ?>
                   </div>
                 </div>
@@ -240,13 +240,13 @@ function cv_genre_icon($name)
                     muted
                     loop
                   >
-                    <source src=\"" . htmlspecialchars(cv_video_src($row['video'])) . "\" type=\"video/mp4\">
+                    <source src=\"" . e(cv_video_src($row['video'])) . "\" type=\"video/mp4\">
                     Your browser does not support the video tag.
                   </video>";
             if (!empty($row['modal_poster_title'])) {
-              $carousel_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($row['modal_poster_title']) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
+              $carousel_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . e($row['modal_poster_title']) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
             } else {
-              $carousel_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($row['title']) . "</p>";
+              $carousel_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . e($row['title']) . "</p>";
             }
             $carousel_modals .= "
                   <a href=\"play-vid.php?video=" . urlencode($row['video']) . "&type=movie_series&id=" . $movie_series_id . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
@@ -260,19 +260,19 @@ function cv_genre_icon($name)
                 <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
                   <div class=\"col-8 text-wrap\">
                     <div class=\"d-flex gap-2\">
-                      <p class='modal-text-rating mb-0'>" . htmlspecialchars($row['date_released']) . "</p>
-                      <p class='modal-text-rating mb-0'>" . htmlspecialchars($row['duration']) . "</p>
+                      <p class='modal-text-rating mb-0'>" . e($row['date_released']) . "</p>
+                      <p class='modal-text-rating mb-0'>" . e($row['duration']) . "</p>
                     </div>
                     <div class=\"d-flex gap-2 align-items-center\">
-                      <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($row['age_rating']) . "+</p>
-                      <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($row['category']) . "</p>
+                      <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . e($row['age_rating']) . "+</p>
+                      <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . e($row['category']) . "</p>
                     </div>
-                    <p class='modal-text-rating'>" . htmlspecialchars($row['description']) . "</p>
+                    <p class='modal-text-rating'>" . e($row['description']) . "</p>
                   </div>
                   <div class=\"col-4 ps-0 pe-4 text-wrap\">
                     <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
                       <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span>
-                      " . htmlspecialchars($row['cast']) . ", more...
+                      " . e($row['cast']) . ", more...
                     </p>
                     <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
                       <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span>
@@ -324,6 +324,12 @@ function cv_genre_icon($name)
     $cw_rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
     foreach ($cw_rows as $r) {
+      if ($r['episode_id'] && $r['episode_title'] === null) {
+        // The episode was replaced (an admin re-saved the series): start the series again.
+        $cw_items[] = ['title' => $r['title'], 'poster' => $r['poster'], 'sub' => 'Pick up the series again', 'pct' => 0,
+          'url' => 'play-vid.php?type=movie_series&id=' . (int) $r['movie_series_id']];
+        continue;
+      }
       $finished = $r['position_sec'] >= $r['duration_sec'] - 90;
       if ($r['position_sec'] < 30 && !$finished) {
         continue; // barely started
@@ -444,18 +450,18 @@ function cv_genre_icon($name)
                 <a href='#' data-bs-toggle='modal' data-bs-target='#modal-top10-<?php echo $movie_series_id ?>'>
                   <div class="top-10-hover position-relative">
                     <img class="top-10-img rounded-3"
-                      src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($top10_poster); ?>"
-                      alt="<?php echo htmlspecialchars($top10_title); ?>">
+                      src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($top10_poster); ?>"
+                      alt="<?php echo e($top10_title); ?>">
                     <i class="fa-solid fa-play play-button-top-10"></i>
                   </div>
                 </a>
               </div>
               <?php
-              $genres = htmlspecialchars($top10_genre_1);
+              $genres = e($top10_genre_1);
               if (!empty($top10_genre_2))
-                $genres .= ', ' . htmlspecialchars($top10_genre_2);
+                $genres .= ', ' . e($top10_genre_2);
               if (!empty($top10_genre_3))
-                $genres .= ', ' . htmlspecialchars($top10_genre_3);
+                $genres .= ', ' . e($top10_genre_3);
 
               $modals .= "
   <div class='modal fade' id='modal-top10-{$movie_series_id}' tabindex='-1' aria-labelledby='exampleModalLabel-{$movie_series_id}' aria-hidden='true'>
@@ -470,13 +476,13 @@ function cv_genre_icon($name)
                 muted
                 loop
               >
-                <source src=\"" . htmlspecialchars(cv_video_src($top10_video)) . "\" type=\"video/mp4\">
+                <source src=\"" . e(cv_video_src($top10_video)) . "\" type=\"video/mp4\">
                 Your browser does not support the video tag.
               </video>";
               if (!empty($top10_modal_poster_title)) {
-                $modals .= "<img class='poster-title-img top10-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($top10_modal_poster_title) . "' alt=''>";
+                $modals .= "<img class='poster-title-img top10-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . e($top10_modal_poster_title) . "' alt=''>";
               } else {
-                $modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($top10_title) . "</p>";
+                $modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . e($top10_title) . "</p>";
               }
               $modals .= "
               <a href=\"play-vid.php?video=" . urlencode($top10_video) . "&type=movie_series&id=" . $movie_series_id . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
@@ -491,19 +497,19 @@ function cv_genre_icon($name)
             <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
               <div class=\"col-8 text-wrap\">
                 <div class=\"d-flex gap-2\">
-                  <p class='modal-text-rating mb-0'>" . htmlspecialchars($top10_date_released) . "</p>
-                  <p class='modal-text-rating mb-0'>" . htmlspecialchars($top10_duration) . "</p>
+                  <p class='modal-text-rating mb-0'>" . e($top10_date_released) . "</p>
+                  <p class='modal-text-rating mb-0'>" . e($top10_duration) . "</p>
                 </div>
                 <div class=\"d-flex gap-2 align-items-center\">
-                  <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($top10_age_rating) . "+</p>
-                  <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($top10_category) . "</p>
+                  <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . e($top10_age_rating) . "+</p>
+                  <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . e($top10_category) . "</p>
                 </div>
-                <p class='modal-text-rating'>" . htmlspecialchars($top10_description) . "</p>
+                <p class='modal-text-rating'>" . e($top10_description) . "</p>
               </div>
               <div class=\"col-4 ps-0 pe-4 text-wrap\">
                 <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
                   <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span> 
-                  " . htmlspecialchars($top10_cast) . ", more...
+                  " . e($top10_cast) . ", more...
                 </p>
                 <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
                   <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span> 
@@ -533,7 +539,7 @@ function cv_genre_icon($name)
           <div class="position-relative" style="min-width:180px; ">
               <select style="transform: translateX(-48px);" id="modal-season-select-' . $movie_series_id . '" class="form-control me-5">';
                 foreach ($seasons as $s) {
-                  $modals .= '<option value="season-' . $s['season_id'] . '">' . htmlspecialchars($s['season_title']) . '</option>';
+                  $modals .= '<option value="season-' . $s['season_id'] . '">' . e($s['season_title']) . '</option>';
                 }
                 $modals .= '</select>
               <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
@@ -555,7 +561,7 @@ function cv_genre_icon($name)
                                   class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                   muted
                                   style="width: 120px; height: 70px; object-fit: cover;">
-                                  <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
+                                  <source src="' . e(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                   Your browser does not support the video tag.
                               </video>
                           </a>';
@@ -564,11 +570,11 @@ function cv_genre_icon($name)
                       </div>
                       <div class="db-text-sec me-4">
                           <div class="d-flex align-items-center justify-content-between mb-2">
-                              <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
-                              <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
+                              <p class="mb-0">' . e($ep['episode_title']) . '</p>
+                              <p class="mb-0">' . e($ep['episode_duration']) . '</p>
                           </div>
                           <div>
-                              <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
+                              <p class="mb-0 " style="font-size: 14px;">' . e($ep['episode_description']) . '</p>
                           </div>
                       </div>
                   </div>';
@@ -629,7 +635,7 @@ function cv_genre_icon($name)
       ?>
       <div class="trending-this-week">
         <p class="trending-text text-white fs-24 fw-bold">
-          <?php echo htmlspecialchars($genre_name); ?>
+          <?php echo e($genre_name); ?>
         </p>
       </div>
 
@@ -681,18 +687,18 @@ function cv_genre_icon($name)
             $trend_cast = $row['cast'];
             $trend_description = $row['description'];
 
-            $genres = htmlspecialchars($trend_genre_1);
+            $genres = e($trend_genre_1);
             if (!empty($trend_genre_2))
-              $genres .= ', ' . htmlspecialchars($trend_genre_2);
+              $genres .= ', ' . e($trend_genre_2);
             if (!empty($trend_genre_3))
-              $genres .= ', ' . htmlspecialchars($trend_genre_3);
+              $genres .= ', ' . e($trend_genre_3);
             ?>
             <div class="trending-images position-relative pe-2" style="overflow: visible;">
               <a href="#" data-bs-toggle="modal" data-bs-target="#modal-romance-<?php echo $movie_series_id ?>">
                 <div class="trending-hover position-relative">
                   <img class="trending-img rounded-3"
-                    src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($trend_poster); ?>"
-                    alt="<?php echo htmlspecialchars($trend_title); ?>">
+                    src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($trend_poster); ?>"
+                    alt="<?php echo e($trend_title); ?>">
                   <i class="fa-solid fa-play play-button"></i>
                 </div>
               </a>
@@ -711,13 +717,13 @@ function cv_genre_icon($name)
                     muted
                     loop
                   >
-                    <source src=\"" . htmlspecialchars(cv_video_src($trend_video)) . "\" type=\"video/mp4\">
+                    <source src=\"" . e(cv_video_src($trend_video)) . "\" type=\"video/mp4\">
                     Your browser does not support the video tag.
                   </video>";
             if (!empty($trend_modal_poster_title)) {
-              $trend_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($trend_modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
+              $trend_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . e($trend_modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
             } else {
-              $trend_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($trend_title) . "</p>";
+              $trend_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . e($trend_title) . "</p>";
             }
             $trend_modals .= "
                   <a href=\"play-vid.php?video=" . urlencode($trend_video) . "&type=movie_series&id=" . $movie_series_id . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
@@ -731,19 +737,19 @@ function cv_genre_icon($name)
                 <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
                   <div class=\"col-8 text-wrap\">
                     <div class=\"d-flex gap-2\">
-                      <p class='modal-text-rating mb-0'>" . htmlspecialchars($trend_date_released) . "</p>
-                      <p class='modal-text-rating mb-0'>" . htmlspecialchars($trend_duration) . "</p>
+                      <p class='modal-text-rating mb-0'>" . e($trend_date_released) . "</p>
+                      <p class='modal-text-rating mb-0'>" . e($trend_duration) . "</p>
                     </div>
                     <div class=\"d-flex gap-2 align-items-center\">
-                      <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($trend_age_rating) . "+</p>
-                      <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($trend_category) . "</p>
+                      <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . e($trend_age_rating) . "+</p>
+                      <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . e($trend_category) . "</p>
                     </div>
-                    <p class='modal-text-rating'>" . htmlspecialchars($trend_description) . "</p>
+                    <p class='modal-text-rating'>" . e($trend_description) . "</p>
                   </div>
                   <div class=\"col-4 ps-0 pe-4 text-wrap\">
                     <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
                       <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span>
-                      " . htmlspecialchars($trend_cast) . ", more...
+                      " . e($trend_cast) . ", more...
                     </p>
                     <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
                       <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span>
@@ -773,7 +779,7 @@ function cv_genre_icon($name)
                 <div class="position-relative" style="min-width:180px; ">
                     <select style="transform: translateX(-48px);" id="modal-season-select-romance-' . $movie_series_id . '" class="form-control me-5">';
               foreach ($seasons as $s) {
-                $trend_modals .= '<option value="season-' . $s['season_id'] . '">' . htmlspecialchars($s['season_title']) . '</option>';
+                $trend_modals .= '<option value="season-' . $s['season_id'] . '">' . e($s['season_title']) . '</option>';
               }
               $trend_modals .= '</select>
                     <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
@@ -795,7 +801,7 @@ function cv_genre_icon($name)
                                         class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                         muted
                                         style="width: 120px; height: 70px; object-fit: cover;">
-                                        <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
+                                        <source src="' . e(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                         Your browser does not support the video tag.
                                     </video>
                                 </a>';
@@ -804,11 +810,11 @@ function cv_genre_icon($name)
                             </div>
                             <div class="db-text-sec me-4">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
-                                    <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
+                                    <p class="mb-0">' . e($ep['episode_title']) . '</p>
+                                    <p class="mb-0">' . e($ep['episode_duration']) . '</p>
                                 </div>
                                 <div>
-                                    <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
+                                    <p class="mb-0 " style="font-size: 14px;">' . e($ep['episode_description']) . '</p>
                                 </div>
                             </div>
                         </div>';
@@ -868,7 +874,7 @@ function cv_genre_icon($name)
       ?>
       <div class="action-movies-top d-flex justify-content-between">
         <p class="action-movies-text text-white fs-24 fw-bold">
-          <?php echo htmlspecialchars($comedy_name); ?>
+          <?php echo e($comedy_name); ?>
         </p>
       </div>
       <div class="top10-featured-wrapper position-relative">
@@ -919,18 +925,18 @@ function cv_genre_icon($name)
             $comedy_cast = $row['cast'];
             $comedy_description = $row['description'];
 
-            $genres = htmlspecialchars($comedy_genre_1);
+            $genres = e($comedy_genre_1);
             if (!empty($comedy_genre_2))
-              $genres .= ', ' . htmlspecialchars($comedy_genre_2);
+              $genres .= ', ' . e($comedy_genre_2);
             if (!empty($comedy_genre_3))
-              $genres .= ', ' . htmlspecialchars($comedy_genre_3);
+              $genres .= ', ' . e($comedy_genre_3);
             ?>
             <div class="comedy-images position-relative pe-2" style="overflow: visible;">
               <a href="#" data-bs-toggle="modal" data-bs-target="#modal-comedy-<?php echo $movie_series_id ?>">
                 <div class="trending-hover position-relative">
                   <img class="action-movies-img rounded-3"
-                    src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($comedy_poster); ?>"
-                    alt="<?php echo htmlspecialchars($comedy_title); ?>">
+                    src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($comedy_poster); ?>"
+                    alt="<?php echo e($comedy_title); ?>">
                   <i class="fa-solid fa-play play-button-comedy"></i>
                 </div>
               </a>
@@ -949,13 +955,13 @@ function cv_genre_icon($name)
                 muted
                 loop
               >
-                <source src=\"" . htmlspecialchars(cv_video_src($comedy_video)) . "\" type=\"video/mp4\">
+                <source src=\"" . e(cv_video_src($comedy_video)) . "\" type=\"video/mp4\">
                 Your browser does not support the video tag.
               </video>";
             if (!empty($comedy_modal_poster_title)) {
-              $comedy_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($comedy_modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
+              $comedy_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . e($comedy_modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
             } else {
-              $comedy_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($comedy_title) . "</p>";
+              $comedy_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . e($comedy_title) . "</p>";
             }
             $comedy_modals .= "
               <a href=\"play-vid.php?video=" . urlencode($comedy_video) . "&type=movie_series&id=" . $movie_series_id . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
@@ -969,19 +975,19 @@ function cv_genre_icon($name)
             <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
               <div class=\"col-8 text-wrap\">
                 <div class=\"d-flex gap-2\">
-                  <p class='modal-text-rating mb-0'>" . htmlspecialchars($comedy_date_released) . "</p>
-                  <p class='modal-text-rating mb-0'>" . htmlspecialchars($comedy_duration) . "</p>
+                  <p class='modal-text-rating mb-0'>" . e($comedy_date_released) . "</p>
+                  <p class='modal-text-rating mb-0'>" . e($comedy_duration) . "</p>
                 </div>
                 <div class=\"d-flex gap-2 align-items-center\">
-                  <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($comedy_age_rating) . "+</p>
-                  <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($comedy_category) . "</p>
+                  <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . e($comedy_age_rating) . "+</p>
+                  <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . e($comedy_category) . "</p>
                 </div>
-                <p class='modal-text-rating'>" . htmlspecialchars($comedy_description) . "</p>
+                <p class='modal-text-rating'>" . e($comedy_description) . "</p>
               </div>
               <div class=\"col-4 ps-0 pe-4 text-wrap\">
                 <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
                   <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span>
-                  " . htmlspecialchars($comedy_cast) . ", more...
+                  " . e($comedy_cast) . ", more...
                 </p>
                 <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
                   <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span>
@@ -1011,7 +1017,7 @@ function cv_genre_icon($name)
             <div class="position-relative" style="min-width:180px; ">
                 <select style="transform: translateX(-48px);" id="modal-season-select-comedy-' . $movie_series_id . '" class="form-control me-5">';
               foreach ($seasons as $s) {
-                $comedy_modals .= '<option value="season-' . $s['season_id'] . '">' . htmlspecialchars($s['season_title']) . '</option>';
+                $comedy_modals .= '<option value="season-' . $s['season_id'] . '">' . e($s['season_title']) . '</option>';
               }
               $comedy_modals .= '</select>
                 <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
@@ -1033,7 +1039,7 @@ function cv_genre_icon($name)
                                     class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                     muted
                                     style="width: 120px; height: 70px; object-fit: cover;">
-                                    <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
+                                    <source src="' . e(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
                             </a>';
@@ -1042,11 +1048,11 @@ function cv_genre_icon($name)
                         </div>
                         <div class="db-text-sec me-4">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
-                                <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
+                                <p class="mb-0">' . e($ep['episode_title']) . '</p>
+                                <p class="mb-0">' . e($ep['episode_duration']) . '</p>
                             </div>
                             <div>
-                                <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
+                                <p class="mb-0 " style="font-size: 14px;">' . e($ep['episode_description']) . '</p>
                             </div>
                         </div>
                     </div>';
@@ -1105,7 +1111,7 @@ function cv_genre_icon($name)
           $action_id = $action ? $action['genre_id'] : 1; // fallback to genre_id 1 if not found
           $action_name = $action ? $action['genre_name'] : "ACTION";
           ?>
-          <p class="featured-text text-uppercase"><?php echo htmlspecialchars($action_name); ?></p>
+          <p class="featured-text text-uppercase"><?php echo e($action_name); ?></p>
           <p class="featured-movies-text fs-2">MOVIES/SERIES</p>
           <div class="top10-featured-wrapper position-relative">
             <div class="prev-button-featured position-absolute"
@@ -1155,18 +1161,18 @@ function cv_genre_icon($name)
                 $action_cast = $row['cast'];
                 $action_description = $row['description'];
 
-                $genres = htmlspecialchars($action_genre_1);
+                $genres = e($action_genre_1);
                 if (!empty($action_genre_2))
-                  $genres .= ', ' . htmlspecialchars($action_genre_2);
+                  $genres .= ', ' . e($action_genre_2);
                 if (!empty($action_genre_3))
-                  $genres .= ', ' . htmlspecialchars($action_genre_3);
+                  $genres .= ', ' . e($action_genre_3);
                 ?>
                 <div class="featured-images position-relative pe-2" style="overflow: visible;">
                   <a href="#" data-bs-toggle="modal" data-bs-target="#modal-action-<?php echo $movie_series_id ?>">
                     <div class="trending-hover position-relative">
                       <img class="featured-img rounded-3"
-                        src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($action_poster); ?>"
-                        alt="<?php echo htmlspecialchars($action_title); ?>">
+                        src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($action_poster); ?>"
+                        alt="<?php echo e($action_title); ?>">
                       <i class="fa-solid fa-play play-button-featured"></i>
                     </div>
                   </a>
@@ -1185,13 +1191,13 @@ function cv_genre_icon($name)
                   muted
                   loop
                 >
-                  <source src=\"" . htmlspecialchars(cv_video_src($action_video)) . "\" type=\"video/mp4\">
+                  <source src=\"" . e(cv_video_src($action_video)) . "\" type=\"video/mp4\">
                   Your browser does not support the video tag.
                 </video>";
                 if (!empty($action_modal_poster_title)) {
-                  $action_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($action_modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
+                  $action_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . e($action_modal_poster_title) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
                 } else {
-                  $action_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($action_title) . "</p>";
+                  $action_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . e($action_title) . "</p>";
                 }
                 $action_modals .= "
                 <a href=\"play-vid.php?video=" . urlencode($action_video) . "&type=movie_series&id=" . $movie_series_id . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
@@ -1205,19 +1211,19 @@ function cv_genre_icon($name)
               <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
                 <div class=\"col-8 text-wrap\">
                   <div class=\"d-flex gap-2\">
-                    <p class='modal-text-rating mb-0'>" . htmlspecialchars($action_date_released) . "</p>
-                    <p class='modal-text-rating mb-0'>" . htmlspecialchars($action_duration) . "</p>
+                    <p class='modal-text-rating mb-0'>" . e($action_date_released) . "</p>
+                    <p class='modal-text-rating mb-0'>" . e($action_duration) . "</p>
                   </div>
                   <div class=\"d-flex gap-2 align-items-center\">
-                    <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($action_age_rating) . "+</p>
-                    <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($action_category) . "</p>
+                    <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . e($action_age_rating) . "+</p>
+                    <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . e($action_category) . "</p>
                   </div>
-                  <p class='modal-text-rating'>" . htmlspecialchars($action_description) . "</p>
+                  <p class='modal-text-rating'>" . e($action_description) . "</p>
                 </div>
                 <div class=\"col-4 ps-0 pe-4 text-wrap\">
                   <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
                     <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span>
-                    " . htmlspecialchars($action_cast) . ", more...
+                    " . e($action_cast) . ", more...
                   </p>
                   <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
                     <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span>
@@ -1247,7 +1253,7 @@ function cv_genre_icon($name)
               <div class="position-relative" style="min-width:180px; ">
                   <select style="transform: translateX(-48px);" id="modal-season-select-action-' . $movie_series_id . '" class="form-control me-5">';
                   foreach ($seasons as $s) {
-                    $action_modals .= '<option value="season-' . $s['season_id'] . '">' . htmlspecialchars($s['season_title']) . '</option>';
+                    $action_modals .= '<option value="season-' . $s['season_id'] . '">' . e($s['season_title']) . '</option>';
                   }
                   $action_modals .= '</select>
                   <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
@@ -1269,7 +1275,7 @@ function cv_genre_icon($name)
                                       class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                       muted
                                       style="width: 120px; height: 70px; object-fit: cover;">
-                                      <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
+                                      <source src="' . e(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                       Your browser does not support the video tag.
                                   </video>
                               </a>';
@@ -1278,11 +1284,11 @@ function cv_genre_icon($name)
                           </div>
                           <div class="db-text-sec me-4">
                               <div class="d-flex align-items-center justify-content-between mb-2">
-                                  <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
-                                  <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
+                                  <p class="mb-0">' . e($ep['episode_title']) . '</p>
+                                  <p class="mb-0">' . e($ep['episode_duration']) . '</p>
                               </div>
                               <div>
-                                  <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
+                                  <p class="mb-0 " style="font-size: 14px;">' . e($ep['episode_description']) . '</p>
                               </div>
                           </div>
                       </div>';
@@ -1347,21 +1353,21 @@ function cv_genre_icon($name)
         $wallpaper1 = mysqli_fetch_assoc($wallpaper1_query);
         if ($wallpaper1):
           ?>
-          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper1['backdrop'] ?: $wallpaper1['poster']); ?>"
+          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($wallpaper1['backdrop'] ?: $wallpaper1['poster']); ?>"
             class="d-block w-100 wallpaper-lotr bg-danger"
-            alt="<?php echo htmlspecialchars($wallpaper1['title']); ?> Wallpaper">
+            alt="<?php echo e($wallpaper1['title']); ?> Wallpaper">
 
           <div
             class="wallpaper-description-tem d-flex flex-column justify-content-end align-items-end position-relative me-5">
 
             <div class="d-flex justify-content-center">
               <img class="tem-title-img position-relative mb-1"
-                src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper1['modal_poster_title']); ?>"
-                alt="<?php echo htmlspecialchars($wallpaper1['title']); ?> Title">
+                src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($wallpaper1['modal_poster_title']); ?>"
+                alt="<?php echo e($wallpaper1['title']); ?> Title">
             </div>
 
             <div class="rating-text-tem my-4 position-relative text-white">
-              <p><?php echo htmlspecialchars($wallpaper1['description']); ?></p>
+              <p><?php echo e($wallpaper1['description']); ?></p>
             </div>
 
             <div class="watch-now-tem position-relative">
@@ -1443,7 +1449,7 @@ function cv_genre_icon($name)
           <p class="action-movies-text text-white fs-24 fw-bold mb-0">
             Recommended for You
             <?php if ($show_based_on_genre)
-              echo "<span class='fs-6 ms-1 text-primary'>(Based on " . htmlspecialchars(implode(', ', $genres_for_recommend)) . ")</span>"; ?>
+              echo "<span class='fs-6 ms-1 text-primary'>(Based on " . e(implode(', ', $genres_for_recommend)) . ")</span>"; ?>
           </p>
           <?php if ($picker_genres): ?>
             <button type="button" class="btn btn-sm cv-edit-genres" data-bs-toggle="modal" data-bs-target="#genreModal">
@@ -1457,21 +1463,21 @@ function cv_genre_icon($name)
               <div class="popular-images position-relative pe-2" style="overflow: visible;">
                 <a href="#" class="recommended-link" data-bs-toggle="modal"
                   data-bs-target="#modal-recommended-<?php echo $item['movie_series_id']; ?>"
-                  data-genre1="<?php echo htmlspecialchars($item['genre_1']); ?>"
-                  data-genre2="<?php echo htmlspecialchars($item['genre_2']); ?>"
-                  data-genre3="<?php echo htmlspecialchars($item['genre_3']); ?>">
+                  data-genre1="<?php echo e($item['genre_1']); ?>"
+                  data-genre2="<?php echo e($item['genre_2']); ?>"
+                  data-genre3="<?php echo e($item['genre_3']); ?>">
                   <img class="popular-img rounded-3"
-                    src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($item['poster']); ?>"
-                    alt="<?php echo htmlspecialchars($item['title']); ?>">
+                    src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($item['poster']); ?>"
+                    alt="<?php echo e($item['title']); ?>">
                   <i class="fa-solid fa-play play-button-popular"></i>
                 </a>
               </div>
               <?php
-              $genres = htmlspecialchars($item['genre_1']);
+              $genres = e($item['genre_1']);
               if (!empty($item['genre_2']))
-                $genres .= ', ' . htmlspecialchars($item['genre_2']);
+                $genres .= ', ' . e($item['genre_2']);
               if (!empty($item['genre_3']))
-                $genres .= ', ' . htmlspecialchars($item['genre_3']);
+                $genres .= ', ' . e($item['genre_3']);
 
               $recommended_modals .= "
     <div class='modal fade' id='modal-recommended-{$item['movie_series_id']}' tabindex='-1' aria-labelledby='exampleModalLabel-recommended-{$item['movie_series_id']}' aria-hidden='true'>
@@ -1486,13 +1492,13 @@ function cv_genre_icon($name)
                   muted
                   loop
                 >
-                  <source src=\"" . htmlspecialchars(cv_video_src($item['video'])) . "\" type=\"video/mp4\">
+                  <source src=\"" . e(cv_video_src($item['video'])) . "\" type=\"video/mp4\">
                   Your browser does not support the video tag.
                 </video>";
               if (!empty($item['modal_poster_title'])) {
-                $recommended_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . htmlspecialchars($item['modal_poster_title']) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
+                $recommended_modals .= "<img class='poster-title-img trend-title' src='../DASHBOARD-HTML/MOVIE_SERIES_TITLE/" . e($item['modal_poster_title']) . "' alt='' style='object-fit: cover; transform: scale(2.0) translate(36px, -14px);'>";
               } else {
-                $recommended_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . htmlspecialchars($item['title']) . "</p>";
+                $recommended_modals .= "<p class='fw-bold fs-3 text-white position-absolute' style='top:10px; left:20px;'>" . e($item['title']) . "</p>";
               }
               $recommended_modals .= "
                 <a href=\"play-vid.php?video=" . urlencode($item['video']) . "&type=movie_series&id=" . $item['movie_series_id'] . "\" class=\"btn btn-light play-btn text-center fs-18 text-end position-absolute\" style=\"width: 120px;\">
@@ -1506,19 +1512,19 @@ function cv_genre_icon($name)
               <div class=\"row modal-body-text\" style=\"margin-left: 18px;\">
                 <div class=\"col-8 text-wrap\">
                   <div class=\"d-flex gap-2\">
-                    <p class='modal-text-rating mb-0'>" . htmlspecialchars($item['date_released']) . "</p>
-                    <p class='modal-text-rating mb-0'>" . htmlspecialchars($item['duration']) . "</p>
+                    <p class='modal-text-rating mb-0'>" . e($item['date_released']) . "</p>
+                    <p class='modal-text-rating mb-0'>" . e($item['duration']) . "</p>
                   </div>
                   <div class=\"d-flex gap-2 align-items-center\">
-                    <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . htmlspecialchars($item['age_rating']) . "+</p>
-                    <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . htmlspecialchars($item['category']) . "</p>
+                    <p class='modal-text-rating p-1' style=\"border: 1px solid #f4fff8; width: fit-content;\">" . e($item['age_rating']) . "+</p>
+                    <p class='modal-text-rating mb-0' style=\"transform: translateY(-8px);\">" . e($item['category']) . "</p>
                   </div>
-                  <p class='modal-text-rating'>" . htmlspecialchars($item['description']) . "</p>
+                  <p class='modal-text-rating'>" . e($item['description']) . "</p>
                 </div>
                 <div class=\"col-4 ps-0 pe-4 text-wrap\">
                   <p class=\"modal-text-rating text-wrap\" style=\"margin-top: 12px;\">
                     <span class=\"text-wrap\" style=\"color: #888684;\">Cast: </span>
-                    " . htmlspecialchars($item['cast']) . ", more...
+                    " . e($item['cast']) . ", more...
                   </p>
                   <p class=\"modal-text-rating text-wrap\" style=\"margin-top: -2px;\">
                     <span class=\"text-wrap\" style=\"color: #888684;\">Genres: </span>
@@ -1548,7 +1554,7 @@ function cv_genre_icon($name)
                 <div class="position-relative" style="min-width:180px; ">
                     <select style="transform: translateX(-48px);" id="modal-season-select-recommended-' . $item['movie_series_id'] . '" class="form-control me-5">';
                 foreach ($seasons as $s) {
-                  $recommended_modals .= '<option value="season-' . $s['season_id'] . '">' . htmlspecialchars($s['season_title']) . '</option>';
+                  $recommended_modals .= '<option value="season-' . $s['season_id'] . '">' . e($s['season_title']) . '</option>';
                 }
                 $recommended_modals .= '</select>
                     <i class="fa-solid fa-caret-down caret-season" style="position: absolute; bottom: 12px; right: 63px; color: #f4fff8; pointer-events: none;"></i>
@@ -1570,7 +1576,7 @@ function cv_genre_icon($name)
                                         class="position-relative rounded-3 m-0 p-0 video-player video-episode" preload=none
                                         muted
                                         style="width: 120px; height: 70px; object-fit: cover;">
-                                        <source src="' . htmlspecialchars(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
+                                        <source src="' . e(cv_video_src($ep['episode_video'], 'MOVIE_SERIES_EPISODE')) . '" type="video/mp4">
                                         Your browser does not support the video tag.
                                     </video>
                                 </a>';
@@ -1579,11 +1585,11 @@ function cv_genre_icon($name)
                             </div>
                             <div class="db-text-sec me-4">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <p class="mb-0">' . htmlspecialchars($ep['episode_title']) . '</p>
-                                    <p class="mb-0">' . htmlspecialchars($ep['episode_duration']) . '</p>
+                                    <p class="mb-0">' . e($ep['episode_title']) . '</p>
+                                    <p class="mb-0">' . e($ep['episode_duration']) . '</p>
                                 </div>
                                 <div>
-                                    <p class="mb-0 " style="font-size: 14px;">' . htmlspecialchars($ep['episode_description']) . '</p>
+                                    <p class="mb-0 " style="font-size: 14px;">' . e($ep['episode_description']) . '</p>
                                 </div>
                             </div>
                         </div>';
@@ -1652,20 +1658,20 @@ function cv_genre_icon($name)
         $wallpaper2 = mysqli_fetch_assoc($wallpaper2_query);
         if ($wallpaper2):
           ?>
-          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper2['backdrop'] ?: $wallpaper2['poster']); ?>"
-            class="d-block w-100 wallpaper-lotr" alt="<?php echo htmlspecialchars($wallpaper2['title']); ?> Wallpaper">
+          <img src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($wallpaper2['backdrop'] ?: $wallpaper2['poster']); ?>"
+            class="d-block w-100 wallpaper-lotr" alt="<?php echo e($wallpaper2['title']); ?> Wallpaper">
 
           <div
             class="wallpaper-description-lotr d-flex flex-column justify-content-end align-items-end position-relative me-5">
 
             <div class="d-flex justify-content-center">
               <img class="lotr-title-img position-relative mb-1"
-                src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo htmlspecialchars($wallpaper2['modal_poster_title']); ?>"
-                alt="<?php echo htmlspecialchars($wallpaper2['title']); ?> Title">
+                src="../DASHBOARD-HTML/MOVIE_SERIES_TITLE/<?php echo e($wallpaper2['modal_poster_title']); ?>"
+                alt="<?php echo e($wallpaper2['title']); ?> Title">
             </div>
 
             <div class="rating-text-lotr my-4 position-relative text-white">
-              <p><?php echo htmlspecialchars($wallpaper2['description']); ?></p>
+              <p><?php echo e($wallpaper2['description']); ?></p>
             </div>
 
             <div class="watch-now-lotr position-relative">
@@ -1746,7 +1752,7 @@ function cv_genre_icon($name)
   <footer>
     <div class="footer text-white d-flex justify-content-between mx-5 align-items-center">
       <p class="footer-long-text">Movie and series details and images come from <a class="text-white" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB. Free classic films stream from the <a class="text-white" href="https://archive.org/" target="_blank" rel="noopener">Internet Archive</a>.</p>
-      <p>© 2025 CineVault. All rights reserved.</p>
+      <p>© <?php echo date('Y'); ?> <?php echo e(cv_setting('site_name', 'CineVault')); ?>. All rights reserved.</p>
     </div>
   </footer>
 
@@ -1793,6 +1799,9 @@ function cv_genre_icon($name)
 
     <?php if ($show_genre_picker): ?>
     new bootstrap.Modal(modalEl).show();
+    <?php else: ?>
+    // Settings links here with #favorite-genres to open the picker.
+    if (location.hash === '#favorite-genres') bootstrap.Modal.getOrCreateInstance(modalEl).show();
     <?php endif; ?>
   });
 </script>

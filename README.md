@@ -16,6 +16,9 @@ CineVault is a free streaming site for **classic movies and TV series**, built w
 - **Search TMDB** on the add form: title, year, runtime, rating, genres, cast, description, poster and title logo fill in automatically
 - **Free full movies**: pick a public domain film from the Internet Archive instead of uploading a video. It streams inside CineVault's own player
 - **Continue Watching**: the player remembers where each member stopped, resumes from there, and the home page lists unfinished titles (and the next episode of a series)
+- **Reports**: the dashboard has a Graphical and a Textual view, and Print / Save as PDF lets you pick which parts go on a sheet with the CineVault letterhead. Every admin table has its own Print button
+- **Archive and restore**: movies, series, genres, members and admins are archived instead of deleted, and restored from the Archive page
+- **Settings**: admins set the site information, featured titles and their password; members set their password, playback, watch history and remembered devices
 
 ## Technologies Used
 
@@ -34,12 +37,12 @@ CineVault is a free streaming site for **classic movies and TV series**, built w
 
 2. **Import the database** (in phpMyAdmin or the MySQL command line):
    - Create a database named `db_finalproject`.
-   - Import `FINAL-PROJECT-ITEC60/ROMANCE_DOWNLOAD/COMEDY_DOWNLOAD/db_finalproject.sql`.
+   - Import `FINAL-PROJECT-ITEC60/database/db_finalproject.sql`.
    - Then import `FINAL-PROJECT-ITEC60/database/update-2026-11.sql`. It adds the tables and columns the old dump is missing.
    - Then import `FINAL-PROJECT-ITEC60/database/update-2026-11-free-membership.sql`. CineVault is free now: accounts work right after sign up, with no payment or approval.
    - Then import `FINAL-PROJECT-ITEC60/database/update-2026-11-remember-me.sql` for the "Remember me" option on sign in.
    - Then import `FINAL-PROJECT-ITEC60/database/update-2026-11-favorite-genres.sql` (favorite genres saved per account), `update-2026-11-home-carousel.sql` and `update-2026-11-movie-series-carousels.sql` (carousel titles) , `update-2026-11-admin-notifications.sql` and `update-2026-11-member-notifications.sql` (read and unread notifications for admins and members), then `update-2026-11-tmdb.sql` (TMDB import).
-   - Then import `update-2026-11-classics.sql`. CineVault is now a free classic-film site: this removes the old sample titles (they only had short clips) and adds the backdrop and featured-spot columns for the carousels and banners. Then import `update-2026-11-continue-watching.sql` (saved watch positions).
+   - Then import `update-2026-11-classics.sql`. CineVault is now a free classic-film site: this removes the old sample titles (they only had short clips) and adds the backdrop and featured-spot columns for the carousels and banners. Then import `update-2026-11-continue-watching.sql` (saved watch positions), `update-2026-11-settings.sql` (site and member settings) and, once, `update-2026-11-archive.sql` (archive and restore instead of delete), then `update-2026-11-no-views.sql` (keeps archived titles in their own tables, since free hosts block database views).
    - Fill the library (after step 3, because it needs the TMDB key):
      ```
      C:\XAMPP-Projects\php\php.exe FINAL-PROJECT-ITEC60\database\seed-free-movies.php
@@ -55,7 +58,7 @@ CineVault is a free streaming site for **classic movies and TV series**, built w
 4. **Run locally:**
    - Start Apache and MySQL in XAMPP.
    - Website: `http://localhost/Movie-Website/FINAL-PROJECT-ITEC60/LANDING-PAGE/LandingPageMovie.php`
-   - Admin: `http://localhost/Movie-Website/FINAL-PROJECT-ITEC60/DASHBOARD-HTML/admin-signin.php`
+   - Sign in (admins and members use the same page): `http://localhost/Movie-Website/FINAL-PROJECT-ITEC60/LANDING-PAGE/SignIn/LP-SignIn.php`
 
 ## Folder Structure
 

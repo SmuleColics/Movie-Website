@@ -1,0 +1,2 @@
+# Server-side code and setup files only: never served to browsers.
+Require all denied

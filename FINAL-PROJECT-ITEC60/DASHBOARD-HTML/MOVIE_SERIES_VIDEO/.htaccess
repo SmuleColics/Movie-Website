@@ -1,8 +1,8 @@
-# Uploaded files are media only. Never run anything here as code.
+# Uploaded files are media only. Never serve or run anything here as code.
+# (Uploads are also checked and renamed by cv_store_upload() in bootstrap.php.)
+# php_flag and Options -ExecCGI are left out: shared hosts such as
+# InfinityFree reject them with a 500 error for every file in the folder.
 <FilesMatch "\.(php\d?|phtml|phar|pht|phps|cgi|pl|py|sh|htaccess)$">
   Require all denied
 </FilesMatch>
-<IfModule php_module>
-  php_flag engine off
-</IfModule>
-Options -ExecCGI -Indexes
+Options -Indexes

@@ -80,8 +80,7 @@ if ($is_edit) {
             }
         }
     } else {
-        echo "<script>alert('Record not found.'); window.location.href='web-movies.php';</script>";
-        exit();
+        cv_alert_redirect('That title is in the Archive or no longer exists. Restore it from the Archive page to edit it.', 'web-movies.php', 'warning');
     }
 }
 
@@ -171,15 +170,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
     // The same TMDB title can only be in the library once.
     $tmdb_error = '';
     if ($tmdb_id && $tmdb_type) {
-        $dup = $con->prepare("SELECT movie_series_id, title FROM tbl_movie_series WHERE tmdb_type = ? AND tmdb_id = ? AND movie_series_id <> ? LIMIT 1");
+        $dup = $con->prepare("SELECT movie_series_id, title, 0 AS is_archived FROM tbl_movie_series WHERE tmdb_type = ? AND tmdb_id = ? AND movie_series_id <> ?
+            UNION ALL SELECT movie_series_id, title, 1 FROM tbl_movie_series_archived WHERE tmdb_type = ? AND tmdb_id = ? LIMIT 1");
         $tid = (int) $tmdb_id;
         $self = (int) $movie_series_id;
-        $dup->bind_param('sii', $tmdb_type, $tid, $self);
+        $dup->bind_param('siisi', $tmdb_type, $tid, $self, $tmdb_type, $tid);
         $dup->execute();
         $dupRow = $dup->get_result()->fetch_assoc();
         $dup->close();
         if ($dupRow) {
-            $tmdb_error = '"' . $dupRow['title'] . '" from TMDB is already in your library (record #' . $dupRow['movie_series_id'] . ').';
+            $tmdb_error = '"' . $dupRow['title'] . '" from TMDB is already ' . ($dupRow['is_archived'] ? 'in the Archive (record #' . $dupRow['movie_series_id'] . '). Restore it from the Archive page instead.' : 'in your library (record #' . $dupRow['movie_series_id'] . ').');
         }
     }
     $tmdb_id_sql = $tmdb_id ? (int) $tmdb_id : 'NULL';
@@ -424,11 +424,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_episode_id'])
                     }
                 }
             }
-            echo "<script>
-                    alert('$msg');
-                    window.location.href='web-movies.php';
-                </script>";
-            exit();
+            $saved_title = trim((string) ($_POST['title'] ?? ''));
+            cv_alert_redirect('"' . $saved_title . '" was ' . ($is_edit ? 'updated.' : 'added to the library.'), 'web-movies.php' . ($category === 'Series' ? '?category=Series' : '?category=Movie'));
         }
     } else {
         if ($file_poster_path && file_exists($file_poster_path)) {
@@ -1146,7 +1143,7 @@ $(document).ready(function () {
         <div class="flex-grow-1">
           <p class="mb-1 fw-semibold">${esc(d.title)} ${d.year ? '(' + d.year + ')' : ''}
             <span class="badge bg-secondary ms-1">${esc(d.category)}</span></p>
-          ${d.existing ? `<p class="mb-1 text-warning fs-14"><i class="fa-solid fa-triangle-exclamation"></i> Already in your library as record #${d.existing.movie_series_id}. Saving will be blocked.</p>` : ''}
+          ${d.existing ? `<p class="mb-1 text-warning fs-14"><i class="fa-solid fa-triangle-exclamation"></i> ${d.existing.is_archived == 1 ? `In the Archive as record #${d.existing.movie_series_id}. Restore it from the Archive page instead.` : `Already in your library as record #${d.existing.movie_series_id}. Saving will be blocked.`}</p>` : ''}
           <p class="mb-1 fs-14 cv-tmdb-sub">Poster: ${d.poster_path ? 'from TMDB (upload your own to replace it)' : '<span class="text-warning">not on TMDB, please upload one</span>'}</p>
           <p class="mb-1 fs-14 cv-tmdb-sub">Title image: ${d.logo_path ? 'from TMDB' : '<span class="text-warning">not on TMDB, please upload one</span>'}</p>
           ${d.logo_url ? `<img class="cv-l mb-1" src="${esc(d.logo_url)}" alt="">` : ''}

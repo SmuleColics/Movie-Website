@@ -983,23 +983,23 @@ body:has(.section-wallpaper .carousel-item) #navbar:not(.is-scrolled) {
 }
 
 /* ========== Top 10: two-digit rank ("10") ==========
-   One digit fits in the 50px left of a poster; "10" needs about twice that,
-   so its "0" used to hide behind the poster. Give it more room. */
+   "10" is about twice as wide as one digit. Its "0" tucks half behind the
+   poster, the same way single digits do, so the gap stays close to the rest. */
 .top-10-images:has(.top-10-text.is-double) {
-  margin-left: 80px;
+  margin-left: 41px;
 }
 
 .top-10-text.is-double {
-  left: -126px;
+  left: -91px;
   letter-spacing: -10px;
 }
 
 @media (max-width: 768px) {
   .top-10-images:has(.top-10-text.is-double) {
-    margin-left: 44px;
+    margin-left: 31px;
   }
   .top-10-text.is-double {
-    left: -92px;
+    left: -81px;
   }
 }
 
@@ -1422,7 +1422,22 @@ footer {
 }
 
 body:has(main > section:last-of-type[class^="movies-"] img) footer {
-  margin-top: -100px;
+  margin-top: 24px;
+}
+
+/* Banners (movies-1, movies-2): the text was lifted over the picture with a
+   transform, which left the text's old space (about 430px) empty below the
+   banner; the row after it was pulled up by hand to hide part of that. A
+   negative margin lifts the text without leaving the space, and the next row
+   gets one even gap instead. */
+section[class^="movies-"] .wallpaper-description-lotr,
+section[class^="movies-"] .wallpaper-description-tem {
+  transform: none;
+  margin-top: -380px;
+}
+
+main > section[class^="movies-"]:has(img) + section {
+  margin-top: 56px !important;
 }
 
 /* ========== Rows with no titles ==========

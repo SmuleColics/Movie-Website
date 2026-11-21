@@ -55,7 +55,7 @@ $member = (int) ($_SESSION['user_id'] ?? 0);
 // the first episode, so progress is kept per episode.
 if ($id && ($type === 'movie_series' || $type === 'top10')) {
     $stmt = $con->prepare("SELECT
-            (SELECT wp.episode_id FROM tbl_watch_progress wp WHERE wp.signup_id = ? AND wp.movie_series_id = m.movie_series_id) AS last_ep,
+            (SELECT e2.episode_id FROM tbl_watch_progress wp JOIN tbl_movie_series_episodes e2 ON e2.episode_id = wp.episode_id WHERE wp.signup_id = ? AND wp.movie_series_id = m.movie_series_id) AS last_ep, -- only if that episode still exists
             (SELECT e.episode_id FROM tbl_movie_series_seasons s JOIN tbl_movie_series_episodes e ON e.season_id = s.season_id
               WHERE s.movie_series_id = m.movie_series_id ORDER BY s.season_number, e.episode_id LIMIT 1) AS first_ep
         FROM tbl_movie_series m WHERE m.movie_series_id = ? AND m.category = 'Series'");
@@ -96,8 +96,6 @@ if ($id && ($type === 'movie_series' || $type === 'top10')) {
         $parentId = (int) $row['movie_series_id'];
     }
     $stmt->close();
-} elseif ($type === 'trend' && isset($_GET['video'])) {
-    $videoPath = '../DASHBOARD-HTML/TREND_VIDEOS/' . basename((string) $_GET['video']);
 }
 
 // Local files must exist; streams are checked by cv_is_stream_url().
@@ -118,15 +116,16 @@ if ($videoPath !== '') {
         $stmt->execute();
         $stmt->close();
     }
-} else {
-    $videoPath = 'default.mp4';
 }
 
 // Where this member stopped last time (Continue Watching).
 $resumeAt = 0;
 $trackType = $type === 'episode' ? 'episode' : 'movie_series';
 $trackId = $type === 'episode' ? $id : $parentId;
-if ($member && $trackId && empty($_GET['restart'])) {
+if ($videoPath === '') {
+    $trackId = 0; // nothing to play, so nothing to resume or save
+}
+if ($member && $trackId && empty($_GET['restart']) && cv_member_prefs($member)['resume_playback']) { // Settings > Playback can turn this off
     if ($trackType === 'episode') {
         $stmt = $con->prepare('SELECT position_sec, duration_sec FROM tbl_episode_progress WHERE signup_id = ? AND episode_id = ?');
     } else {
@@ -148,7 +147,7 @@ if ($member && $trackId && empty($_GET['restart'])) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?php echo e($videoTitle); ?> | CineVault</title>
-  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg">
+  <link rel="icon" href="../MOVIE-IMG/HEADER-IMG/CINEVAULT-LOGO.svg?v=<?php echo CV_ASSET_VERSION; ?>">
   <style>
     body { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Poppins', Arial, sans-serif; }
     .video-container { width: 100vw; height: 100vh; }
@@ -165,6 +164,9 @@ if ($member && $trackId && empty($_GET['restart'])) {
       font-size: 14px; z-index: 6; transition: opacity .4s; }
     .cv-resume button { background: #C9A24B; color: #1A140C; border: 0; border-radius: 999px; padding: 5px 12px; font: inherit; font-weight: 600; cursor: pointer; }
     .cv-resume.gone { opacity: 0; pointer-events: none; }
+    .cv-missing { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #D8CCB0; padding: 24px; }
+    .cv-missing-title { font-size: 22px; color: #F1E8D4; font-weight: 600; margin-bottom: 6px; }
+    .cv-missing a { margin-top: 14px; background: #C9A24B; color: #1A140C; padding: 8px 18px; border-radius: 999px; text-decoration: none; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -175,12 +177,20 @@ if ($member && $trackId && empty($_GET['restart'])) {
       <span class="cv-player-credit">Public domain, streaming from the Internet Archive</span>
     <?php endif; ?>
   </div>
+  <?php if ($videoPath === ''): ?>
+    <div class="cv-missing">
+      <p class="cv-missing-title">This title can't be played right now.</p>
+      <p>It may have been archived, or its video is missing. Try another title.</p>
+      <a href="FirstProject.php">Back to Home</a>
+    </div>
+  <?php else: ?>
   <div class="video-container">
     <video class="video" id="cv-video" autoplay controls playsinline>
       <source src="<?php echo e($videoPath); ?>" type="video/mp4">
       Your browser does not support the video tag.
     </video>
   </div>
+  <?php endif; ?>
   <?php if ($resumeAt): ?>
     <div class="cv-resume" id="cv-resume">
       <span>Resumed from <?php echo e(sprintf('%d:%02d', intdiv($resumeAt, 60), $resumeAt % 60)); ?></span>

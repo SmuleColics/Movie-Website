@@ -137,9 +137,10 @@ function tmdb_details($con, $type, $id)
     }
 
     // Already in the library?
-    $stmt = $con->prepare('SELECT movie_series_id, title FROM tbl_movie_series WHERE tmdb_type = ? AND tmdb_id = ? LIMIT 1');
+    $stmt = $con->prepare('SELECT movie_series_id, title, 0 AS is_archived FROM tbl_movie_series WHERE tmdb_type = ? AND tmdb_id = ?
+        UNION ALL SELECT movie_series_id, title, 1 FROM tbl_movie_series_archived WHERE tmdb_type = ? AND tmdb_id = ? LIMIT 1');
     $tid = (int) $id;
-    $stmt->bind_param('si', $type, $tid);
+    $stmt->bind_param('sisi', $type, $tid, $type, $tid);
     $stmt->execute();
     $existing = $stmt->get_result()->fetch_assoc() ?: null;
     $stmt->close();
@@ -213,7 +214,7 @@ function tmdb_match_genres($con, array $tmdbGenres)
         $local[strtolower(trim($g['genre_name']))] = (int) $g['genre_id'];
     }
     $alias = [
-        'horror' => 'terror', 'tv movie' => 'cinema tv',
+        'terror' => 'horror', 'tv movie' => 'cinema tv',
         'action & adventure' => 'action', 'science fiction' => 'science fiction',
     ];
 
