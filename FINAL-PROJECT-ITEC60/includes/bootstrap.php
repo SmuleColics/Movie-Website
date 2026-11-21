@@ -45,7 +45,7 @@ if (!headers_sent()) {
 /* ---------- Asset version ----------
  * Added to CSS/JS links as ?v=... so browsers fetch fresh copies.
  * Change this whenever a .css or .js file changes. */
-const CV_ASSET_VERSION = '20261121.1';
+const CV_ASSET_VERSION = '20261121.2';
 
 /* ---------- Small helpers ---------- */
 function e($value)

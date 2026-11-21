@@ -188,8 +188,11 @@ body.cv-admin .dt-length select {
   color: var(--adm-muted);
 }
 
-.cv-account-menu {
-  min-width: 280px;
+/* .dropdown-menu in the selector: Bootstrap loads after this file on admin
+   pages, and its own .dropdown-menu (min-width 10rem) would win otherwise. */
+.dropdown-menu.cv-account-menu {
+  min-width: 300px;
+  max-width: calc(100vw - 24px);
   margin-top: 10px !important;
   padding: 8px;
   background: var(--adm-card) !important;
@@ -217,7 +220,7 @@ body.cv-admin .dt-length select {
 .cv-account-head-email {
   font-size: 13px;
   color: var(--adm-muted);
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .cv-account-head-role {
@@ -237,7 +240,15 @@ body.cv-admin .dt-length select {
 
 .cv-account-menu .dropdown-item {
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 9px 10px;
+}
+
+/* Same icon size and width for every item, so the labels line up. */
+.cv-account-menu .dropdown-item i {
+  width: 18px;
+  font-size: 15px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 /* Bell and notification menu styles live in ../shared/notifications.css (shared with the member site). */
@@ -250,6 +261,15 @@ body.cv-admin .dt-length select {
   }
   .cv-account {
     padding: 3px;
+  }
+  /* The bell sits right of the avatar, so a 300px menu anchored to the
+     avatar would run off the left edge. Anchor it to the header instead. */
+  .dropdown:has(> .cv-account-menu) {
+    position: static;
+  }
+  .dropdown-menu.cv-account-menu {
+    right: 12px !important;
+    left: auto !important;
   }
 }
 
