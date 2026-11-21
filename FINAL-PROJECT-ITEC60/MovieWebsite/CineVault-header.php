@@ -237,8 +237,9 @@ $cv_member_initials = strtoupper(substr($cv_member['first_name'] ?? 'M', 0, 1) .
             link.classList.remove('active');
           }
         });
-        // If no match, set Home as active by default
-        if (!found && links.length > 0) {
+        // Only the bare folder address counts as Home; pages that aren't in
+        // the menu (My Profile, Settings, the player) highlight nothing.
+        if (!found && links.length > 0 && window.location.pathname.endsWith('/')) {
           links[0].classList.add('active');
         }
       }
